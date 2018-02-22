@@ -1,0 +1,18 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '9.0'
+
+target 'Project' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+
+  # Pods for Project
+  pod 'SJUIFactory'
+  pod 'Masonry'
+  pod 'SJFullscreenPopGesture'
+  pod 'SJBorderLineView'
+  pod 'SJPrompt'
+  pod 'SJOrentationObserver'
+  pod 'SJVideoPlayerAssetCarrier'
+  pod 'SJVolBrigControl'
+  pod 'SJObserverHelper'
+end
