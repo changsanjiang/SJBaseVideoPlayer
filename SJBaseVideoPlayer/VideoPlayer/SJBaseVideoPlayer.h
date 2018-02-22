@@ -10,12 +10,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SJVideoPlayerURLAsset.h"
 #import "SJVideoPlayerState.h"
 #import "SJVideoPlayerPreviewInfo.h"
 #import <SJPrompt/SJPrompt.h>
 
 NS_ASSUME_NONNULL_BEGIN
-@class SJBaseVideoPlayer, SJVideoPlayerURLAsset;
 @protocol SJVideoPlayerControlLayerDataSource, SJVideoPlayerControlLayerDelegate;
 
 
@@ -91,8 +91,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)play;
 
 @property (nonatomic, assign, readonly) BOOL userPaused; // 区分是用户暂停的, 还是开发者暂停的
-- (BOOL)pause;          // 调用这个方法, 表示开发者暂停.
-- (void)pauseForUser;   // 调用这个方法, 表示用户暂停.
+- (BOOL)pause;                                           // 调用此方法, 表示开发者暂停.
+- (void)pauseForUser;                                    // 调用此方法, 表示用户暂停.
 
 - (void)stop;
 

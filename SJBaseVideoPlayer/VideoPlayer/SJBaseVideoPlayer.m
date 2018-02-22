@@ -19,7 +19,6 @@
 #import <SJObserverHelper/NSObject+SJObserverHelper.h>
 #import "SJVideoPlayerRegistrar.h"
 #import "SJVideoPlayerPresentView.h"
-#import "SJVideoPlayerURLAsset.h"
 
 @interface SJVideoPlayerAssetCarrier (SJBaseVideoPlayerAdd)
 @property (nonatomic, assign) CGSize videoPresentationSize;
@@ -34,6 +33,8 @@
 }
 @end
 
+
+#pragma mark -
 
 NS_ASSUME_NONNULL_BEGIN
 @interface _SJBaseVideoPlayerControlDisplayRecorder : NSObject
@@ -66,8 +67,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readwrite, nullable) SJVideoPlayerAssetCarrier *asset;
 @property (nonatomic, assign, readwrite) BOOL scrollIn;
 @property (nonatomic, assign, readwrite) BOOL touchedScrollView; // 如果为`YES`, 则不旋转
-@property (nonatomic, assign, readwrite) BOOL suspend; // Set it when the [`pause` + `play` + `stop`] is called.
-@property (nonatomic, assign, readwrite) BOOL stopped; // Set it when the [`play` + `stop`] is called.
+@property (nonatomic, assign, readwrite) BOOL suspend; // Set it when the [`pause` || `play` || `stop`] is called.
+@property (nonatomic, assign, readwrite) BOOL stopped; // Set it when the [`play` || `stop`] is called.
 @property (nonatomic, assign, readwrite) BOOL resignActive; // app 进入后台, 进入前台时会设置
 
 @property (nonatomic, strong, readonly) SJVideoPlayerRegistrar *registrar;
@@ -78,7 +79,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) SJVolBrigControl *volBrigControl;
 @property (nonatomic, strong, readonly) _SJBaseVideoPlayerControlDisplayRecorder *displayRecorder;
 
-- (void)clear;
+- (void)clearAsset;
 
 @end
 NS_ASSUME_NONNULL_END
@@ -105,9 +106,7 @@ NS_ASSUME_NONNULL_END
 #ifndef DEBUG
     NSLog(@"%zd - %s", __LINE__, __func__);
 #endif
-    [self.asset.player pause];
-    self.presentView.player = nil;
-    self.asset = nil;
+    [self stop];
 }
 
 #pragma mark -
@@ -126,7 +125,7 @@ NS_ASSUME_NONNULL_END
         if ( self.state == SJVideoPlayerPlayState_PlayEnd ) return;
         switch ( status ) {
             case AVPlayerItemStatusUnknown:  break;
-            case  AVPlayerItemStatusFailed: {
+            case AVPlayerItemStatusFailed: {
                 [self _itemPlayFailed];
             }
                 break;
@@ -238,11 +237,14 @@ NS_ASSUME_NONNULL_END
     };
 }
 
-- (void)setcontrolLayerDataSource:(id<SJVideoPlayerControlLayerDataSource>)controlLayerDataSource {
+- (void)setControlLayerDataSource:(id<SJVideoPlayerControlLayerDataSource>)controlLayerDataSource {
     if ( controlLayerDataSource == _controlLayerDataSource ) return;
     [_controlLayerDataSource.controlView removeFromSuperview];
     _controlLayerDataSource = controlLayerDataSource;
+    if ( !controlLayerDataSource ) return;
+    
     _controlLayerDataSource.controlView.clipsToBounds = YES;
+    // install
     [self.controlContentView addSubview:_controlLayerDataSource.controlView];
     [_controlLayerDataSource.controlView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.offset(0);
@@ -253,16 +255,18 @@ NS_ASSUME_NONNULL_END
     }
 }
 
-- (void)setcontrolLayerDelegate:(id<SJVideoPlayerControlLayerDelegate>)controlLayerDelegate {
+- (void)setControlLayerDelegate:(id<SJVideoPlayerControlLayerDelegate>)controlLayerDelegate {
     if ( controlLayerDelegate == _controlLayerDelegate ) return;
     _controlLayerDelegate = controlLayerDelegate;
+    
     if ( [controlLayerDelegate respondsToSelector:@selector(videoPlayer:volumeChanged:)] ) {
         [controlLayerDelegate videoPlayer:self volumeChanged:_volBrigControl.volume];
     }
     if ( [controlLayerDelegate respondsToSelector:@selector(videoPlayer:brightnessChanged:)] ) {
         [controlLayerDelegate videoPlayer:self brightnessChanged:_volBrigControl.brightness];
     }
-    if ( SJVideoPlayerPlayState_Prepare == self.state && [controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
+    if ( SJVideoPlayerPlayState_Prepare == self.state &&
+         [controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
         [controlLayerDelegate startLoading:self];
     }
 }
@@ -710,9 +714,10 @@ NS_ASSUME_NONNULL_END
     }
 }
 
-- (void)clear {
+- (void)clearAsset {
     [self.asset.player pause];
-    self.presentView.player = [AVPlayer new];
+    [self.presentView.player replaceCurrentItemWithPlayerItem:nil];
+    self.presentView.player = nil;
     self.asset = nil;
 }
 
@@ -902,7 +907,7 @@ NS_ASSUME_NONNULL_END
     self.stopped = YES;
     
     if ( !self.asset ) return;
-    [self clear];
+    [self clearAsset];
     self.state = SJVideoPlayerPlayState_Unknown;
 }
 
