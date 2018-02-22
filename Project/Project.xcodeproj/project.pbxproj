@@ -23,6 +23,7 @@
 		77826C10203E74AC009D5F2C /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 77826C0F203E74AC009D5F2C /* Podfile */; };
 		77826C12203E75E9009D5F2C /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 77826C11203E753E009D5F2C /* sample.mp4 */; };
 		77826C14203E7773009D5F2C /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 77826C13203E7773009D5F2C /* placeholder.png */; };
+		77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */; };
 		C72090F66CE012968A1699AF /* libPods-Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3783465EF81E7A5838D5F3FF /* libPods-Project.a */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +59,7 @@
 		77826C0F203E74AC009D5F2C /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		77826C11203E753E009D5F2C /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
 		77826C13203E7773009D5F2C /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
+		77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = SJBaseVideoPlayer.podspec; path = ../SJBaseVideoPlayer.podspec; sourceTree = "<group>"; };
 		77DE8360EA219A9C5A02BA5F /* Pods-Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -77,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				77826C0F203E74AC009D5F2C /* Podfile */,
+				77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */,
 				77826BD8203E7427009D5F2C /* Project */,
 				77826BD7203E7427009D5F2C /* Products */,
 				FFBBA4CDD7038BE2A325A590 /* Pods */,
@@ -114,6 +117,8 @@
 		77826BEF203E743A009D5F2C /* SJBaseVideoPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				77826C06203E743A009D5F2C /* SJBaseVideoPlayer.h */,
+				77826C07203E743A009D5F2C /* SJBaseVideoPlayer.m */,
 				77826BF0203E743A009D5F2C /* Category */,
 				77826BF3203E743A009D5F2C /* GestureControl */,
 				77826BF6203E743A009D5F2C /* Header */,
@@ -121,7 +126,6 @@
 				77826BFC203E743A009D5F2C /* Present */,
 				77826BFF203E743A009D5F2C /* Registrar */,
 				77826C02203E743A009D5F2C /* TimerControl */,
-				77826C05203E743A009D5F2C /* VideoPlayer */,
 			);
 			name = SJBaseVideoPlayer;
 			path = ../../SJBaseVideoPlayer;
@@ -188,15 +192,6 @@
 				77826C04203E743A009D5F2C /* SJTimerControl.m */,
 			);
 			path = TimerControl;
-			sourceTree = "<group>";
-		};
-		77826C05203E743A009D5F2C /* VideoPlayer */ = {
-			isa = PBXGroup;
-			children = (
-				77826C06203E743A009D5F2C /* SJBaseVideoPlayer.h */,
-				77826C07203E743A009D5F2C /* SJBaseVideoPlayer.m */,
-			);
-			path = VideoPlayer;
 			sourceTree = "<group>";
 		};
 		D032E6A2ED349265007434F2 /* Frameworks */ = {
@@ -278,6 +273,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				77826BE6203E7427009D5F2C /* LaunchScreen.storyboard in Resources */,
+				77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */,
 				77826C14203E7773009D5F2C /* placeholder.png in Resources */,
 				77826BE3203E7427009D5F2C /* Assets.xcassets in Resources */,
 				77826C10203E74AC009D5F2C /* Podfile in Resources */,
