@@ -38,10 +38,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface _SJBaseVideoPlayerControlDisplayRecorder : NSObject
+@property (nonatomic, getter=isEnabled) BOOL enabled;
+@property (nonatomic, readonly) BOOL controlLayerAppearedState;
 - (instancetype)initWithVideoPlayer:(SJBaseVideoPlayer *)videoPlayer;
 - (void)considerDisplay;
-- (void)needDisplay;
-- (void)needHidden;
+- (void)layerAppear;
+- (void)layerDisappear;
 - (void)clear;
 @end
 NS_ASSUME_NONNULL_END
@@ -97,6 +99,7 @@ NS_ASSUME_NONNULL_END
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error];
     if ( error ) NSLog(@"%@", error.userInfo);
     self.autoPlay = YES;
+    self.enableControlLayerDisplayController = YES;
     [self registrar];
     [self view];
     return self;
@@ -190,7 +193,7 @@ NS_ASSUME_NONNULL_END
             if ( !self ) return;
             if ( self.scrollIn ) return;
             self.scrollIn = YES;
-            [self.displayRecorder needDisplay];
+            [self.displayRecorder layerAppear];
             if ( superview && self.view.superview != superview ) {
                 [self.view removeFromSuperview];
                 [superview addSubview:self.view];
@@ -315,7 +318,7 @@ NS_ASSUME_NONNULL_END
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        [self.displayRecorder needDisplay];
+        [self.displayRecorder layerAppear];
     });
 }
 
@@ -431,7 +434,7 @@ NS_ASSUME_NONNULL_END
     _orentationObserver.orientationWillChange = ^(SJOrentationObserver * _Nonnull observer, BOOL isFullScreen) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        [self.displayRecorder needHidden];
+        [self.displayRecorder layerDisappear];
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:willRotateView:)] ) {
             [self.controlLayerDelegate videoPlayer:self willRotateView:isFullScreen];
         }
@@ -486,9 +489,8 @@ NS_ASSUME_NONNULL_END
              self.playOnCell &&
             !self.orentationObserver.isFullScreen ) return NO;
         
-        if ( SJPlayerGestureType_Pan == type &&
-             SJPanDirection_H == control.panDirection &&
-             ![self.controlLayerDataSource triggerGesturesCondition:[gesture locationInView:gesture.view]] ) return NO;
+        if ( self.controlLayerDataSource &&
+            ![self.controlLayerDataSource triggerGesturesCondition:[gesture locationInView:gesture.view]] ) return NO;
         
         return YES;
     };
@@ -961,20 +963,67 @@ NS_ASSUME_NONNULL_END
     self.asset.rate = 1;
 }
 
-- (void)setRateChanged:(void (^)(SJBaseVideoPlayer * _Nonnull))rateChanged {
+- (void)setRateChanged:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull))rateChanged {
     objc_setAssociatedObject(self, @selector(rateChanged), rateChanged, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-- (void (^)(SJBaseVideoPlayer * _Nonnull))rateChanged {
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull))rateChanged {
     return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)setPlayDidToEnd:(void (^)(SJBaseVideoPlayer * _Nonnull))playDidToEnd {
+- (void)setPlayDidToEnd:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playDidToEnd {
     objc_setAssociatedObject(self, @selector(playDidToEnd), playDidToEnd, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-- (void (^)(SJBaseVideoPlayer * _Nonnull))playDidToEnd {
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playDidToEnd {
     return objc_getAssociatedObject(self, _cmd);
+}
+
+@end
+
+
+#pragma mark - 控制层
+
+@implementation SJBaseVideoPlayer (ControlLayer)
+
+- (BOOL)enableControlLayerDisplayController {
+    return [objc_getAssociatedObject(self, _cmd) boolValue];
+}
+
+- (void)setEnableControlLayerDisplayController:(BOOL)enableControlLayerDisplayController {
+    objc_setAssociatedObject(self, @selector(enableControlLayerDisplayController), @(enableControlLayerDisplayController), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    self.displayRecorder.enabled = enableControlLayerDisplayController;
+}
+
+- (BOOL)controlLayerAppeared {
+    return self.displayRecorder.controlLayerAppearedState;
+}
+
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))controlLayerAppearStateChanged {
+    return objc_getAssociatedObject(self, _cmd);
+}
+
+- (void)setControlLayerAppearStateChanged:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))controlLayerAppearStateChanged {
+    objc_setAssociatedObject(self, @selector(controlLayerAppearStateChanged), controlLayerAppearStateChanged, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+- (void)controlLayerNeedAppear {
+    [self.displayRecorder layerAppear];
+}
+- (void)controlLayerNeedDisappear {
+    [self.displayRecorder layerDisappear];
+}
+
+- (void)setControlViewDisplayStatus:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))controlViewDisplayStatus {
+    self.controlLayerAppearStateChanged = controlViewDisplayStatus;
+}
+
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))controlViewDisplayStatus {
+    return self.controlLayerAppearStateChanged;
+}
+
+- (BOOL)controlViewDisplayed {
+    return self.controlLayerAppeared;
 }
 
 @end
@@ -997,19 +1046,19 @@ NS_ASSUME_NONNULL_END
     return [objc_getAssociatedObject(self, _cmd) boolValue];
 }
 
-- (void)setWillRotateScreen:(void (^)(SJBaseVideoPlayer * _Nonnull, BOOL))willRotateScreen {
+- (void)setWillRotateScreen:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))willRotateScreen {
     objc_setAssociatedObject(self, @selector(willRotateScreen), willRotateScreen, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-- (void (^)(SJBaseVideoPlayer * _Nonnull, BOOL))willRotateScreen {
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))willRotateScreen {
     return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)setRotatedScreen:(void (^)(SJBaseVideoPlayer * _Nonnull, BOOL))rotatedScreen {
+- (void)setRotatedScreen:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))rotatedScreen {
     objc_setAssociatedObject(self, @selector(rotatedScreen), rotatedScreen, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-- (void (^)(SJBaseVideoPlayer * _Nonnull, BOOL))rotatedScreen {
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))rotatedScreen {
     return objc_getAssociatedObject(self, _cmd);
 }
 
@@ -1024,11 +1073,11 @@ NS_ASSUME_NONNULL_END
 
 @implementation SJBaseVideoPlayer (Screenshot)
 
-- (void)setPresentationSize:(void (^)(SJBaseVideoPlayer * _Nonnull, CGSize))presentationSize {
+- (void)setPresentationSize:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull, CGSize))presentationSize {
     objc_setAssociatedObject(self, @selector(presentationSize), presentationSize, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-- (void (^)(SJBaseVideoPlayer * _Nonnull, CGSize))presentationSize {
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull, CGSize))presentationSize {
     return objc_getAssociatedObject(self, _cmd);
 }
 
@@ -1037,13 +1086,13 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)screenshotWithTime:(NSTimeInterval)time
-                completion:(void(^)(SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block {
+                completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block {
     [self screenshotWithTime:time size:CGSizeZero completion:block];
 }
 
 - (void)screenshotWithTime:(NSTimeInterval)time
                       size:(CGSize)size
-                completion:(void(^)(SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block {
+                completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block {
     [self.asset screenshotWithTime:time size:size completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, SJVideoPreviewModel * _Nullable images, NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if ( block ) block(self, images.image, error);
@@ -1052,7 +1101,7 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)generatedPreviewImagesWithMaxItemSize:(CGSize)itemSize
-                                   completion:(void(^)(SJBaseVideoPlayer *player, NSArray<id<SJVideoPlayerPreviewInfo>> *__nullable images, NSError *__nullable error))block {
+                                   completion:(void(^)(__kindof SJBaseVideoPlayer *player, NSArray<id<SJVideoPlayerPreviewInfo>> *__nullable images, NSError *__nullable error))block {
     itemSize = CGSizeMake(ceil(itemSize.width), ceil(itemSize.height));
     __weak typeof(self) _self = self;
     [self.asset generatedPreviewImagesWithMaxItemSize:itemSize completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, NSArray<SJVideoPreviewModel *> * _Nullable images, NSError * _Nullable error) {
@@ -1064,6 +1113,8 @@ NS_ASSUME_NONNULL_END
 
 @end
 
+
+#pragma mark - 在`tableView`或`collectionView`上播放
 
 @implementation SJBaseVideoPlayer (ScrollView)
 
@@ -1109,9 +1160,9 @@ NS_ASSUME_NONNULL_END
 
 NS_ASSUME_NONNULL_BEGIN
 @interface _SJBaseVideoPlayerControlDisplayRecorder ()
-@property (nonatomic, readonly) BOOL appearState;
 @property (nonatomic, weak, readonly) SJBaseVideoPlayer *videoPlayer;
 @property (nonatomic, strong, readonly) SJTimerControl *controlHiddenTimer;
+@property (nonatomic, readwrite) BOOL controlLayerAppearedState;
 @end
 NS_ASSUME_NONNULL_END
 
@@ -1129,12 +1180,13 @@ NS_ASSUME_NONNULL_END
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     if ( [keyPath isEqualToString:@"state"] ) {
-        if      ( SJVideoPlayerPlayState_Paused == self.videoPlayer.state ) {
+        if      ( SJVideoPlayerPlayState_Paused == self.videoPlayer.state ||
+                  SJVideoPlayerPlayState_PlayEnd == self.videoPlayer.state ) {
             [self _keepDisplay];
         }
         else if ( SJVideoPlayerPlayState_Playing == self.videoPlayer.state &&
-                  self.appearState ) {
-            [self needDisplay];
+                  self.controlLayerAppearedState ) {
+            [self layerAppear];
         }
     }
     else if ( [keyPath isEqualToString:@"locked"] ) {
@@ -1147,34 +1199,44 @@ NS_ASSUME_NONNULL_END
     }
 }
 
-- (void)considerDisplay {
-    if      ( SJVideoPlayerPlayState_Paused == self.videoPlayer.state ) [self _keepDisplay];
-    else if ( self.appearState ) [self needHidden];
-    else [self needDisplay];
+- (void)setEnabled:(BOOL)enabled {
+    _enabled = enabled;
+    if ( enabled ) [_controlHiddenTimer start];
+    else [_controlHiddenTimer clear];
 }
 
-- (void)needDisplay {
+- (void)considerDisplay {
+    if ( self.controlLayerAppearedState ) [self layerDisappear];
+    else [self layerAppear];
+}
+
+- (void)layerAppear {
+    if ( !self.isEnabled ) return;
     [self clear];
     if ( !self.videoPlayer.controlLayerDataSource ) return;
-    if ( !self.videoPlayer.controlLayerDataSource.controlLayerAppearCondition ) return;
     [self.controlHiddenTimer start];
     [self _callDelegateMethodWithStatus:YES];
+    self.controlLayerAppearedState = YES;
+    if ( self.videoPlayer.controlLayerAppearStateChanged ) self.videoPlayer.controlLayerAppearStateChanged(self.videoPlayer, YES);
 }
 
 - (void)_keepDisplay {
-    [self needDisplay];                 // 显示
-    [self.controlHiddenTimer clear];    // 清除timer, 使其一直显示
+    if ( !self.isEnabled ) return;
+    [self layerAppear];                      // 显示
+    [self.controlHiddenTimer clear];         // 清除timer, 使其一直显示
 }
 
-- (void)needHidden {
+- (void)layerDisappear {
+    if ( !self.isEnabled ) return;
     if ( !self.videoPlayer.controlLayerDataSource ) return;
-    if ( !self.videoPlayer.controlLayerDataSource.controlLayerDisappearCondition ) return;
     [self.controlHiddenTimer clear];
     [self _callDelegateMethodWithStatus:NO];
+    self.controlLayerAppearedState = NO;
+    if ( self.videoPlayer.controlLayerAppearStateChanged ) self.videoPlayer.controlLayerAppearStateChanged(self.videoPlayer, NO);
 }
 
 - (void)clear {
-    [self.controlHiddenTimer clear];
+    [_controlHiddenTimer clear];
 }
 
 - (SJTimerControl *)controlHiddenTimer {
@@ -1184,7 +1246,10 @@ NS_ASSUME_NONNULL_END
     _controlHiddenTimer.exeBlock = ^(SJTimerControl * _Nonnull control) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( self.appearState ) [self needHidden];
+        // 如果控制层显示, 当达到隐藏的条件, `timer`将控制层隐藏. 否则, 清除`timer`.
+        if ( self.controlLayerAppearedState &&
+             self.videoPlayer.controlLayerDataSource.controlLayerDisappearCondition )
+             [self layerDisappear];
         else [control clear];
     };
     return _controlHiddenTimer;
@@ -1200,7 +1265,4 @@ NS_ASSUME_NONNULL_END
     }
 }
 
-- (BOOL)appearState {
-    return self.videoPlayer.controlLayerDataSource.controlLayerAppearedState;
-}
 @end
