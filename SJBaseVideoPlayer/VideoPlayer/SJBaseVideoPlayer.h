@@ -219,8 +219,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
-#pragma mark - Delegate
-
 @protocol SJVideoPlayerControlLayerDelegate <NSObject>
 
 @optional

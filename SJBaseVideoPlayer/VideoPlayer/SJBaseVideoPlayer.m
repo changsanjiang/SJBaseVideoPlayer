@@ -1111,12 +1111,12 @@ NS_ASSUME_NONNULL_BEGIN
 @interface _SJBaseVideoPlayerControlDisplayRecorder ()
 @property (nonatomic, readonly) BOOL appearState;
 @property (nonatomic, weak, readonly) SJBaseVideoPlayer *videoPlayer;
-@property (nonatomic, strong, readonly) SJTimerControl *timerControl;
+@property (nonatomic, strong, readonly) SJTimerControl *controlHiddenTimer;
 @end
 NS_ASSUME_NONNULL_END
 
 @implementation _SJBaseVideoPlayerControlDisplayRecorder
-@synthesize timerControl = _timerControl;
+@synthesize controlHiddenTimer = _controlHiddenTimer;
 
 - (instancetype)initWithVideoPlayer:(SJBaseVideoPlayer *)videoPlayer {
     self = [super init];
@@ -1133,65 +1133,61 @@ NS_ASSUME_NONNULL_END
             [self _keepDisplay];
         }
         else if ( SJVideoPlayerPlayState_Playing == self.videoPlayer.state &&
-                 self.appearState ) {
+                  self.appearState ) {
             [self needDisplay];
         }
     }
     else if ( [keyPath isEqualToString:@"locked"] ) {
         if ( _videoPlayer.isLockedScreen ) {
-            [self.timerControl clear];
+            [self.controlHiddenTimer clear];
         }
         else {
-            [self.timerControl start];
+            [self.controlHiddenTimer start];
         }
     }
 }
 
 - (void)considerDisplay {
-    if ( self.appearState ) [self needHidden];
+    if      ( SJVideoPlayerPlayState_Paused == self.videoPlayer.state ) [self _keepDisplay];
+    else if ( self.appearState ) [self needHidden];
     else [self needDisplay];
 }
 
 - (void)needDisplay {
-    [self.timerControl start];
+    [self clear];
+    if ( !self.videoPlayer.controlLayerDataSource ) return;
+    if ( !self.videoPlayer.controlLayerDataSource.controlLayerAppearCondition ) return;
+    [self.controlHiddenTimer start];
     [self _callDelegateMethodWithStatus:YES];
 }
 
 - (void)_keepDisplay {
-    [self needDisplay];
-    [self.timerControl clear];
+    [self needDisplay];                 // 显示
+    [self.controlHiddenTimer clear];    // 清除timer, 使其一直显示
 }
 
 - (void)needHidden {
-    [self.timerControl clear];
+    if ( !self.videoPlayer.controlLayerDataSource ) return;
+    if ( !self.videoPlayer.controlLayerDataSource.controlLayerDisappearCondition ) return;
+    [self.controlHiddenTimer clear];
     [self _callDelegateMethodWithStatus:NO];
 }
 
 - (void)clear {
-    [self.timerControl clear];
+    [self.controlHiddenTimer clear];
 }
 
-- (SJTimerControl *)timerControl {
-    if ( _timerControl ) return _timerControl;
-    _timerControl = [[SJTimerControl alloc] init];
+- (SJTimerControl *)controlHiddenTimer {
+    if ( _controlHiddenTimer ) return _controlHiddenTimer;
+    _controlHiddenTimer = [[SJTimerControl alloc] init];
     __weak typeof(self) _self = self;
-    _timerControl.exeBlock = ^(SJTimerControl * _Nonnull control) {
+    _controlHiddenTimer.exeBlock = ^(SJTimerControl * _Nonnull control) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        
-        // 是否达到触发时机, 如果没达到时机, 则保持状态.
-        if ( !self.videoPlayer.controlLayerDataSource.controlLayerAppearCondition ||
-            !self.videoPlayer.controlLayerDataSource.controlLayerDisappearCondition ||
-            ( self.appearState && SJVideoPlayerPlayState_Paused == self.videoPlayer.state ) ) {
-            [control reset];
-        }
-        else {
-            if ( self.appearState ) [self needHidden];
-            else [control clear];
-        }
-        
+        if ( self.appearState ) [self needHidden];
+        else [control clear];
     };
-    return _timerControl;
+    return _controlHiddenTimer;
 }
 
 #pragma mark -
@@ -1201,11 +1197,10 @@ NS_ASSUME_NONNULL_END
     }
     else if ( !status && [self.videoPlayer.controlLayerDelegate respondsToSelector:@selector(controlLayerNeedDisappear:)] ) {
         [self.videoPlayer.controlLayerDelegate controlLayerNeedDisappear:self.videoPlayer];
-    }    
+    }
 }
 
 - (BOOL)appearState {
     return self.videoPlayer.controlLayerDataSource.controlLayerAppearedState;
 }
 @end
-
