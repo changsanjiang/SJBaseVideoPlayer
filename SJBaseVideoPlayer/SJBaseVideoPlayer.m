@@ -302,6 +302,11 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)_itemReadyToPlay {
+
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:currentTime:currentTimeStr:totalTime:totalTimeStr:)] ) {
+        [self.controlLayerDelegate videoPlayer:self currentTime:self.currentTime currentTimeStr:self.currentTimeStr totalTime:self.totalTime totalTimeStr:self.totalTimeStr];
+    }
+    
     if ( !self.autoPlay ) return;
     
     if ( !self.userClickedPause && !self.suspend ) {
