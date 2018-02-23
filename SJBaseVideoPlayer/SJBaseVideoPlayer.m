@@ -138,8 +138,8 @@ NS_ASSUME_NONNULL_END
         }
     };
     
-    self.asset.playerItemStateChanged(asset, asset.playerItem.status); // update
-
+    self.asset.playerItemStateChanged(asset, asset.playerItem.status);
+    
     self.asset.playTimeChanged = ^(SJVideoPlayerAssetCarrier * _Nonnull asset, NSTimeInterval currentTime, NSTimeInterval duration) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
@@ -1131,6 +1131,10 @@ NS_ASSUME_NONNULL_END
 
 - (BOOL)playOnCell {
     return self.asset.indexPath ? YES : NO;
+}
+
+- (BOOL)scrollIntoTheCell {
+    return self.scrollIn;
 }
 
 @end
