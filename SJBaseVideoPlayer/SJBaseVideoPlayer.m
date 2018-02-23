@@ -132,7 +132,7 @@ NS_ASSUME_NONNULL_END
             }
                 break;
             case AVPlayerItemStatusReadyToPlay: {
-                [self _itemReadyToPlay];
+                if ( !self.resignActive ) [self _itemReadyToPlay];
             }
                 break;
         }
