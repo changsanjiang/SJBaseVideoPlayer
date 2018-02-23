@@ -402,6 +402,7 @@ static float const __GeneratePreImgScale = 0.05;
     [_playerItem removeObserver:self forKeyPath:@"presentationSize"];
     if ( _scrollView && !_removedScrollObserver ) [self _removingScrollViewObserver];
     if ( _rootScrollView && !_removedParentScrollObserver ) [self _removingrootScrollViewObserver];
+    NSLog(@"%zd - %s", __LINE__, __func__);
 }
 
 #pragma mark
@@ -569,4 +570,3 @@ static float const __GeneratePreImgScale = 0.05;
 }
 
 @end
-
