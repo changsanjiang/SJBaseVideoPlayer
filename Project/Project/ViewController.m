@@ -30,8 +30,11 @@
         make.height.equalTo(_videoPlayer.view.mas_width).multipliedBy(9 / 16.0f);
     }];
 
-    
     _videoPlayer.placeholder = [UIImage imageNamed:@"placeholder"];
+    
+    _videoPlayer.rotateOrientation = SJRotateViewOrientation_LandscapeLeft;
+    
+    _videoPlayer.supportedRotateViewOrientation = SJSupportedRotateViewOrientation_LandscapeLeft | SJSupportedRotateViewOrientation_LandscapeRight;
     
     // Do any additional setup after loading the view, typically from a nib.
 }
