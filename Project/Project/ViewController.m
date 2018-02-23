@@ -33,12 +33,6 @@
     _videoPlayer.placeholder = [UIImage imageNamed:@"placeholder"];
     
     _videoPlayer.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
-
-    // 设置全屏播放
-    _videoPlayer.rotateOrientation = SJRotateViewOrientation_LandscapeLeft;
-    
-    // 设置支持的旋转方向
-    _videoPlayer.supportedRotateViewOrientation = SJSupportedRotateViewOrientation_LandscapeLeft | SJSupportedRotateViewOrientation_LandscapeRight;
     
     // Do any additional setup after loading the view, typically from a nib.
 }
