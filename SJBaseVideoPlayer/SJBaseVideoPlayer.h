@@ -18,6 +18,16 @@
 #import <SJOrentationObserver/SJOrentationObserver.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
+    SJDisablePlayerGestureTypes_None,
+    SJDisablePlayerGestureTypes_SingleTap = 1 << 0,
+    SJDisablePlayerGestureTypes_DoubleTap = 1 << 1,
+    SJDisablePlayerGestureTypes_Pan = 1 << 2,
+    SJDisablePlayerGestureTypes_Pinch = 1 << 3,
+    SJDisablePlayerGestureTypes_All = 1 << 4
+};
+
 @protocol SJVideoPlayerControlLayerDataSource, SJVideoPlayerControlLayerDelegate;
 
 
@@ -106,7 +116,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL disableVolumeSetting;
 
 @property (nonatomic, readwrite) float brightness;
-
 @property (nonatomic, readwrite) BOOL disableBrightnessSetting;
 
 @property (nonatomic, readwrite) float rate; // 0.5...2
@@ -116,6 +125,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)resetRate;
 
 @property (nonatomic, copy, readwrite, nullable) void(^playDidToEnd)(__kindof SJBaseVideoPlayer *player); // 播放完毕
+
+@end
+
+
+#pragma mark - Gesture
+
+@interface SJBaseVideoPlayer (GestureControl)
+
+@property (nonatomic, readwrite) SJDisablePlayerGestureTypes disableGestureTypes;
 
 @end
 
@@ -190,8 +208,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SJBaseVideoPlayer (ScrollView)
 
-@property (nonatomic, assign, readonly) BOOL playOnCell;            // 是在cell上播放
-@property (nonatomic, assign, readonly) BOOL scrollIntoTheCell;     // 播放器滚进了单元格中
+@property (nonatomic, assign, readonly) BOOL playOnScrollView;      // 是否在scrollView上播放
+@property (nonatomic, assign, readonly) BOOL isScrollAppeared;      // 播放器滚动到显示的状态.
+
+@property (nonatomic, assign, readonly) BOOL playOnCell NS_DEPRECATED(2_0, 2_0, 2_0, 2_0, "use `playOnScrollView`");            // 是在cell上播放
+@property (nonatomic, assign, readonly) BOOL scrollIntoTheCell NS_DEPRECATED(2_0, 2_0, 2_0, 2_0, "use `isScrollAppeared`");     // 播放器滚进了单元格中
 
 @end
 
