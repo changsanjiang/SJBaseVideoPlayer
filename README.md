@@ -7,6 +7,7 @@ ___
 
 ## interface
 
+<img src="https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/Project/SJBaseVideoPlayer.png" />
 ___
 
 ```Objective-C
