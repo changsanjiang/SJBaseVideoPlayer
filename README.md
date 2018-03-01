@@ -3,6 +3,12 @@ video player. rotation, volume, brightness, rate, play, pause, stop, seekToTime,
 
 - [Demo](https://github.com/changsanjiang/SJVideoPlayer)
 
+___
+
+## interface
+
+___
+
 ```Objective-C
 @interface SJBaseVideoPlayer : NSObject
 

@@ -25,6 +25,7 @@
 		77826C14203E7773009D5F2C /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 77826C13203E7773009D5F2C /* placeholder.png */; };
 		77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */; };
 		77826C18203FAB8B009D5F2C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 77826C17203FAB8B009D5F2C /* README.md */; };
+		77EE06922047A20D00EA5A92 /* SJBaseVideoPlayer.png in Resources */ = {isa = PBXBuildFile; fileRef = 77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */; };
 		C72090F66CE012968A1699AF /* libPods-Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3783465EF81E7A5838D5F3FF /* libPods-Project.a */; };
 /* End PBXBuildFile section */
 
@@ -63,6 +64,7 @@
 		77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = SJBaseVideoPlayer.podspec; path = ../SJBaseVideoPlayer.podspec; sourceTree = "<group>"; };
 		77826C17203FAB8B009D5F2C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		77DE8360EA219A9C5A02BA5F /* Pods-Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.debug.xcconfig"; sourceTree = "<group>"; };
+		77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = SJBaseVideoPlayer.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 				77826C0F203E74AC009D5F2C /* Podfile */,
 				77826C17203FAB8B009D5F2C /* README.md */,
 				77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */,
+				77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */,
 				77826BD8203E7427009D5F2C /* Project */,
 				77826BD7203E7427009D5F2C /* Products */,
 				FFBBA4CDD7038BE2A325A590 /* Pods */,
@@ -277,6 +280,7 @@
 			files = (
 				77826BE6203E7427009D5F2C /* LaunchScreen.storyboard in Resources */,
 				77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */,
+				77EE06922047A20D00EA5A92 /* SJBaseVideoPlayer.png in Resources */,
 				77826C14203E7773009D5F2C /* placeholder.png in Resources */,
 				77826BE3203E7427009D5F2C /* Assets.xcassets in Resources */,
 				77826C10203E74AC009D5F2C /* Podfile in Resources */,
