@@ -5,6 +5,11 @@
 //  Created by BlueDancer on 2017/9/1.
 //  Copyright © 2017年 SanJiang. All rights reserved.
 //
+//  https://github.com/changsanjiang/SJVideoPlayerAssetCarrier
+//  Demo: https://github.com/changsanjiang/SJVideoPlayer
+//  changsanjiang@gmail.com
+//
+
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
@@ -195,6 +200,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - other
 - (NSString *)timeString:(NSInteger)secs;
+@property (nonatomic, copy, readwrite, nullable) void(^deallocExeBlock)(SJVideoPlayerAssetCarrier *asset);
 
 #pragma mark - properties
 @property (nonatomic, strong, readonly) AVURLAsset *asset;

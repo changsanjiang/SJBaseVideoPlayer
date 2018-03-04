@@ -148,6 +148,7 @@ static float const __GeneratePreImgScale = 0.05;
     if ( !self ) return nil;
     _asset = [AVURLAsset assetWithURL:assetURL];
     _playerItem = [AVPlayerItem playerItemWithAsset:_asset automaticallyLoadedAssetKeys:@[@"duration"]];
+    _player = [AVPlayer playerWithPlayerItem:_playerItem];
     _assetURL = assetURL;
     _beginTime = beginTime;
     if ( 0 == _beginTime ) _jumped = YES;
@@ -162,10 +163,19 @@ static float const __GeneratePreImgScale = 0.05;
     _scrollIn_bool = YES;
     _parent_scrollIn_bool = YES;
     _rate = 1;
-
+    
     // observe
     [self _observing];
-    _player = [AVPlayer playerWithPlayerItem:_playerItem];
+    /*!
+     AVPlayerItemStatusUnknown 该状态表示当前媒体还未载入并且还不在播放队列中.
+     将`AVPlayerItem`与一个`AVPlayer`对象进行关联就开始将媒体放入队列中, 但是在具体内容可以播放前, 需要等待对象的状态由`unknown`变为`readyToPlay`.
+     我们可以通过`KVO`来监听`status`的改变.
+     
+     AVPlayerItemStatusReadyToPlay,
+     AVPlayerItemStatusFailed
+     **/
+    [self _addTimeObserver];
+    [self _addItemPlayEndObserver];
     return self;
 }
 
@@ -177,8 +187,7 @@ static float const __GeneratePreImgScale = 0.05;
         __strong typeof(_self) self = _self;
         if ( !self ) return;
         NSTimeInterval currentTime = CMTimeGetSeconds(time);
-        NSTimeInterval duration = CMTimeGetSeconds(self.playerItem.duration);
-        if ( self.playTimeChanged ) self.playTimeChanged(self, currentTime, duration);
+        if ( self.playTimeChanged ) self.playTimeChanged(self, currentTime, self.duration);
     }];
 }
 
@@ -197,6 +206,7 @@ static float const __GeneratePreImgScale = 0.05;
     [_playerItem addObserver:self forKeyPath:@"presentationSize" options:NSKeyValueObservingOptionNew context:nil];
     [_playerItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:nil];
     [_playerItem addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:nil];
+    [_playerItem addObserver:self forKeyPath:@"duration" options:NSKeyValueObservingOptionNew context:nil];
     
     if ( _scrollView ) {
         __weak typeof(self) _self = self;
@@ -244,23 +254,11 @@ static float const __GeneratePreImgScale = 0.05;
             }
         }
         else if ( [keyPath isEqualToString:@"loadedTimeRanges"] ) {
-            if ( 0 == CMTimeGetSeconds(_playerItem.duration) ) return;
-            float progress = [self _loadedTimeSecs] / CMTimeGetSeconds(_playerItem.duration);
+            if ( 0 == self.duration ) return;
+            float progress = [self _loadedTimeSecs] / self.duration;
             if ( self.loadedTimeProgress ) self.loadedTimeProgress(progress);
         }
         else if ( [keyPath isEqualToString:@"status"] ) {
-            /*!
-                 AVPlayerItemStatusUnknown 该状态表示当前媒体还未载入并且还不在播放队列中.
-                 将`AVPlayerItem`与一个`AVPlayer`对象进行关联就开始将媒体放入队列中, 但是在具体内容可以播放前, 需要等待对象的状态由`unknown`变为`readyToPlay`.
-                 我们可以通过`KVO`来监听`status`的改变.
-             
-                 AVPlayerItemStatusReadyToPlay,
-                 AVPlayerItemStatusFailed
-             **/
-            if ( AVPlayerItemStatusReadyToPlay == self.playerItem.status ) {
-                [self _addTimeObserver];
-                [self _addItemPlayEndObserver];
-            }
             
             if ( !_jumped &&
                 AVPlayerItemStatusReadyToPlay == self.playerItem.status &&
@@ -282,6 +280,9 @@ static float const __GeneratePreImgScale = 0.05;
                     if ( self.playerItemStateChanged ) self.playerItemStateChanged(self, self.playerItem.status);
                 });
             }
+        }
+        else if ( [keyPath isEqualToString:@"duration"] ) {
+            _duration = CMTimeGetSeconds(_playerItem.duration);
         }
         else if ( [keyPath isEqualToString:@"playbackBufferEmpty"] ) {
             if ( self.beingBuffered ) self.beingBuffered([self _loadedTimeSecs] <= self.currentTime + 5);
@@ -413,8 +414,9 @@ static float const __GeneratePreImgScale = 0.05;
     }];
 }
 
+@synthesize duration = _duration;
 - (NSTimeInterval)duration {
-    return CMTimeGetSeconds(_playerItem.duration);
+    return _duration;
 }
 
 - (NSTimeInterval)currentTime {
@@ -441,13 +443,15 @@ static float const __GeneratePreImgScale = 0.05;
     [self cancelPreviewImagesGeneration];
     [_player pause];
     [_player removeTimeObserver:_timeObserver];
-    [[NSNotificationCenter defaultCenter] removeObserver:_itemEndObserver name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:_itemEndObserver name:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem];
     [_playerItem removeObserver:self forKeyPath:@"status"];
     [_playerItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
     [_playerItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
     [_playerItem removeObserver:self forKeyPath:@"presentationSize"];
+    [_playerItem removeObserver:self forKeyPath:@"duration"];
     if ( _scrollView && !_removedScrollObserver ) [self _removingScrollViewObserver];
     if ( _rootScrollView && !_removedParentScrollObserver ) [self _removingrootScrollViewObserver];
+    if ( _deallocExeBlock ) _deallocExeBlock(self);
 }
 
 #pragma mark
@@ -467,7 +471,7 @@ static float const __GeneratePreImgScale = 0.05;
 
 - (void)playOnHeader_scrollViewDidScroll:(UIScrollView *)scrollView {
     if ( [self.playerSuperViewOfTableHeader isKindOfClass:[UICollectionView class]] &&
-         scrollView == self.playerSuperViewOfTableHeader ) {
+        scrollView == self.playerSuperViewOfTableHeader ) {
         UICollectionView *collectionView = (UICollectionView *)scrollView;
         UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:self.indexPath];
         bool visable = [collectionView.visibleCells containsObject:cell];
@@ -649,4 +653,3 @@ static float const __GeneratePreImgScale = 0.05;
 }
 
 @end
-

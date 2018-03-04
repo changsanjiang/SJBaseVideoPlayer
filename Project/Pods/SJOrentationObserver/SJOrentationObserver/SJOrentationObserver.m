@@ -121,13 +121,13 @@
         case SJRotateViewOrientation_LandscapeRight: {
             ori = UIInterfaceOrientationLandscapeLeft;
             transform = CGAffineTransformMakeRotation(-M_PI_2);
-            superview = [UIApplication sharedApplication].keyWindow;
+            superview = [(id)[UIApplication sharedApplication].delegate valueForKey:@"window"];
         }
             break;
         case SJRotateViewOrientation_LandscapeLeft: {
             ori = UIInterfaceOrientationLandscapeRight;
             transform = CGAffineTransformMakeRotation(M_PI_2);
-            superview = [UIApplication sharedApplication].keyWindow;
+            superview = [(id)[UIApplication sharedApplication].delegate valueForKey:@"window"];
         }
             break;
         case SJRotateViewOrientation_Portrait: {
@@ -146,7 +146,7 @@
     
     if ( _rotateOrientation == SJRotateViewOrientation_Portrait && UIInterfaceOrientationPortrait != ori ) {
         CGRect fix = _view.frame;
-        fix.origin = [[UIApplication sharedApplication].keyWindow convertPoint:CGPointZero fromView:_targetSuperview];
+        fix.origin = [[(id)[UIApplication sharedApplication].delegate valueForKey:@"window"] convertPoint:CGPointZero fromView:_targetSuperview];
         [superview addSubview:_view];
         _view.frame = fix;
     }
@@ -158,7 +158,7 @@
     
     [_view mas_remakeConstraints:^(MASConstraintMaker *make) {
         if ( UIInterfaceOrientationPortrait == ori ) {
-            CGRect rect = [[UIApplication sharedApplication].keyWindow convertRect:self.targetSuperview.bounds fromView:self.targetSuperview];
+            CGRect rect = [[(id)[UIApplication sharedApplication].delegate valueForKey:@"window"] convertRect:self.targetSuperview.bounds fromView:self.targetSuperview];
             make.size.mas_equalTo(rect.size);
             make.top.offset(rect.origin.y);
             make.leading.offset(rect.origin.x);
@@ -178,7 +178,7 @@
     
     [UIView animateWithDuration:_duration animations:^{
         [_view setTransform:transform];
-        [_view.superview layoutIfNeeded];
+        [_view layoutIfNeeded];
     } completion:^(BOOL finished) {
         self.transitioning = NO;
         if ( UIInterfaceOrientationPortrait == ori ) {
