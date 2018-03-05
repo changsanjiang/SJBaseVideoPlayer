@@ -108,6 +108,7 @@ NS_ASSUME_NONNULL_END
 #ifdef DEBUG
     NSLog(@"%zd - %s", __LINE__, __func__);
 #endif
+    if ( self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
     [_presentView removeFromSuperview];
     [self stop];
 }
@@ -826,8 +827,9 @@ NS_ASSUME_NONNULL_END
 
 - (void)refresh {
     if ( !self.asset ) return;
-    [self.URLAsset setValue:[[SJVideoPlayerAssetCarrier alloc] initWithAssetURL:self.asset.assetURL beginTime:self.asset.beginTime indexPath:self.asset.indexPath superviewTag:self.asset.superviewTag scrollViewIndexPath:self.asset.scrollViewIndexPath scrollViewTag:self.asset.scrollViewTag scrollView:self.asset.scrollView rootScrollView:self.asset.rootScrollView] forKey:kSJVideoPlayerAssetKey];
-    self.asset = [self.URLAsset valueForKey:kSJVideoPlayerAssetKey];
+    self.state = SJVideoPlayerPlayState_Unknown;
+    [self.asset refreshAVPlayer];
+    self.presentView.player = self.asset.player;
 }
 
 - (void)setAssetDeallocExeBlock:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull))assetDeallocExeBlock {
