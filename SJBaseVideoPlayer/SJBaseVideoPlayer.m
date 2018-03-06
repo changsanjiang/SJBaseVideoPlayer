@@ -809,11 +809,6 @@ NS_ASSUME_NONNULL_END
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:stateChanged:)] ) {
         [self.controlLayerDelegate videoPlayer:self stateChanged:state];
     }
-    if ( SJVideoPlayerPlayState_PlayFailed == state ) {
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:playFailed:)] ) {
-            [self.controlLayerDelegate videoPlayer:self playFailed:self.error];
-        }
-    }
 }
 
 - (void)clearAsset {
