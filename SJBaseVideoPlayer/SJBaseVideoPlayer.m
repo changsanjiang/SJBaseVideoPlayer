@@ -53,6 +53,7 @@ NS_ASSUME_NONNULL_END
 
 NS_ASSUME_NONNULL_BEGIN
 @interface _SJReachabilityObserver : NSObject
++ (instancetype)sharedInstance;
 @property (nonatomic, assign, readonly) SJNetworkStatus networkStatus;
 @property (nonatomic, copy, readwrite, nullable) void(^reachabilityChangedExeBlock)(_SJReachabilityObserver *observer, SJNetworkStatus status);
 @end
@@ -733,7 +734,7 @@ NS_ASSUME_NONNULL_END
 
 - (_SJReachabilityObserver *)reachabilityObserver {
     if ( _reachabilityObserver ) return _reachabilityObserver;
-    _reachabilityObserver = [_SJReachabilityObserver new];
+    _reachabilityObserver = [_SJReachabilityObserver sharedInstance];
     __weak typeof(self) _self = self;
     _reachabilityObserver.reachabilityChangedExeBlock = ^(_SJReachabilityObserver * _Nonnull observer, SJNetworkStatus status) {
         __strong typeof(_self) self = _self;
@@ -1457,6 +1458,16 @@ NS_ASSUME_NONNULL_BEGIN
 NS_ASSUME_NONNULL_END
 
 @implementation _SJReachabilityObserver
+
++ (instancetype)sharedInstance {
+    static id _instance;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _instance = [self new];
+    });
+    return _instance;
+}
+
 - (instancetype)init {
     self = [super init];
     if ( !self ) return nil;
