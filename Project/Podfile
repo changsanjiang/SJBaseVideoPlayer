@@ -15,4 +15,5 @@ target 'Project' do
   pod 'SJVideoPlayerAssetCarrier'
   pod 'SJVolBrigControl'
   pod 'SJObserverHelper'
+  pod 'Reachability'
 end

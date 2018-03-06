@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "73AD69137C1A1B95FD8BA5436FBE5B82"
+               BlueprintIdentifier = "6E365E3257C1CD1BD2B68DEC9E076C2D"
                BuildableName = "libSJVolBrigControl.a"
                BlueprintName = "SJVolBrigControl"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -47,7 +47,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "73AD69137C1A1B95FD8BA5436FBE5B82"
+            BlueprintIdentifier = "6E365E3257C1CD1BD2B68DEC9E076C2D"
             BuildableName = "libSJVolBrigControl.a"
             BlueprintName = "SJVolBrigControl"
             ReferencedContainer = "container:Pods.xcodeproj">

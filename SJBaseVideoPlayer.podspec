@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = 'SJBaseVideoPlayer'
-s.version      = '1.0.1.4'
+s.version      = '1.0.2'
 s.summary      = 'video player.'
 s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
 s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -19,6 +19,7 @@ s.dependency 'SJOrentationObserver'
 s.dependency 'SJVideoPlayerAssetCarrier'
 s.dependency 'SJVolBrigControl'
 s.dependency 'SJObserverHelper'
+s.dependency 'Reachability'
 
 s.source_files = 'SJBaseVideoPlayer/*.{h,m}'
 

@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6F5F56C9AEC0AF614C391C3B5E7F38E2"
+               BlueprintIdentifier = "27D4FA1B285562DD0328C7F0C7952DF7"
                BuildableName = "libSJBorderLineView.a"
                BlueprintName = "SJBorderLineView"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -47,7 +47,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6F5F56C9AEC0AF614C391C3B5E7F38E2"
+            BlueprintIdentifier = "27D4FA1B285562DD0328C7F0C7952DF7"
             BuildableName = "libSJBorderLineView.a"
             BlueprintName = "SJBorderLineView"
             ReferencedContainer = "container:Pods.xcodeproj">
