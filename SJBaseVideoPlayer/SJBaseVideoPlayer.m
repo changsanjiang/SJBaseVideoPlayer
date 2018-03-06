@@ -110,7 +110,7 @@ NS_ASSUME_NONNULL_END
     [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error];
     if ( error ) NSLog(@"%@", error.userInfo);
     self.autoPlay = YES;
-    self.enableControlLayerDisplayController = YES; 
+    self.enableControlLayerDisplayController = YES;
     [self registrar];
     [self view];
     [self reachabilityObserver];
@@ -1471,6 +1471,10 @@ NS_ASSUME_NONNULL_END
         SJNetworkStatus status = (NSInteger)[self.reachability currentReachabilityStatus];
         self.reachabilityChangedExeBlock(self, status);
     }
+}
+
+- (SJNetworkStatus)networkStatus {
+    return (NSInteger)[self.reachability currentReachabilityStatus];
 }
 
 - (void)dealloc {
