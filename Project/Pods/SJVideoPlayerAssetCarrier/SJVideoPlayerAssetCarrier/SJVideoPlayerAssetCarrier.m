@@ -187,21 +187,30 @@ static float const __GeneratePreImgScale = 0.05;
     _parent_scrollIn_bool = YES;
     _rate = 1;
     
-    [self _initializeAVPlayer];
-    [self _itemObserving];
+    __weak typeof(self) _self = self;
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        [self _initializeAVPlayer];
+        [self _itemObserving];
+    });
+    
     [self _scrollViewObserving];
     return self;
 }
 
 - (void)_initializeAVPlayer {
+    
     _asset = [AVURLAsset assetWithURL:_assetURL];
     _playerItem = [AVPlayerItem playerItemWithAsset:_asset automaticallyLoadedAssetKeys:@[@"duration"]];
     _player = [AVPlayer playerWithPlayerItem:_playerItem];
     _player.actionAtItemEnd = AVPlayerActionAtItemEndPause;
-    
     if ( @available(iOS 10.0, *) ) {
         _player.automaticallyWaitsToMinimizeStalling = YES;
     }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if ( self.loadedPlayerExeBlock ) self.loadedPlayerExeBlock(self);
+    });
 }
 
 - (void)_itemObserving {
@@ -327,6 +336,15 @@ static float const __GeneratePreImgScale = 0.05;
     CMTime rangeDuration  = loadTimeRange.duration;
     Float64 seconds = CMTimeGetSeconds(startTime) + CMTimeGetSeconds(rangeDuration);
     return seconds;
+}
+
+#pragma mark -
+
+- (void)setPresentationSize:(void (^)(SJVideoPlayerAssetCarrier * _Nonnull, CGSize))presentationSize {
+    _presentationSize = [presentationSize copy];
+    if ( !CGSizeEqualToSize(_playerItem.presentationSize, CGSizeZero) ) {
+        if ( presentationSize ) presentationSize(self, _playerItem.presentationSize);
+    }
 }
 
 #pragma mark -
@@ -752,8 +770,8 @@ static float const __GeneratePreImgScale = 0.05;
 }
 
 - (void)convertToCellWithTableOrCollectionView:(__unsafe_unretained UIScrollView *)tableOrCollectionView
-                                        indexPath:(NSIndexPath *)indexPath
-                               playerSuperviewTag:(NSInteger)superviewTag {
+                                     indexPath:(NSIndexPath *)indexPath
+                            playerSuperviewTag:(NSInteger)superviewTag {
     [self _convertingWithBlock:^{
         _indexPath = indexPath;
         _superviewTag = superviewTag;
@@ -762,7 +780,7 @@ static float const __GeneratePreImgScale = 0.05;
 }
 
 - (void)convertToTableHeaderViewWithPlayerSuperView:(__weak UIView *)superView
-                                             tableView:(__unsafe_unretained UITableView *)tableView {
+                                          tableView:(__unsafe_unretained UITableView *)tableView {
     [self _convertingWithBlock:^{
         _tableHeaderSubView = superView;
         _scrollView = tableView;
@@ -770,9 +788,9 @@ static float const __GeneratePreImgScale = 0.05;
 }
 
 - (void)convertToTableHeaderViewWithCollectionView:(__weak UICollectionView *)collectionView
-                              collectionCellIndexPath:(NSIndexPath *)indexPath
-                                   playerSuperViewTag:(NSInteger)playerSuperViewTag
-                                        rootTableView:(__unsafe_unretained UITableView *)rootTableView {
+                           collectionCellIndexPath:(NSIndexPath *)indexPath
+                                playerSuperViewTag:(NSInteger)playerSuperViewTag
+                                     rootTableView:(__unsafe_unretained UITableView *)rootTableView {
     [self _convertingWithBlock:^{
         _scrollView = collectionView;
         _indexPath = indexPath;
@@ -782,10 +800,10 @@ static float const __GeneratePreImgScale = 0.05;
 }
 
 - (void)convertToCellWithIndexPath:(NSIndexPath *)indexPath
-                         superviewTag:(NSInteger)superviewTag
-              collectionViewIndexPath:(NSIndexPath *)collectionViewIndexPath
-                    collectionViewTag:(NSInteger)collectionViewTag
-                        rootTableView:(__unsafe_unretained UITableView *)rootTableView {
+                      superviewTag:(NSInteger)superviewTag
+           collectionViewIndexPath:(NSIndexPath *)collectionViewIndexPath
+                 collectionViewTag:(NSInteger)collectionViewTag
+                     rootTableView:(__unsafe_unretained UITableView *)rootTableView {
     [self _convertingWithBlock:^{
         _indexPath = indexPath;
         _superviewTag = superviewTag;
