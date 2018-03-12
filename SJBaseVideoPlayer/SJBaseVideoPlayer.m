@@ -446,7 +446,6 @@ NS_ASSUME_NONNULL_END
     _orentationObserver.orientationWillChange = ^(SJOrentationObserver * _Nonnull observer, BOOL isFullScreen) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        [self.displayRecorder layerDisappear];
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:willRotateView:)] ) {
             [self.controlLayerDelegate videoPlayer:self willRotateView:isFullScreen];
         }
@@ -909,6 +908,7 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)seekToTime:(CMTime)time completionHandler:(void (^ __nullable)(BOOL finished))completionHandler {
+    self.state = SJVideoPlayerPlayState_Buffing;
     if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
         [self.controlLayerDelegate startLoading:self];
     }
@@ -1264,6 +1264,40 @@ NS_ASSUME_NONNULL_END
 @end
 
 
+#pragma mark - 输出
+
+@implementation SJBaseVideoPlayer (Export)
+
+- (void)exportWithBeginTime:(NSTimeInterval)beginTime
+                    endTime:(NSTimeInterval)endTime
+                 presetName:(nullable NSString *)presetName
+                   progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))pro
+                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, SJVideoPlayerURLAsset *asset, NSURL *fileURL, UIImage *thumbImage))completion
+                    failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure {
+    if ( !self.asset.loadedPlayer ) {
+        NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-1 userInfo:@{@"msg":@"Resources are being initialized and cannot be exported."}];
+        if ( failure ) failure(self, error);
+        return;
+    }
+    __weak typeof(self) _self = self;
+    [self.asset exportWithBeginTime:beginTime endTime:endTime presetName:presetName progress:^(SJVideoPlayerAssetCarrier * _Nonnull asset, float progress) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( pro ) pro(self, progress);
+    } completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, AVAsset * _Nonnull sandboxAsset, NSURL * _Nonnull fileURL, UIImage * _Nonnull thumbImage) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( completion ) completion(self, [[SJVideoPlayerURLAsset alloc] initWithAssetURL:fileURL], fileURL, thumbImage);
+    } failure:^(SJVideoPlayerAssetCarrier * _Nonnull asset, NSError * _Nonnull error) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( failure ) failure(self, error);
+    }];
+}
+
+@end
+
+
 #pragma mark - 在`tableView`或`collectionView`上播放
 
 @implementation SJBaseVideoPlayer (ScrollView)
@@ -1335,23 +1369,12 @@ NS_ASSUME_NONNULL_END
     self = [super init];
     if ( !self ) return nil;
     _videoPlayer = videoPlayer;
-    [_videoPlayer sj_addObserver:self forKeyPath:@"state"];
     [_videoPlayer sj_addObserver:self forKeyPath:@"locked"];
     return self;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
-    if ( [keyPath isEqualToString:@"state"] ) {
-        if      ( SJVideoPlayerPlayState_Paused == self.videoPlayer.state ||
-                 SJVideoPlayerPlayState_PlayEnd == self.videoPlayer.state ) {
-            if ( !self.videoPlayer.isLockedScreen ) [self _keepDisplay];
-        }
-        else if ( SJVideoPlayerPlayState_Playing == self.videoPlayer.state &&
-                 self.controlLayerAppearedState ) {
-            [self layerAppear];
-        }
-    }
-    else if ( [keyPath isEqualToString:@"locked"] ) {
+    if ( [keyPath isEqualToString:@"locked"] ) {
         if ( _videoPlayer.isLockedScreen ) {
             [self.controlHiddenTimer clear];
         }
@@ -1374,11 +1397,6 @@ NS_ASSUME_NONNULL_END
 
 - (void)layerAppear {
     [self _changing:YES];
-}
-
-- (void)_keepDisplay {
-    [self layerAppear];                      // 显示
-    [self.controlHiddenTimer clear];         // 清除timer, 使其一直显示
 }
 
 - (void)layerDisappear {
@@ -1405,7 +1423,6 @@ NS_ASSUME_NONNULL_END
 - (void)_changing:(BOOL)status {
     if ( !self.isEnabled ) return;
     if ( !self.videoPlayer.controlLayerDataSource ) return;
-
     self.controlLayerAppearedState = status;
     if ( status ) [self.controlHiddenTimer start];
     else [self.controlHiddenTimer clear];

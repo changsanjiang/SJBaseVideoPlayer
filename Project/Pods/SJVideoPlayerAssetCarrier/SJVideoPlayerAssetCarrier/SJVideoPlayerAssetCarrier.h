@@ -82,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithAssetURL:(NSURL *)assetURL
                        beginTime:(NSTimeInterval)beginTime
-    playerSuperViewOfTableHeader:(__weak UIView *)superView
+    playerSuperViewOfTableHeader:(__unsafe_unretained UIView *)superView
                        tableView:(__unsafe_unretained UITableView *)tableView;
 
 /**
@@ -99,7 +99,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithAssetURL:(NSURL *)assetURL
                        beginTime:(NSTimeInterval)beginTime
-     collectionViewOfTableHeader:(__weak UICollectionView *)collectionView
+     collectionViewOfTableHeader:(__unsafe_unretained UICollectionView *)collectionView
          collectionCellIndexPath:(NSIndexPath *)indexPath
               playerSuperViewTag:(NSInteger)playerSuperViewTag
                    rootTableView:(__unsafe_unretained UITableView *)rootTableView;
@@ -192,12 +192,24 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - preview images
 @property (nonatomic, assign, readonly) BOOL hasBeenGeneratedPreviewImages;
-@property (nonatomic, strong, readonly) NSArray<SJVideoPreviewModel *> *generatedPreviewImages;
+@property (nonatomic, strong, readonly, nullable) NSArray<SJVideoPreviewModel *> *generatedPreviewImages;
 @property (nonatomic, assign, readonly) CGSize maxItemSize;
 - (void)generatedPreviewImagesWithMaxItemSize:(CGSize)itemSize
                                    completion:(void(^)(SJVideoPlayerAssetCarrier *asset, NSArray<SJVideoPreviewModel *> *__nullable images, NSError *__nullable error))block;
 - (void)cancelPreviewImagesGeneration;
 
+
+#pragma mark - export
+
+/**
+ preset name default is `AVAssetExportPresetMediumQuality`.
+ */
+- (void)exportWithBeginTime:(NSTimeInterval)beginTime
+                    endTime:(NSTimeInterval)endTime
+                 presetName:(nullable NSString *)presetName
+                   progress:(void(^)(SJVideoPlayerAssetCarrier *asset, float progress))progress
+                 completion:(void(^)(SJVideoPlayerAssetCarrier *asset, AVAsset * __nullable sandboxAsset, NSURL * __nullable fileURL, UIImage * __nullable thumbImage))completion
+                    failure:(void(^)(SJVideoPlayerAssetCarrier *asset, NSError * __nullable error))failure;
 
 #pragma mark - seek to time
 - (void)jumpedToTime:(NSTimeInterval)time completionHandler:(void (^ __nullable)(BOOL finished))completionHandler;
@@ -253,7 +265,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  video player -> cell -> collection view -> table header view -> table view
  *
  **/
-- (void)convertToTableHeaderViewWithCollectionView:(__weak UICollectionView *)collectionView
+- (void)convertToTableHeaderViewWithCollectionView:(__unsafe_unretained UICollectionView *)collectionView
                               collectionCellIndexPath:(NSIndexPath *)indexPath
                                    playerSuperViewTag:(NSInteger)playerSuperViewTag
                                         rootTableView:(__unsafe_unretained UITableView *)rootTableView;
@@ -280,7 +292,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 #pragma mark - properties
-@property (nonatomic, assign, readonly) BOOL converted;
+@property (nonatomic, assign, readonly, getter=isLoadedPlayer) BOOL loadedPlayer;
+@property (nonatomic, assign, readonly, getter=isConverted) BOOL converted;
 @property (nonatomic, strong, readonly) AVURLAsset *asset;
 @property (nonatomic, strong, readonly) AVPlayerItem *playerItem;
 @property (nonatomic, strong, readonly) AVPlayer *player;

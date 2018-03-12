@@ -68,16 +68,19 @@ static float const __GeneratePreImgScale = 0.05;
 
 #pragma mark -
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SJVideoPlayerAssetCarrier () {
     id _timeObserver;
     id _itemEndObserver;
     NSTimer *_bufferRefreshTimer;
+    NSTimer *_refreshProgressTimer;
 }
 
-@property (nonatomic, strong, readwrite) AVAssetImageGenerator *imageGenerator;
-@property (nonatomic, strong, readwrite) AVAssetImageGenerator *tmp_imageGenerator;
+@property (nonatomic, strong, readwrite, nullable) AVAssetImageGenerator *imageGenerator;
+@property (nonatomic, strong, readwrite, nullable) AVAssetImageGenerator *tmp_imageGenerator;
 @property (nonatomic, assign, readwrite) BOOL hasBeenGeneratedPreviewImages;
-@property (nonatomic, strong, readwrite) NSArray<SJVideoPreviewModel *> *generatedPreviewImages;
+@property (nonatomic, strong, readwrite, nullable) NSArray<SJVideoPreviewModel *> *generatedPreviewImages;
 @property (nonatomic, assign, readwrite) BOOL jumped;
 @property (nonatomic, assign, readwrite) BOOL scrollIn_bool;
 @property (nonatomic, assign, readwrite) BOOL removedScrollObserver;
@@ -86,9 +89,12 @@ static float const __GeneratePreImgScale = 0.05;
 @property (nonatomic, strong, readwrite, nullable) SJAssetUIKitEctype *ectype;
 @property (nonatomic, assign, readwrite) CGSize maxItemSize;
 @property (nonatomic, assign, readwrite) BOOL beginBuffer;
-@property (nonatomic, strong, readwrite) NSTimer *bufferRefreshTimer;
+@property (nonatomic, strong, readonly) NSTimer *bufferRefreshTimer;
+@property (nonatomic, strong, readwrite, nullable) AVAssetExportSession *exportSession;
+@property (nonatomic, strong, readwrite, nullable) NSTimer *refreshProgressTimer;
 
 @end
+NS_ASSUME_NONNULL_END
 
 @implementation SJVideoPlayerAssetCarrier
 
@@ -222,6 +228,7 @@ static float const __GeneratePreImgScale = 0.05;
         _player.automaticallyWaitsToMinimizeStalling = YES;
     }
     dispatch_async(dispatch_get_main_queue(), ^{
+        _loadedPlayer = YES;
         if ( self.loadedPlayerExeBlock ) self.loadedPlayerExeBlock(self);
     });
 }
@@ -251,13 +258,32 @@ static float const __GeneratePreImgScale = 0.05;
         if ( self.playTimeChanged ) self.playTimeChanged(self, currentTime, self.duration);
     }];
     
-    
     _itemEndObserver =
     [[NSNotificationCenter defaultCenter] addObserverForName:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
         if ( self.playDidToEnd ) self.playDidToEnd(self);
     }];
+}
+
+- (void)_clearAVPlayer {
+    [_playerItem removeObserver:self forKeyPath:@"status"];
+    [_playerItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
+    [_playerItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
+    [_playerItem removeObserver:self forKeyPath:@"presentationSize"];
+    [_playerItem removeObserver:self forKeyPath:@"duration"];
+    [_tmp_imageGenerator cancelAllCGImageGeneration];
+    [self cancelPreviewImagesGeneration];
+    if ( 0 != _player.rate ) [_player pause];
+    [_player removeTimeObserver:_timeObserver]; _timeObserver = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:_itemEndObserver name:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem]; _itemEndObserver = nil;
+    _beginBuffer = NO;
+    [self _cleanBufferTimer];
+    if ( _cancelledBuffer ) _cancelledBuffer(self);
+    [_exportSession cancelExport];
+    _exportSession = nil;
+    _loadedPlayer = NO;
+    [self _cleanRefreshProgressTimer];
 }
 
 - (void)_scrollViewObserving {
@@ -391,9 +417,6 @@ static float const __GeneratePreImgScale = 0.05;
     if ( _bufferRefreshTimer ) {
         [_bufferRefreshTimer invalidate];
         _bufferRefreshTimer = nil;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if ( _cancelledBuffer ) _cancelledBuffer(self);
-        });
     }
 }
 
@@ -524,6 +547,88 @@ static float const __GeneratePreImgScale = 0.05;
     }];
 }
 
+- (void)exportWithBeginTime:(NSTimeInterval)beginTime
+                    endTime:(NSTimeInterval)endTime
+                 presetName:(nullable NSString *)presetName
+                   progress:(void(^)(SJVideoPlayerAssetCarrier *asset, float progress))progress
+                 completion:(void(^)(SJVideoPlayerAssetCarrier *asset, AVAsset *sandboxAsset, NSURL *fileURL, UIImage *thumbImage))completion
+                    failure:(void(^)(SJVideoPlayerAssetCarrier *asset, NSError *error))failure {
+    if ( !presetName ) presetName = AVAssetExportPresetMediumQuality;
+    [_exportSession cancelExport];
+    [self _cleanRefreshProgressTimer];
+    AVAsset *asset = self.asset;
+    AVMutableComposition *compositionM = [AVMutableComposition composition];
+    AVMutableCompositionTrack *audioTrackM = [compositionM addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
+    AVMutableCompositionTrack *videoTrackM = [compositionM addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
+    CMTimeRange cutRange = CMTimeRangeMake(CMTimeMakeWithSeconds(beginTime, NSEC_PER_SEC), CMTimeMakeWithSeconds(endTime, NSEC_PER_SEC));
+    AVAssetTrack *assetAudioTrack = [asset tracksWithMediaType:AVMediaTypeAudio].firstObject;
+    AVAssetTrack *assetVideoTrack = [asset tracksWithMediaType:AVMediaTypeVideo].firstObject;
+    NSError *error;
+    [audioTrackM insertTimeRange:cutRange ofTrack:assetAudioTrack atTime:kCMTimeZero error:&error];
+    if ( error ) { NSLog(@"Export Failed: error = %@", error); if ( failure ) failure(self, error); return;}
+    [videoTrackM insertTimeRange:cutRange ofTrack:assetVideoTrack atTime:kCMTimeZero error:&error];
+    if ( error ) { NSLog(@"Export Failed: error = %@", error); if ( failure ) failure(self, error); return;}
+    
+    NSURL *exportURL = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:@"Export.mp4"];
+    [[NSFileManager defaultManager] removeItemAtURL:exportURL error:nil];
+    _exportSession = [AVAssetExportSession exportSessionWithAsset:compositionM presetName:presetName];
+    _exportSession.outputURL = exportURL;
+    _exportSession.shouldOptimizeForNetworkUse = YES;
+    _exportSession.outputFileType = AVFileTypeMPEG4;
+    
+    __weak typeof(self) _self = self;
+    _refreshProgressTimer = [NSTimer assetAdd_timerWithTimeInterval:0.1 block:^(NSTimer *timer) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( progress ) progress(self, self.exportSession.progress);
+    } repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:_refreshProgressTimer forMode:NSRunLoopCommonModes];
+    [_refreshProgressTimer setFireDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+    
+    [_exportSession exportAsynchronouslyWithCompletionHandler:^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( self.exportSession.status == AVAssetExportSessionStatusCancelled ||
+             self.exportSession.status == AVAssetExportSessionStatusCompleted ||
+            self.exportSession.status == AVAssetExportSessionStatusFailed ) {
+            [self _cleanRefreshProgressTimer];
+        }
+        
+        switch ( self.exportSession.status ) {
+            case AVAssetExportSessionStatusUnknown:
+            case AVAssetExportSessionStatusWaiting:
+            case AVAssetExportSessionStatusCancelled:
+            case AVAssetExportSessionStatusExporting:
+                break;
+            case AVAssetExportSessionStatusCompleted: {
+                [self screenshotWithTime:beginTime completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, SJVideoPreviewModel * _Nullable images, NSError * _Nullable error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        __strong typeof(_self) self = _self;
+                        if ( !self ) return;
+                        if ( progress ) progress(self, 1);
+                        if ( completion ) completion(self, compositionM, exportURL, images.image);
+                    });
+                }];
+            }
+                break;
+            case AVAssetExportSessionStatusFailed: {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    __strong typeof(_self) self = _self;
+                    if ( !self ) return;
+                    if ( failure ) failure(self, error);
+                });
+            }
+                break;
+        }
+    }];
+}
+
+- (void)_cleanRefreshProgressTimer {
+    [_refreshProgressTimer invalidate];
+    _refreshProgressTimer = nil;
+}
+
+#pragma mark -
 @synthesize duration = _duration;
 - (NSTimeInterval)duration {
     return _duration;
@@ -539,7 +644,6 @@ static float const __GeneratePreImgScale = 0.05;
     else return self.currentTime / duration;
 }
 
-#pragma mark -
 - (void)setRate:(float)rate {
     _rate = rate;
     _player.rate = rate;
@@ -773,21 +877,6 @@ static float const __GeneratePreImgScale = 0.05;
         _rateChanged = _ectype.rateChanged;
     }];
     _converted = NO;
-}
-
-- (void)_clearAVPlayer {
-    [_playerItem removeObserver:self forKeyPath:@"status"];
-    [_playerItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
-    [_playerItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
-    [_playerItem removeObserver:self forKeyPath:@"presentationSize"];
-    [_playerItem removeObserver:self forKeyPath:@"duration"];
-    [_tmp_imageGenerator cancelAllCGImageGeneration];
-    [self cancelPreviewImagesGeneration];
-    if ( 0 != _player.rate ) [_player pause];
-    [_player removeTimeObserver:_timeObserver]; _timeObserver = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:_itemEndObserver name:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem]; _itemEndObserver = nil;
-    _beginBuffer = NO;
-    [self _cleanBufferTimer];
 }
 
 - (void)_clearUIKit {

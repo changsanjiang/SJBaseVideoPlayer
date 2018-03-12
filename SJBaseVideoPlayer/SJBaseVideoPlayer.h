@@ -290,6 +290,7 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
 @property (nonatomic, copy, nullable) void(^controlLayerAppearStateChanged)(__kindof SJBaseVideoPlayer *player, BOOL state);
 
 /**
+ When you want to appear the control layer, you should call this method to appear.
  This method will call the control layer delegate method.
  
  - (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;
@@ -297,6 +298,7 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
 - (void)controlLayerNeedAppear;
 
 /**
+ When you want to disappear the control layer, you should call this method to disappear.
  This method will call the control layer delegate method.
  
  - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;
@@ -414,6 +416,31 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
 
 
 
+#pragma mark - 输出
+
+@interface SJBaseVideoPlayer (Export)
+
+/**
+ export session.
+ 
+ @param beginTime           unit is sec.
+ @param endTime             unit is sec.
+ @param presetName 	        default is `AVAssetExportPresetMediumQuality`.
+ @param progress            progress
+ @param completion 	        completion
+ @param failure 	        failure
+ */
+- (void)exportWithBeginTime:(NSTimeInterval)beginTime
+                    endTime:(NSTimeInterval)endTime
+                 presetName:(nullable NSString *)presetName
+                   progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progress
+                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, SJVideoPlayerURLAsset *asset, NSURL *fileURL, UIImage *thumbImage))completion
+                    failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure;
+
+@end
+
+
+
 #pragma mark - 在`tableView`或`collectionView`上播放
 
 @interface SJBaseVideoPlayer (ScrollView)
@@ -483,6 +510,8 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
  */
 - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;
 
+
+@optional
 /**
  Call it when `tableView` or` collectionView` is about to appear. Because scrollview may be scrolled.
  */
@@ -493,9 +522,6 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
  */
 - (void)videoPlayerWillDisappearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;
 
-
-
-@optional
 
 #pragma mark - 播放之前/状态
 
