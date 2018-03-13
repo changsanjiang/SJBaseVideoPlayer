@@ -619,7 +619,10 @@ NS_ASSUME_NONNULL_END
         switch (direction) {
             case SJPanDirection_H: {
                 if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:horizontalDirectionDidMove:)] ) {
-                    __increment += translate.x;
+                    float add = 0;
+                    if ( __totalTime > 60 * 2 ) add = translate.x;
+                    else add = translate.x * 0.1;
+                    __increment += add;
                     CGFloat progress = (__currentTime + __increment) / __totalTime;
                     [self.controlLayerDelegate videoPlayer:self horizontalDirectionDidMove:progress];
                 }
