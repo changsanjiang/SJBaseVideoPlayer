@@ -302,10 +302,11 @@ NS_ASSUME_NONNULL_END
 
 - (void)setControlLayerDataSource:(id<SJVideoPlayerControlLayerDataSource>)controlLayerDataSource {
     if ( controlLayerDataSource == _controlLayerDataSource ) return;
-    if ( _controlContentView ) {
-        [_controlLayerDataSource.controlView removeFromSuperview];
-        _controlLayerDataSource = controlLayerDataSource;
-    }
+    
+    if ( _controlContentView ) { [_controlLayerDataSource.controlView removeFromSuperview];}
+    
+    _controlLayerDataSource = controlLayerDataSource;
+
     if ( !controlLayerDataSource ) return;
     
     _controlLayerDataSource.controlView.clipsToBounds = YES;
