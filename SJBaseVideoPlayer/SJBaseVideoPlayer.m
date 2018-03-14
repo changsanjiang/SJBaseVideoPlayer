@@ -110,10 +110,8 @@ NS_ASSUME_NONNULL_END
     if ( error ) NSLog(@"%@", error.userInfo);
     self.autoPlay = YES;
     self.enableControlLayerDisplayController = YES;
+    self.pauseWhenAppResignActive = YES;
     [self registrar];
-    [self view];
-    [self reachabilityObserver];
-    self.videoGravity = AVLayerVideoGravityResizeAspect;
     return self;
 }
 
@@ -131,10 +129,13 @@ NS_ASSUME_NONNULL_END
 - (void)setAsset:(SJVideoPlayerAssetCarrier *)asset {
     _asset = asset;
     if ( !asset ) return;
+    
     if ( self.mute ) self.mute = YES; // update
+    
     [self _itemPrepareToPlay];
     
     __weak typeof(self) _self = self;
+    
     asset.loadedPlayerExeBlock = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
@@ -301,8 +302,10 @@ NS_ASSUME_NONNULL_END
 
 - (void)setControlLayerDataSource:(id<SJVideoPlayerControlLayerDataSource>)controlLayerDataSource {
     if ( controlLayerDataSource == _controlLayerDataSource ) return;
-    [_controlLayerDataSource.controlView removeFromSuperview];
-    _controlLayerDataSource = controlLayerDataSource;
+    if ( _controlContentView ) {
+        [_controlLayerDataSource.controlView removeFromSuperview];
+        _controlLayerDataSource = controlLayerDataSource;
+    }
     if ( !controlLayerDataSource ) return;
     
     _controlLayerDataSource.controlView.clipsToBounds = YES;
@@ -334,8 +337,11 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)setPlaceholder:(UIImage *)placeholder {
-    _placeholder = placeholder;
     self.presentView.placeholder = placeholder;
+}
+
+- (UIImage *)placeholder {
+    return self.presentView.placeholder;
 }
 
 - (void)setVideoGravity:(AVLayerVideoGravity)videoGravity {
@@ -343,7 +349,8 @@ NS_ASSUME_NONNULL_END
 }
 
 - (AVLayerVideoGravity)videoGravity {
-    return self.presentView.videoGravity;
+    if ( _presentView ) return _presentView.videoGravity;
+    return AVLayerVideoGravityResizeAspect;
 }
 
 #pragma mark -
@@ -410,7 +417,8 @@ NS_ASSUME_NONNULL_END
     
     [self orentationObserver];
     [self gestureControl];
-    [self addInterceptTapGR];   // 防止其他手势不触发导致事件穿透播放器.
+    [self addInterceptTapGR];       // 防止其他手势不触发导致事件穿透播放器.
+    [self reachabilityObserver];
     return _view;
 }
 
@@ -499,6 +507,8 @@ NS_ASSUME_NONNULL_END
         __strong typeof(_self) self = _self;
         if ( !self ) return NO;
         
+        if ( self.isLockedScreen ) return NO;
+
         SJDisablePlayerGestureTypes disableTypes = self.disableGestureTypes;
         if ( SJDisablePlayerGestureTypes_All == (disableTypes & SJDisablePlayerGestureTypes_All)  ) {
             disableTypes = SJDisablePlayerGestureTypes_Pan | SJDisablePlayerGestureTypes_Pinch | SJDisablePlayerGestureTypes_DoubleTap | SJDisablePlayerGestureTypes_SingleTap;
@@ -533,18 +543,17 @@ NS_ASSUME_NONNULL_END
                 break;
         }
         
-        if ( self.isLockedScreen ) return NO;
-        
         if ( SJVideoPlayerPlayState_Unknown == self.state ||
-            SJVideoPlayerPlayState_Prepare == self.state ||
-            SJVideoPlayerPlayState_PlayFailed == self.state ) return NO;
+             SJVideoPlayerPlayState_Prepare == self.state ||
+             SJVideoPlayerPlayState_PlayFailed == self.state ) return NO;
         
         if ( SJPlayerGestureType_Pan == type &&
-            self.isPlayOnScrollView &&
+             self.isPlayOnScrollView &&
             !self.orentationObserver.isFullScreen ) return NO;
         
         if ( self.controlLayerDataSource &&
             ![self.controlLayerDataSource triggerGesturesCondition:[gesture locationInView:gesture.view]] ) return NO;
+        
         if ( type == SJPlayerGestureType_Pan ) {
             switch ( control.panLocation ) {
                 case SJPanLocation_Unknown: break;
@@ -722,7 +731,7 @@ NS_ASSUME_NONNULL_END
         __strong typeof(_self) self = _self;
         if ( !self ) return;
         self.resignActive = YES;
-        if ( self.state != SJVideoPlayerPlayState_Paused ) [self.asset.player pause];
+        if ( self.state != SJVideoPlayerPlayState_Paused && self.pauseWhenAppResignActive ) [self.asset.player pause];
     };
     
     _registrar.didBecomeActive = ^(SJVideoPlayerRegistrar * _Nonnull registrar) {
@@ -731,8 +740,8 @@ NS_ASSUME_NONNULL_END
         self.resignActive = NO;
         if ( self.isPlayOnScrollView && !self.scrollIn ) return;
         if ( self.state == SJVideoPlayerPlayState_PlayEnd ||
-            self.state == SJVideoPlayerPlayState_Unknown ||
-            self.state == SJVideoPlayerPlayState_PlayFailed ) return;
+             self.state == SJVideoPlayerPlayState_Unknown ||
+             self.state == SJVideoPlayerPlayState_PlayFailed ) return;
         if ( !self.userClickedPause ) [self play];
     };
     
@@ -996,6 +1005,14 @@ NS_ASSUME_NONNULL_END
 }
 
 - (BOOL)isAutoPlay {
+    return [objc_getAssociatedObject(self, _cmd) boolValue];
+}
+
+- (void)setPauseWhenAppResignActive:(BOOL)pauseWhenAppResignActive {
+    objc_setAssociatedObject(self, @selector(pauseWhenAppResignActive), @(pauseWhenAppResignActive), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)pauseWhenAppResignActive {
     return [objc_getAssociatedObject(self, _cmd) boolValue];
 }
 
