@@ -1286,8 +1286,11 @@ NS_ASSUME_NONNULL_END
 - (void)screenshotWithTime:(NSTimeInterval)time
                       size:(CGSize)size
                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block {
+    __weak typeof(self) _self = self;
     [self.asset screenshotWithTime:time size:size completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, SJVideoPreviewModel * _Nullable images, NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(_self) self = _self;
+            if ( !self ) return;
             if ( block ) block(self, images.image, error);
         });
     }];
