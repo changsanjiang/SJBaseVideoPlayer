@@ -103,7 +103,7 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
 
 /**
  Create an asset to play. (Any of the following initialization)
- 
+
  1.  video player -> UIView
  2.  video player -> cell            -> table Or collection view
  3.  video player -> table header    -> table view
@@ -111,6 +111,10 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
  5.  video player -> collection cell -> collection view -> table cell   -> table view
  
  If this value is changed, the delegate method will be called. - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer prepareToPlay:(SJVideoPlayerURLAsset *)asset
+ 
+ For example:
+ [_containerView addSubView:_videoPlayer.view];
+ _videoPlayer.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithAssetURL:[NSURL URLWithString:@"http://....."]];
  
  readwrite.
  */
