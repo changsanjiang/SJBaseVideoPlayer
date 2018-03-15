@@ -5,11 +5,17 @@
 //  Created by BlueDancer on 2018/2/2.
 //  Copyright © 2018年 SanJiang. All rights reserved.
 //
-//  https://github.com/changsanjiang/SJBaseVideoPlayer  没有控制层的播放器(如果想自定义控制层, 可以使用它)
-//  https://github.com/changsanjiang/SJVideoPlayer      有默认控制层的播放器
+//  The base player, without the control layer, can be used if you need a custom control layer.
+//  https://github.com/changsanjiang/SJBaseVideoPlayer
+//
+//  Player with default control layer.
+//  https://github.com/changsanjiang/SJVideoPlayer
+//
 //  changsanjiang@gmail.com
 //
+
 /**
+ ------------------------
  *  Play
  *  Network
  *  Prompt
@@ -22,6 +28,7 @@
  *  Export
  *  ScrollView
  *  ControlLayerProtocol
+ -------------------------
  */
 
 #import <UIKit/UIKit.h>
