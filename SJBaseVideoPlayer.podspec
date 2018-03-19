@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = 'SJBaseVideoPlayer'
-s.version      = '1.0.4.1'
+s.version      = '1.0.4.2'
 s.summary      = 'video player.'
 s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
 s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -53,4 +53,8 @@ ss.source_files = 'SJBaseVideoPlayer/Model/*.{h,m}'
 ss.dependency 'SJVideoPlayerAssetCarrier'
 end
 
+s.subspec 'Download' do |ss|
+ss.source_files = 'SJBaseVideoPlayer/Download/*.{h,m}'
+ss.ios.library = 'sqlite3'
+end
 end

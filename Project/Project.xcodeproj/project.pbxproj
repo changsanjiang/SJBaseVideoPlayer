@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		775211F4205F968F00DB76F2 /* SJMediaDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 775211F3205F968F00DB76F2 /* SJMediaDownloader.m */; };
 		77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDA203E7427009D5F2C /* AppDelegate.m */; };
 		77826BDE203E7427009D5F2C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDD203E7427009D5F2C /* ViewController.m */; };
 		77826BE1203E7427009D5F2C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 77826BDF203E7427009D5F2C /* Main.storyboard */; };
@@ -32,6 +33,8 @@
 /* Begin PBXFileReference section */
 		04C647CC6AA139DA4312FCCE /* Pods-Project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.release.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.release.xcconfig"; sourceTree = "<group>"; };
 		3783465EF81E7A5838D5F3FF /* libPods-Project.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Project.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		775211F2205F968F00DB76F2 /* SJMediaDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJMediaDownloader.h; sourceTree = "<group>"; };
+		775211F3205F968F00DB76F2 /* SJMediaDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJMediaDownloader.m; sourceTree = "<group>"; };
 		77826BD6203E7427009D5F2C /* Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77826BD9203E7427009D5F2C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		77826BDA203E7427009D5F2C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -79,6 +82,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		775211F1205F968F00DB76F2 /* Download */ = {
+			isa = PBXGroup;
+			children = (
+				775211F2205F968F00DB76F2 /* SJMediaDownloader.h */,
+				775211F3205F968F00DB76F2 /* SJMediaDownloader.m */,
+			);
+			path = Download;
+			sourceTree = "<group>";
+		};
 		77826BCD203E7427009D5F2C = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +138,7 @@
 				77826C06203E743A009D5F2C /* SJBaseVideoPlayer.h */,
 				77826C07203E743A009D5F2C /* SJBaseVideoPlayer.m */,
 				77826BF0203E743A009D5F2C /* Category */,
+				775211F1205F968F00DB76F2 /* Download */,
 				77826BF3203E743A009D5F2C /* GestureControl */,
 				77826BF6203E743A009D5F2C /* Header */,
 				77826BF9203E743A009D5F2C /* Model */,
@@ -352,6 +365,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				77826BDE203E7427009D5F2C /* ViewController.m in Sources */,
+				775211F4205F968F00DB76F2 /* SJMediaDownloader.m in Sources */,
 				77826BE9203E7427009D5F2C /* main.m in Sources */,
 				77826C09203E743B009D5F2C /* SJPlayerGestureControl.m in Sources */,
 				77826C08203E743B009D5F2C /* UIView+SJVideoPlayerAdd.m in Sources */,
