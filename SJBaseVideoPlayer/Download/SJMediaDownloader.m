@@ -384,8 +384,13 @@ NS_ASSUME_NONNULL_END
         
         if ( self.currentEntity.task && self.currentEntity.mediaId == mediaId && self.currentEntity.downloadStatus == SJMediaDownloadStatus_Downloading ) {
             entity = self.currentEntity;
-            self.currentEntity.task.cancelledBlock = pausedBlock;
-            [self async_suspendWithTask:self.currentEntity.task entity:self.currentEntity completion:^(BOOL saved) {}];
+            if ( self.currentEntity.task.state != NSURLSessionTaskStateCanceling ) {
+                self.currentEntity.task.cancelledBlock = pausedBlock;
+                [self async_suspendWithTask:self.currentEntity.task entity:self.currentEntity completion:^(BOOL saved) {}];
+            }
+            else {
+                pausedBlock();
+            }
         }
         else {
             [self async_requestMediaWithID:mediaId completion:^(SJMediaDownloader * _Nonnull downloader, SJMediaEntity *media) {
