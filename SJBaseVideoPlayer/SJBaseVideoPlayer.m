@@ -73,6 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
     _SJControlLayerAppearStateManager *_displayRecorder;
     SJVideoPlayerRegistrar *_registrar;
     _SJReachabilityObserver *_reachabilityObserver;
+    UITapGestureRecognizer *_lockStateTapGesture;
 }
 
 @property (nonatomic, assign, readwrite) BOOL userClickedPause;
@@ -92,6 +93,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) SJVolBrigControl *volBrigControl;
 @property (nonatomic, strong, readonly) _SJControlLayerAppearStateManager *displayRecorder;
 @property (nonatomic, strong, readonly) _SJReachabilityObserver *reachabilityObserver;
+
+@property (nonatomic, strong, readonly) UITapGestureRecognizer *lockStateTapGesture;
 
 - (void)clearAsset;
 
@@ -829,6 +832,17 @@ NS_ASSUME_NONNULL_END
     self.asset = nil;
 }
 
+- (UITapGestureRecognizer *)lockStateTapGesture {
+    if ( _lockStateTapGesture ) return _lockStateTapGesture;
+    _lockStateTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleLockStateTapGesture:)];
+    return _lockStateTapGesture;
+}
+
+- (void)handleLockStateTapGesture:(UITapGestureRecognizer *)tap {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(tappedPlayerOnTheLockedState:)] ) {
+        [self.controlLayerDelegate tappedPlayerOnTheLockedState:self];
+    }
+}
 @end
 
 
@@ -977,6 +991,12 @@ NS_ASSUME_NONNULL_END
 
 - (void)setLockedScreen:(BOOL)lockedScreen {
     objc_setAssociatedObject(self, @selector(isLockedScreen), @(lockedScreen), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if ( lockedScreen ) {
+        [self.controlLayerDataSource.controlView addGestureRecognizer:self.lockStateTapGesture];
+    }
+    else {
+        [self.controlLayerDataSource.controlView removeGestureRecognizer:self.lockStateTapGesture];
+    }
     if      ( lockedScreen && [self.controlLayerDelegate respondsToSelector:@selector(lockedVideoPlayer:)] ) {
         [self.controlLayerDelegate lockedVideoPlayer:self];
     }
