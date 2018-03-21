@@ -39,11 +39,14 @@ NS_ASSUME_NONNULL_BEGIN
 @interface _SJControlLayerAppearStateManager : NSObject
 @property (nonatomic, getter=isEnabled) BOOL enabled;
 @property (nonatomic, readonly) BOOL controlLayerAppearedState;
+@property (nonatomic, readonly) BOOL initialization;
 - (instancetype)initWithVideoPlayer:(SJBaseVideoPlayer *)videoPlayer;
 - (void)considerChangeState;
 - (void)layerAppear;
 - (void)layerDisappear;
+- (void)resetInitialization;
 @property (nonatomic) BOOL pausedToKeepAppearState;
+@property (nonatomic) BOOL playFailedToKeepAppearState;
 
 @end
 NS_ASSUME_NONNULL_END
@@ -116,6 +119,7 @@ NS_ASSUME_NONNULL_END
     self.autoPlay = YES;
     self.enableControlLayerDisplayController = YES;
     self.pauseWhenAppResignActive = YES;
+    self.playFailedToKeepAppearState = YES;
     [self registrar];
     return self;
 }
@@ -126,7 +130,7 @@ NS_ASSUME_NONNULL_END
 #endif
     if ( self.asset && self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
     [_presentView removeFromSuperview];
-    [self stop];
+    [self clearAsset];
 }
 
 #pragma mark -
@@ -141,6 +145,12 @@ NS_ASSUME_NONNULL_END
     
     __weak typeof(self) _self = self;
     
+    asset.convertToOriginalExeBlock = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        [self _itemPrepareToPlay];
+    };
+    
     asset.loadedPlayerExeBlock = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
@@ -149,17 +159,50 @@ NS_ASSUME_NONNULL_END
     
     if ( asset.loadedPlayer ) asset.loadedPlayerExeBlock(asset);
     
+    asset.startBuffering = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( SJVideoPlayerPlayState_Paused == self.state ) return;
+        if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
+            [self.controlLayerDelegate startLoading:self];
+        }
+        self.state = SJVideoPlayerPlayState_Buffing;
+        [self.asset.player pause];
+    };
+    
+    asset.cancelledBuffer = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( [self.controlLayerDelegate respondsToSelector:@selector(cancelLoading:)] ) {
+            [self.controlLayerDelegate cancelLoading:self];
+        }
+    };
+    
+    asset.completeBuffer = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
+            [self.controlLayerDelegate loadCompletion:self];
+        }
+        if ( SJVideoPlayerPlayState_Paused != self.state ) [self play];
+    };
+    
     asset.playerItemStateChanged = ^(SJVideoPlayerAssetCarrier * _Nonnull asset, AVPlayerItemStatus status) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
         if ( self.state == SJVideoPlayerPlayState_PlayEnd ) return;
         switch ( status ) {
-            case AVPlayerItemStatusUnknown:  break;
+            case AVPlayerItemStatusUnknown: {
+                asset.startBuffering(asset);
+            }
+                break;
             case AVPlayerItemStatusFailed: {
+                asset.cancelledBuffer(asset);
                 [self _itemPlayFailed];
             }
                 break;
             case AVPlayerItemStatusReadyToPlay: {
+                asset.completeBuffer(asset);
                 if ( !self.resignActive ) [self _itemReadyToPlay];
             }
                 break;
@@ -191,34 +234,6 @@ NS_ASSUME_NONNULL_END
     };
     
     if ( 0 != asset.loadedTimeProgressValue ) asset.loadedTimeProgress(asset.loadedTimeProgressValue);
-    
-    asset.startBuffering = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( SJVideoPlayerPlayState_Paused == self.state ) return;
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
-            [self.controlLayerDelegate startLoading:self];
-        }
-        self.state = SJVideoPlayerPlayState_Buffing;
-        [self.asset.player pause];
-    };
-    
-    asset.cancelledBuffer = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(cancelLoading:)] ) {
-            [self.controlLayerDelegate cancelLoading:self];
-        }
-    };
-    
-    asset.completeBuffer = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
-            [self.controlLayerDelegate loadCompletion:self];
-        }
-        if ( SJVideoPlayerPlayState_Paused != self.state ) [self play];
-    };
     
     asset.rateChanged = ^(SJVideoPlayerAssetCarrier * _Nonnull asset, float rate) {
         __strong typeof(_self) self = _self;
@@ -338,10 +353,6 @@ NS_ASSUME_NONNULL_END
     if ( [controlLayerDelegate respondsToSelector:@selector(videoPlayer:brightnessChanged:)] ) {
         [controlLayerDelegate videoPlayer:self brightnessChanged:_volBrigControl.brightness];
     }
-    if ( SJVideoPlayerPlayState_Prepare == self.state &&
-        [controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
-        [controlLayerDelegate startLoading:self];
-    }
 }
 
 - (void)setPlaceholder:(UIImage *)placeholder {
@@ -363,16 +374,12 @@ NS_ASSUME_NONNULL_END
 
 #pragma mark -
 - (void)_itemPrepareToPlay {
+    self.userClickedPause = NO;
+    self.state = SJVideoPlayerPlayState_Prepare;
+
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:prepareToPlay:)] ) {
         [self.controlLayerDelegate videoPlayer:self prepareToPlay:self.URLAsset];
     }
-    
-    if ( self.autoPlay && [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
-        [self.controlLayerDelegate startLoading:self];
-    }
-    
-    self.userClickedPause = NO;
-    self.state = SJVideoPlayerPlayState_Prepare;
 }
 
 - (void)_itemPlayFailed {
@@ -395,11 +402,12 @@ NS_ASSUME_NONNULL_END
         [self.controlLayerDelegate loadCompletion:self];
     }
     
+    [self.displayRecorder resetInitialization];
     __weak typeof(self) _self = self;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        [self controlLayerNeedAppear];
+        if ( !self.displayRecorder.initialization && !self.displayRecorder.controlLayerAppearedState ) [self controlLayerNeedAppear];
     });
 }
 
@@ -781,6 +789,7 @@ NS_ASSUME_NONNULL_END
 
 #pragma mark -
 - (void)setState:(SJVideoPlayerPlayState)state {
+    if ( state == _state ) return;
     _state = state;
 #if 0
     switch ( state ) {
@@ -879,7 +888,7 @@ NS_ASSUME_NONNULL_END
 
 - (void)refresh {
     if ( !self.asset ) return;
-    self.state = SJVideoPlayerPlayState_Buffing;
+    self.asset.startBuffering(self.asset);
     __weak typeof(self) _self = self;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         __strong typeof(_self) self = _self;
@@ -947,16 +956,13 @@ NS_ASSUME_NONNULL_END
 
 - (void)seekToTime:(CMTime)time completionHandler:(void (^ __nullable)(BOOL finished))completionHandler {
     self.state = SJVideoPlayerPlayState_Buffing;
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
-        [self.controlLayerDelegate startLoading:self];
-    }
+    self.asset.startBuffering(self.asset);
     __weak typeof(self) _self = self;
     [self.asset seekToTime:time completionHandler:^(BOOL finished) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
-            [self.controlLayerDelegate loadCompletion:self];
-        }
+        if ( finished ) self.asset.completeBuffer(self.asset);
+        else self.asset.cancelledBuffer(self.asset);
         if ( completionHandler ) completionHandler(finished);
     }];
 }
@@ -1026,6 +1032,9 @@ NS_ASSUME_NONNULL_END
 }
 
 - (BOOL)play {
+    if ( self.state ==  SJVideoPlayerPlayState_PlayFailed ||
+         self.state == SJVideoPlayerPlayState_Unknown ) return NO;
+    
     self.suspend = NO;
     
     self.userClickedPause = NO;
@@ -1036,6 +1045,9 @@ NS_ASSUME_NONNULL_END
 }
 
 - (BOOL)pause {
+    if ( self.state ==  SJVideoPlayerPlayState_PlayFailed ||
+         self.state == SJVideoPlayerPlayState_Unknown ) return NO;
+    
     self.suspend = YES;
     self.userClickedPause = NO;
     
@@ -1204,6 +1216,12 @@ NS_ASSUME_NONNULL_END
 }
 - (BOOL)pausedToKeepAppearState {
     return self.displayRecorder.pausedToKeepAppearState;
+}
+- (void)setPlayFailedToKeepAppearState:(BOOL)playFailedToKeepAppearState {
+    self.displayRecorder.playFailedToKeepAppearState = playFailedToKeepAppearState;
+}
+- (BOOL)playFailedToKeepAppearState {
+    return self.displayRecorder.playFailedToKeepAppearState;
 }
 @end
 
@@ -1451,6 +1469,7 @@ NS_ASSUME_NONNULL_END
     if ( !self ) return nil;
     _videoPlayer = videoPlayer;
     [_videoPlayer sj_addObserver:self forKeyPath:@"locked"];
+    [_videoPlayer sj_addObserver:self forKeyPath:@"state"];
     return self;
 }
 
@@ -1463,6 +1482,11 @@ NS_ASSUME_NONNULL_END
             [self.controlHiddenTimer start];
         }
     }
+    else if ( [keyPath isEqualToString:@"state"] ) {
+        if ( _videoPlayer.state == SJVideoPlayerPlayState_PlayFailed ) {
+            [self layerAppear];
+        }
+    }
 }
 
 - (void)setEnabled:(BOOL)enabled {
@@ -1472,19 +1496,26 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)considerChangeState {
+    if ( _playFailedToKeepAppearState && self.videoPlayer.state == SJVideoPlayerPlayState_PlayFailed ) return;
     if ( self.controlLayerAppearedState ) [self layerDisappear];
     else [self layerAppear];
 }
 
 - (void)layerAppear {
     if ( _pausedToKeepAppearState && self.videoPlayer.state == SJVideoPlayerPlayState_Paused ) [self.controlHiddenTimer clear];
+    else if ( _playFailedToKeepAppearState && self.videoPlayer.state == SJVideoPlayerPlayState_PlayFailed ) [self.controlHiddenTimer clear];
     else [self.controlHiddenTimer start];
     [self _changing:YES];
+    _initialization = YES;
 }
 
 - (void)layerDisappear {
     [self.controlHiddenTimer clear];
     [self _changing:NO];
+}
+
+- (void)resetInitialization {
+    _initialization = NO;
 }
 
 - (SJTimerControl *)controlHiddenTimer {

@@ -9,6 +9,7 @@
 #import "SJVideoPlayerAssetCarrier.h"
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
+#import <SJObserverHelper/NSObject+SJObserverHelper.h>
 
 /*!
  *  Refresh interval for timed observations of AVPlayer
@@ -21,16 +22,6 @@ static float const __TimeRefreshInterval = 0.5;
 static float const __GeneratePreImgScale = 0.05;
 
 
-@interface SJTmpObj : NSObject
-@property (nonatomic, copy) void(^deallocCallBlock)(SJTmpObj *obj);
-@end
-
-@implementation SJTmpObj
-- (void)dealloc {
-    if ( _deallocCallBlock ) _deallocCallBlock(self);
-}
-@end
-
 @interface NSTimer (SJAssetAdd)
 + (NSTimer *)assetAdd_timerWithTimeInterval:(NSTimeInterval)ti
                                       block:(void(^)(NSTimer *timer))block
@@ -38,6 +29,7 @@ static float const __GeneratePreImgScale = 0.05;
 @end
 
 @interface SJAssetUIKitEctype: NSObject
+@property (nonatomic, assign) SJViewHierarchyStack viewHierarchyStack;
 @property (nonatomic, strong) NSIndexPath *indexPath;
 @property (nonatomic, assign) NSInteger superviewTag;
 @property (nonatomic, unsafe_unretained) UIScrollView *scrollView;
@@ -76,15 +68,13 @@ NS_ASSUME_NONNULL_BEGIN
     NSTimer *_bufferRefreshTimer;
     NSTimer *_refreshProgressTimer;
 }
-
+@property (nonatomic, assign, readwrite) SJViewHierarchyStack viewHierarchyStack;
 @property (nonatomic, strong, readwrite, nullable) AVAssetImageGenerator *imageGenerator;
 @property (nonatomic, strong, readwrite, nullable) AVAssetImageGenerator *tmp_imageGenerator;
 @property (nonatomic, assign, readwrite) BOOL hasBeenGeneratedPreviewImages;
 @property (nonatomic, strong, readwrite, nullable) NSArray<SJVideoPreviewModel *> *generatedPreviewImages;
 @property (nonatomic, assign, readwrite) BOOL jumped;
 @property (nonatomic, assign, readwrite) BOOL scrollIn_bool;
-@property (nonatomic, assign, readwrite) BOOL removedScrollObserver;
-@property (nonatomic, assign, readwrite) BOOL removedParentScrollObserver;
 @property (nonatomic, assign, readwrite) BOOL parent_scrollIn_bool;
 @property (nonatomic, strong, readwrite, nullable) SJAssetUIKitEctype *ectype;
 @property (nonatomic, assign, readwrite) CGSize maxItemSize;
@@ -116,7 +106,7 @@ NS_ASSUME_NONNULL_END
                       scrollView:(__unsafe_unretained UIScrollView * __nullable)scrollView
                        indexPath:(NSIndexPath * __nullable)indexPath
                     superviewTag:(NSInteger)superviewTag {
-    return [self initWithAssetURL:assetURL beginTime:0 scrollView:scrollView indexPath:indexPath superviewTag:superviewTag];
+    return [self initWithAssetURL:assetURL beginTime:0 indexPath:indexPath superviewTag:superviewTag scrollViewIndexPath:nil scrollViewTag:0 scrollView:scrollView rootScrollView:nil];
 }
 
 - (instancetype)initWithAssetURL:(NSURL *)assetURL
@@ -140,6 +130,7 @@ NS_ASSUME_NONNULL_END
                      superviewTag:0];
     if ( !self ) return nil;
     _tableHeaderSubView = superView;
+    _viewHierarchyStack = SJViewHierarchyStack_TableHeaderView;
     return self;
 }
 
@@ -159,6 +150,7 @@ NS_ASSUME_NONNULL_END
                    rootScrollView:rootTableView];
     if ( !self ) return nil;
     _tableHeaderSubView = collectionView;
+    _viewHierarchyStack = SJViewHierarchyStack_NestedInTableHeaderView;
     return self;
 }
 
@@ -181,6 +173,7 @@ NS_ASSUME_NONNULL_END
         }
     }
     return [self initWithAssetURL:assetURL beginTime:beginTime indexPath:indexPath superviewTag:superviewTag scrollViewIndexPath:scrollViewIndexPath scrollViewTag:scrollViewTag scrollView:scrollView rootScrollView:rootScrollView];
+
 }
 
 - (instancetype)initWithAssetURL:(NSURL *)assetURL
@@ -215,11 +208,14 @@ NS_ASSUME_NONNULL_END
     });
     
     [self _scrollViewObserving];
+    
+    if ( _rootScrollView && _scrollView ) _viewHierarchyStack = SJViewHierarchyStack_NestedInTableView;
+    else if ( _scrollView ) _viewHierarchyStack = SJViewHierarchyStack_ScrollView;
+    else _viewHierarchyStack = SJViewHierarchyStack_View;
     return self;
 }
 
 - (void)_initializeAVPlayer {
-    
     _asset = [AVURLAsset assetWithURL:_assetURL];
     _playerItem = [AVPlayerItem playerItemWithAsset:_asset automaticallyLoadedAssetKeys:@[@"duration"]];
     _player = [AVPlayer playerWithPlayerItem:_playerItem];
@@ -279,7 +275,6 @@ NS_ASSUME_NONNULL_END
     [[NSNotificationCenter defaultCenter] removeObserver:_itemEndObserver name:AVPlayerItemDidPlayToEndTimeNotification object:self.playerItem]; _itemEndObserver = nil;
     _beginBuffer = NO;
     [self _cleanBufferTimer];
-    if ( _cancelledBuffer ) _cancelledBuffer(self);
     [_exportSession cancelExport];
     _exportSession = nil;
     _loadedPlayer = NO;
@@ -287,27 +282,8 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)_scrollViewObserving {
-    if ( _scrollView ) {
-        __weak typeof(self) _self = self;
-        [self _observeScrollView:_scrollView deallocCallBlock:^(SJTmpObj *obj) {
-            __strong typeof(_self) self = _self;
-            if ( !self ) return;
-            if ( !self.removedScrollObserver ) {
-                [self _removingScrollViewObserver];
-            }
-        }];
-    }
-    
-    if ( _rootScrollView ) {
-        __weak typeof(self) _self = self;
-        [self _observeScrollView:_rootScrollView deallocCallBlock:^(SJTmpObj *obj) {
-            __strong typeof(_self) self = _self;
-            if ( !self ) return;
-            if ( !self.removedParentScrollObserver ) {
-                [self _removingrootScrollViewObserver];
-            }
-        }];
-    }
+    if ( _scrollView ) [self _observeScrollView:_scrollView];
+    if ( _rootScrollView ) [self _observeScrollView:_rootScrollView];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
@@ -594,7 +570,7 @@ NS_ASSUME_NONNULL_END
         __strong typeof(_self) self = _self;
         if ( !self ) return;
         if ( self.exportSession.status == AVAssetExportSessionStatusCancelled ||
-             self.exportSession.status == AVAssetExportSessionStatusCompleted ||
+            self.exportSession.status == AVAssetExportSessionStatusCompleted ||
             self.exportSession.status == AVAssetExportSessionStatusFailed ) {
             [self _cleanRefreshProgressTimer];
         }
@@ -659,14 +635,13 @@ NS_ASSUME_NONNULL_END
 
 - (void)dealloc {
     [self _clearAVPlayer];
-    if ( _scrollView && !_removedScrollObserver ) [self _removingScrollViewObserver];
-    if ( _rootScrollView && !_removedParentScrollObserver ) [self _removingrootScrollViewObserver];
     if ( _deallocExeBlock ) _deallocExeBlock(self);
 }
 
 #pragma mark
 
 - (void)_scrollViewDidScroll:(UIScrollView *)scrollView {
+    if ( !_scrollView ) return;
     if ( scrollView == _scrollView ) {
         if ( _scrollViewDidScroll ) _scrollViewDidScroll(self);
     }
@@ -768,21 +743,11 @@ NS_ASSUME_NONNULL_END
     
     if ( !newScrollView || newScrollView == _scrollView ) return;
     
-    // remove observer
-    [self _removingScrollViewObserver];
-    
     // set new scrollview
     _scrollView = newScrollView;
     
     // add observer
-    __weak typeof(self) _self = self;
-    [self _observeScrollView:newScrollView deallocCallBlock:^(SJTmpObj *obj) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( !self.removedScrollObserver ) {
-            [self _removingScrollViewObserver];
-        }
-    }];
+    [self _observeScrollView:newScrollView];
 }
 
 - (UIView *)_getVideoPlayerSuperView {
@@ -800,36 +765,9 @@ NS_ASSUME_NONNULL_END
     return superView;
 }
 
-- (void)_observeScrollView:(UIScrollView *)scrollView deallocCallBlock:(void(^)(SJTmpObj *obj))block {
-    if ( !scrollView ) return;
-    if      ( scrollView == _rootScrollView ) _removedParentScrollObserver = NO;
-    else if ( scrollView == _scrollView ) _removedScrollObserver = NO;
-    [scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
-    [scrollView.panGestureRecognizer addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:nil];
-    [self _injectTmpObjToScrollView:scrollView deallocCallBlock:^(SJTmpObj *obj) {
-        obj.deallocCallBlock = block;
-    }];
-}
-
-- (void)_injectTmpObjToScrollView:(UIScrollView *)scrollView deallocCallBlock:(void(^)(SJTmpObj *obj))block {
-    if ( !scrollView ) return;
-    SJTmpObj *obj = [SJTmpObj new];
-    obj.deallocCallBlock = block;
-    objc_setAssociatedObject(scrollView, _cmd, obj, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (void)_removingScrollViewObserver {
-    [_scrollView removeObserver:self forKeyPath:@"contentOffset"];
-    [_scrollView.panGestureRecognizer removeObserver:self forKeyPath:@"state"];
-    _scrollView = nil;
-    _removedScrollObserver = YES;
-}
-
-- (void)_removingrootScrollViewObserver {
-    [_rootScrollView removeObserver:self forKeyPath:@"contentOffset"];
-    [_rootScrollView.panGestureRecognizer removeObserver:self forKeyPath:@"state"];
-    _rootScrollView = nil;
-    _removedParentScrollObserver = YES;
+- (void)_observeScrollView:(UIScrollView *)scrollView {
+    [scrollView sj_addObserver:self forKeyPath:@"contentOffset"];
+    [scrollView.panGestureRecognizer sj_addObserver:self forKeyPath:@"state"];
 }
 
 - (NSString *)timeString:(NSInteger)secs {
@@ -849,14 +787,17 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)refreshAVPlayer {
-    [self _clearAVPlayer];
-    [self _initializeAVPlayer];
-    [self _itemObserving];
+    @synchronized(self) {
+        [self _clearAVPlayer];
+        [self _initializeAVPlayer];
+        [self _itemObserving];
+    }
 }
 
 - (void)convertToOriginal {
-    if ( !_ectype ) return;
+    if ( !_converted ) return;
     [self _convertingWithBlock:^{
+        _viewHierarchyStack = _ectype.viewHierarchyStack;
         _indexPath = _ectype.indexPath;
         _superviewTag = _ectype.superviewTag;
         _scrollView = _ectype.scrollView;
@@ -882,11 +823,13 @@ NS_ASSUME_NONNULL_END
         _rateChanged = _ectype.rateChanged;
     }];
     _converted = NO;
+    if ( _convertToOriginalExeBlock ) _convertToOriginalExeBlock(self);
 }
 
 - (void)_clearUIKit {
     if ( !_ectype ) {
         _ectype = [SJAssetUIKitEctype new];
+        _ectype.viewHierarchyStack = _viewHierarchyStack;
         _ectype.indexPath = _indexPath;
         _ectype.superviewTag = _superviewTag;
         _ectype.scrollView = _scrollView;
@@ -911,8 +854,7 @@ NS_ASSUME_NONNULL_END
         _ectype.scrollOut = _scrollOut;
         _ectype.rateChanged = _rateChanged;
     }
-    [self _removingScrollViewObserver];
-    [self _removingrootScrollViewObserver];
+    
     _indexPath = nil;
     _superviewTag = 0;
     _scrollView = nil;
@@ -925,8 +867,9 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)convertToUIView {
-    if ( !self.converted ) return;
-    [self _convertingWithBlock:nil];
+    [self _convertingWithBlock:^{
+        _viewHierarchyStack = SJViewHierarchyStack_View;
+    }];
 }
 
 - (void)convertToCellWithTableOrCollectionView:(__unsafe_unretained UIScrollView *)tableOrCollectionView
@@ -936,6 +879,7 @@ NS_ASSUME_NONNULL_END
         _indexPath = indexPath;
         _superviewTag = superviewTag;
         _scrollView = tableOrCollectionView;
+        _viewHierarchyStack = SJViewHierarchyStack_ScrollView;
     }];
 }
 
@@ -944,6 +888,7 @@ NS_ASSUME_NONNULL_END
     [self _convertingWithBlock:^{
         _tableHeaderSubView = superView;
         _scrollView = tableView;
+        _viewHierarchyStack = SJViewHierarchyStack_TableHeaderView;
     }];
 }
 
@@ -956,6 +901,7 @@ NS_ASSUME_NONNULL_END
         _indexPath = indexPath;
         _superviewTag = playerSuperViewTag;
         _rootScrollView = rootTableView;
+        _viewHierarchyStack = SJViewHierarchyStack_NestedInTableHeaderView;
     }];
 }
 
@@ -970,16 +916,16 @@ NS_ASSUME_NONNULL_END
         _scrollView = [[rootTableView cellForRowAtIndexPath:collectionViewIndexPath] viewWithTag:collectionViewTag];
         _scrollViewTag = collectionViewTag;
         _rootScrollView = rootTableView;
+        _viewHierarchyStack = SJViewHierarchyStack_NestedInTableView;
     }];
 }
 
 - (void)_convertingWithBlock:(void(^)(void))block {
     [self _clearUIKit];
     if ( block ) block();
-    [self _scrollViewObserving];
+    [self _scrollViewObserving]; 
     _converted = YES;
 }
-
 @end
 
 

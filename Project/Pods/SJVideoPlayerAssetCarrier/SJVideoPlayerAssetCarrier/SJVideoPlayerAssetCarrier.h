@@ -13,12 +13,15 @@
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
+#import "SJViewHierarchyStack.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class SJVideoPreviewModel;
 
 @interface SJVideoPlayerAssetCarrier : NSObject
+
+@property (nonatomic, assign, readonly) SJViewHierarchyStack viewHierarchyStack;
 
 #pragma mark -
 - (instancetype)initWithAssetURL:(NSURL *)assetURL;
@@ -226,6 +229,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - other
 - (NSString *)timeString:(NSInteger)secs;
+@property (nonatomic, copy, readwrite, nullable) void(^convertToOriginalExeBlock)(SJVideoPlayerAssetCarrier *asset);
 @property (nonatomic, copy, readwrite, nullable) void(^deallocExeBlock)(SJVideoPlayerAssetCarrier *asset);
 
 

@@ -315,11 +315,20 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
 @property (nonatomic) BOOL enableControlLayerDisplayController;
 
 /**
- When the player paused, Whether to keep the appear state. default is NO.
+ When the player paused, Whether to keep the appear state.
+ default is NO.
  
  readwrite.
  */
 @property (nonatomic) BOOL pausedToKeepAppearState;
+
+/**
+ When play failed, Whether to kepp the appear state.
+ default is YES.
+ 
+ readwrite.
+ */
+@property (nonatomic) BOOL playFailedToKeepAppearState;
 
 /**
  YES -> Appear.

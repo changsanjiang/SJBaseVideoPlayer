@@ -2,9 +2,9 @@ PODS:
   - Masonry (1.1.0)
   - Reachability (3.2)
   - SJBorderLineView (0.0.6)
-  - SJFullscreenPopGesture (1.3.7.2):
-    - SJFullscreenPopGesture/View (= 1.3.7.2)
-  - SJFullscreenPopGesture/View (1.3.7.2)
+  - SJFullscreenPopGesture (1.3.7.3):
+    - SJFullscreenPopGesture/View (= 1.3.7.3)
+  - SJFullscreenPopGesture/View (1.3.7.3)
   - SJObserverHelper (1.0.3)
   - SJOrentationObserver (1.0.6.1):
     - Masonry
@@ -16,7 +16,8 @@ PODS:
   - SJUIFactory (0.0.15):
     - SJUIFactory/Category (= 0.0.15)
   - SJUIFactory/Category (0.0.15)
-  - SJVideoPlayerAssetCarrier (1.0.9.4)
+  - SJVideoPlayerAssetCarrier (1.1.0.1):
+    - SJObserverHelper
   - SJVolBrigControl (0.0.4):
     - Masonry
     - SJBorderLineView
@@ -41,12 +42,12 @@ SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SJBorderLineView: 5878e67fb57e812a2d5d029ca666068784b5448a
-  SJFullscreenPopGesture: cd46395d8487000b3c1b4fbac2c8747f34de7fc1
+  SJFullscreenPopGesture: f16c9f31a32aa741d6f79d56952572bdd07860b8
   SJObserverHelper: b270d707cd18ab76538596aa4e98cf798c9e9868
   SJOrentationObserver: 7e7b9e96bed9e72f71b81e8a2fc2fabe5a2eab72
   SJPrompt: eaecd94f2055a12d25090967dbad3f21da011626
   SJUIFactory: 36f08c8bef27b2f6f123f7c3df1c1aeb1b750742
-  SJVideoPlayerAssetCarrier: de2c23d8968a3c6293f3df87400b2093f52158de
+  SJVideoPlayerAssetCarrier: c921fa00b0e0004361b4886923c67d05658299c3
   SJVolBrigControl: c8f8a6e8d56ff58bcebd2b77ec4b485b1802fff9
 
 PODFILE CHECKSUM: b5a98f5f0268b3cf31b549fbc0f31a98b8f48a41
