@@ -647,8 +647,6 @@ typedef NS_ENUM(NSInteger, SJNetworkStatus) {
 @required
 /**
  This method will be called when the control layer needs to be appear. You should do some appear work here.
- 
- 
  */
 - (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;
 
