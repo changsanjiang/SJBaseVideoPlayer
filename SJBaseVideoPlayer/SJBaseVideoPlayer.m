@@ -285,7 +285,7 @@ NS_ASSUME_NONNULL_END
 
 - (void)dealloc {
 #ifdef DEBUG
-    NSLog(@"SJVideoPlayerLog: %zd - %s", __LINE__, __func__);
+    NSLog(@"SJVideoPlayerLog: %d - %s", (int)__LINE__, __func__);
 #endif
     if ( self.asset && self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
     [_presentView removeFromSuperview];
@@ -587,10 +587,11 @@ NS_ASSUME_NONNULL_END
         if ( CGRectIsEmpty(self.presentView.frame) ) {
             self.presentView.frame = view.bounds;
             [self.presentView addSubview:self.controlContentView];
-            // need auto layout
-            [self.controlContentView mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.edges.offset(0);
-            }];
+            self.controlContentView.frame = view.bounds;
+//            // need auto layout
+//            [self.controlContentView mas_makeConstraints:^(MASConstraintMaker *make) {
+//                make.edges.offset(0);
+//            }];
         }
     }];
     
@@ -642,6 +643,9 @@ NS_ASSUME_NONNULL_END
     _orentationObserver.orientationWillChange = ^(SJOrentationObserver * _Nonnull observer, BOOL isFullScreen) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
+        [UIView animateWithDuration:observer.duration animations:^{
+           self.controlContentView.frame = self.presentView.bounds;
+        }];
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:willRotateView:)] ) {
             [self.controlLayerDelegate videoPlayer:self willRotateView:isFullScreen];
         }
