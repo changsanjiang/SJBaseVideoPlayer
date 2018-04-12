@@ -584,17 +584,13 @@ NS_ASSUME_NONNULL_END
     [(SJBaseVideoPlayerView *)_view setLayoutSubViewsExeBlock:^(SJBaseVideoPlayerView *view) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( CGRectIsEmpty(self.presentView.frame) ) {
+        if ( self.presentView.superview == view ) {
             self.presentView.frame = view.bounds;
             [self.presentView addSubview:self.controlContentView];
             self.controlContentView.frame = view.bounds;
-//            // need auto layout
-//            [self.controlContentView mas_makeConstraints:^(MASConstraintMaker *make) {
-//                make.edges.offset(0);
-//            }];
         }
     }];
-    
+
     [self orentationObserver];
     [self gestureControl];
     [self reachabilityObserver];
@@ -989,7 +985,7 @@ NS_ASSUME_NONNULL_END
 #endif
     _presentView.playState = state;
     
-    if ( state == SJVideoPlayerPlayState_Paused && self.pausedToKeepAppearState ) [self.displayRecorder layerAppear];
+    if ( state == SJVideoPlayerPlayState_Paused && self.pausedToKeepAppearState && self.registrar.state == SJVideoPlayerBackstageState_Forground ) [self.displayRecorder layerAppear];
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:stateChanged:)] ) {
         [self.controlLayerDelegate videoPlayer:self stateChanged:state];
@@ -1534,8 +1530,8 @@ NS_ASSUME_NONNULL_END
 - (void)exportWithBeginTime:(NSTimeInterval)beginTime
                     endTime:(NSTimeInterval)endTime
                  presetName:(nullable NSString *)presetName
-                   progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))pro
-                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, SJVideoPlayerURLAsset *asset, NSURL *fileURL, UIImage *thumbImage))completion
+                   progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
+                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSURL *fileURL, UIImage *thumbnailImage))completion
                     failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure {
     if ( !self.asset.loadedPlayer ) {
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-1 userInfo:@{@"msg":@"Resources are being initialized and cannot be exported."}];
@@ -1546,11 +1542,11 @@ NS_ASSUME_NONNULL_END
     [self.asset exportWithBeginTime:beginTime endTime:endTime presetName:presetName progress:^(SJVideoPlayerAssetCarrier * _Nonnull asset, float progress) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( pro ) pro(self, progress);
+        if ( progressBlock ) progressBlock(self, progress);
     } completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, AVAsset * _Nonnull sandboxAsset, NSURL * _Nonnull fileURL, UIImage * _Nonnull thumbImage) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( completion ) completion(self, [[SJVideoPlayerURLAsset alloc] initWithAssetURL:fileURL], fileURL, thumbImage);
+        if ( completion ) completion(self, fileURL, thumbImage);
     } failure:^(SJVideoPlayerAssetCarrier * _Nonnull asset, NSError * _Nonnull error) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
@@ -1558,9 +1554,14 @@ NS_ASSUME_NONNULL_END
     }];
 }
 
-- (void)generateGifWithBeginTime:(NSTimeInterval)beginTime
+- (void)cancelExportOperation {
+    [self.asset cancelExportOperation];
+}
+
+- (void)generateGIFWithBeginTime:(NSTimeInterval)beginTime
                         duration:(NSTimeInterval)duration
-                      completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSURL *fileURL, UIImage *thumbnailImage))completion
+                        progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
+                      completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage *imageGIF, UIImage *thumbnailImage, NSURL *filePath))completion
                          failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure {
     if ( !self.asset ) {
         if ( failure ) {
@@ -1570,11 +1571,15 @@ NS_ASSUME_NONNULL_END
         }
         return;
     }
+    
+    NSURL *filePath = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"SJGeneratedGif.gif"]];
     __weak typeof(self) _self = self;
-    [self.asset generateGifWithBeginTime:beginTime duration:duration maximumSize:self.asset.videoPresentationSize interval:0.1f gifSavePath:[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"SJGeneratedGif.gif"]]  completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, NSURL * _Nonnull fileURL, UIImage * _Nonnull thumbnailImage) {
+    [self.asset generateGIFWithBeginTime:beginTime duration:duration maximumSize:CGSizeMake(375, 375) interval:0.25f gifSavePath:filePath progress:^(SJVideoPlayerAssetCarrier * _Nonnull asset, float progress) {
+        if ( progressBlock ) progressBlock(self, progress);
+    } completion:^(SJVideoPlayerAssetCarrier * _Nonnull asset, UIImage *imageGIF, UIImage * _Nonnull thumbnailImage) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( completion ) completion(self, fileURL, thumbnailImage);
+        if ( completion ) completion(self, imageGIF, thumbnailImage, filePath);
     } failure:^(SJVideoPlayerAssetCarrier * _Nonnull asset, NSError * _Nonnull error) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
@@ -1582,6 +1587,9 @@ NS_ASSUME_NONNULL_END
     }];
 }
 
+- (void)cancelGenerateGIFOperation {
+    [self.asset cancelGenerateGIFOperation];
+}
 @end
 
 
@@ -1635,6 +1643,19 @@ NS_ASSUME_NONNULL_END
 - (void)showTitle:(NSString *)title duration:(NSTimeInterval)duration hiddenExeBlock:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull))hiddenExeBlock {
     __weak typeof(self) _self = self;
     [self.prompt showTitle:title duration:duration hiddenExeBlock:^(SJPrompt * _Nonnull prompt) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( hiddenExeBlock ) hiddenExeBlock(self);
+    }];
+}
+
+- (void)showAttributedString:(NSAttributedString *)attributedString duration:(NSTimeInterval)duration {
+    [self showAttributedString:attributedString duration:duration hiddenExeBlock:nil];
+}
+
+- (void)showAttributedString:(NSAttributedString *)attributedString duration:(NSTimeInterval)duration hiddenExeBlock:(void(^__nullable)(__kindof SJBaseVideoPlayer *player))hiddenExeBlock {
+    __weak typeof(self) _self = self;
+    [self.prompt showAttributedString:attributedString duration:duration hiddenExeBlock:^(SJPrompt * _Nonnull prompt) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
         if ( hiddenExeBlock ) hiddenExeBlock(self);
