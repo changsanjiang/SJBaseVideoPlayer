@@ -16,7 +16,7 @@ PODS:
   - SJUIFactory (0.0.15):
     - SJUIFactory/Category (= 0.0.15)
   - SJUIFactory/Category (0.0.15)
-  - SJVideoPlayerAssetCarrier (1.1.2):
+  - SJVideoPlayerAssetCarrier (1.1.3):
     - SJObserverHelper
   - SJVolBrigControl (1.0.0):
     - Masonry
@@ -60,7 +60,7 @@ SPEC CHECKSUMS:
   SJOrentationObserver: ad50cb72c2730d25826c53bf8aa27a50d9f37c08
   SJPrompt: e3c244e225c962b0962b539208c68b0a78c94012
   SJUIFactory: 36f08c8bef27b2f6f123f7c3df1c1aeb1b750742
-  SJVideoPlayerAssetCarrier: 00e696118fcfb96e1b05bb70f60a7bfdb1ea4489
+  SJVideoPlayerAssetCarrier: 1b77e0b7ae4cb60a611a13ad40a6e0c6a149fb10
   SJVolBrigControl: dd639d187bf139b42d795e014edf372501352ea8
 
 PODFILE CHECKSUM: b5a98f5f0268b3cf31b549fbc0f31a98b8f48a41
