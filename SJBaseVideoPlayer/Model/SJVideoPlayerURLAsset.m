@@ -140,55 +140,47 @@
     return [self.asset.assetURL.absoluteString containsString:@".m3u8"];
 }
 
-- (NSURL *)assetURL {
-    return self.asset.assetURL;
-}
-
-- (NSIndexPath *)indexPath {
-    return self.asset.indexPath;
-}
-
-- (BOOL)isOtherAsset {
-    return self.asset.isOtherAsset;
+- (id<SJVideoPlayerAssetCarrier>)carrier {
+    return (id)self.asset;
 }
 
 #pragma mark - DEPRECATED
 - (BOOL)converted {
-    return self.asset.converted;
+    return [(SJVideoPlayerAssetCarrier *)self.asset isConverted];
 }
 
 - (void)convertToOriginal {
-    [self.asset convertToOriginal];
+    [(SJVideoPlayerAssetCarrier *)self.asset convertToOriginal];
 }
 
 - (SJViewHierarchyStack)viewHierarchyStack {
-    return self.asset.viewHierarchyStack;
+    return [(SJVideoPlayerAssetCarrier *)self.asset viewHierarchyStack];
 }
 
 - (void)convertToUIView {
-    [self.asset convertToUIView];
+    [(SJVideoPlayerAssetCarrier *)self.asset convertToUIView];
 }
 - (void)convertToCellWithTableOrCollectionView:(__unsafe_unretained UIScrollView *)tableOrCollectionView
                                      indexPath:(NSIndexPath *)indexPath
                             playerSuperviewTag:(NSInteger)superviewTag {
-    [self.asset convertToCellWithTableOrCollectionView:tableOrCollectionView indexPath:indexPath playerSuperviewTag:superviewTag];
+    [(SJVideoPlayerAssetCarrier *)self.asset convertToCellWithTableOrCollectionView:tableOrCollectionView indexPath:indexPath playerSuperviewTag:superviewTag];
 }
 - (void)convertToTableHeaderViewWithPlayerSuperView:(__weak UIView *)superView
                                           tableView:(__unsafe_unretained UITableView *)tableView {
-    [self.asset convertToTableHeaderViewWithPlayerSuperView:superView tableView:tableView];
+    [(SJVideoPlayerAssetCarrier *)self.asset convertToTableHeaderViewWithPlayerSuperView:superView tableView:tableView];
 }
 - (void)convertToTableHeaderViewWithCollectionView:(__weak UICollectionView *)collectionView
                            collectionCellIndexPath:(NSIndexPath *)indexPath
                                 playerSuperViewTag:(NSInteger)playerSuperViewTag
                                      rootTableView:(__unsafe_unretained UITableView *)rootTableView {
-    [self.asset convertToTableHeaderViewWithCollectionView:collectionView collectionCellIndexPath:indexPath playerSuperViewTag:playerSuperViewTag rootTableView:rootTableView];
+    [(SJVideoPlayerAssetCarrier *)self.asset convertToTableHeaderViewWithCollectionView:collectionView collectionCellIndexPath:indexPath playerSuperViewTag:playerSuperViewTag rootTableView:rootTableView];
 }
 - (void)convertToCellWithIndexPath:(NSIndexPath *)indexPath
                       superviewTag:(NSInteger)superviewTag
            collectionViewIndexPath:(NSIndexPath *)collectionViewIndexPath
                  collectionViewTag:(NSInteger)collectionViewTag
                      rootTableView:(__unsafe_unretained UITableView *)rootTableView {
-    [self.asset convertToCellWithIndexPath:indexPath superviewTag:superviewTag collectionViewIndexPath:collectionViewIndexPath collectionViewTag:collectionViewTag rootTableView:rootTableView];
+    [(SJVideoPlayerAssetCarrier *)self.asset convertToCellWithIndexPath:indexPath superviewTag:superviewTag collectionViewIndexPath:collectionViewIndexPath collectionViewTag:collectionViewTag rootTableView:rootTableView];
 }
 @end
 

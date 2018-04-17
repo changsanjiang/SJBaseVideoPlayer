@@ -11,20 +11,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol SJVideoPlayerAssetCarrier <NSObject>
+@property (nonatomic, strong, readonly, nullable) NSIndexPath *indexPath;
+@property (nonatomic, strong, readonly) NSURL *assetURL;
+@property (nonatomic, readonly) BOOL isOtherAsset;
+@end
+
 
 @interface SJVideoPlayerURLAsset : NSObject
 
+@property (nonatomic, strong, readonly) id<SJVideoPlayerAssetCarrier> carrier;
+
 @property (nonatomic, assign, readonly) BOOL isM3u8;
-
-@property (nonatomic, assign, readonly) BOOL converted; // 是否被转换过.
-
 @property (nonatomic, assign, readonly) SJViewHierarchyStack viewHierarchyStack;
 
-@property (nonatomic, strong, readonly) NSURL *assetURL;
-
-@property (nonatomic, strong, readonly, nullable) NSIndexPath *indexPath;
-
-@property (nonatomic, readonly) BOOL isOtherAsset;
 
 #pragma mark -
 
@@ -184,6 +184,7 @@ NS_ASSUME_NONNULL_BEGIN
            collectionViewIndexPath:(NSIndexPath *)collectionViewIndexPath
                  collectionViewTag:(NSInteger)collectionViewTag
                      rootTableView:(__unsafe_unretained UITableView *)rootTableView NS_DEPRECATED(2_0, 2_0, 2_0, 2_0, "use `initWithOtherAsset:`");
+@property (nonatomic, assign, readonly) BOOL converted NS_DEPRECATED(2_0, 2_0, 2_0, 2_0, "use `initWithOtherAsset:`");
 @end
 
 extern NSString * const kSJVideoPlayerAssetKey;

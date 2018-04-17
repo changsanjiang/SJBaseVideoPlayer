@@ -8,7 +8,6 @@
 
 #import "SJVideoPlayerPresentView.h"
 #import <AVFoundation/AVPlayerLayer.h>
-#import <Masonry/Masonry.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -90,14 +89,16 @@ NS_ASSUME_NONNULL_END
     return [self avLayer].videoGravity;
 }
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    _placeholderImageView.frame = self.bounds;
+}
+
 #pragma mark -
 
 - (void)_presentSetupView {
     self.backgroundColor = [UIColor blackColor];
     [self addSubview:self.placeholderImageView];
-    [_placeholderImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.offset(0);
-    }];
 }
 
 - (UIImageView *)placeholderImageView {
