@@ -11,6 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+
 @interface SJVideoPlayerURLAsset : NSObject
 
 @property (nonatomic, assign, readonly) BOOL isM3u8;
@@ -18,6 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) BOOL converted; // 是否被转换过.
 
 @property (nonatomic, assign, readonly) SJViewHierarchyStack viewHierarchyStack;
+
+@property (nonatomic, strong, readonly) NSURL *assetURL;
+
+@property (nonatomic, strong, readonly, nullable) NSIndexPath *indexPath;
+
+@property (nonatomic, readonly) BOOL isOtherAsset;
 
 #pragma mark -
 

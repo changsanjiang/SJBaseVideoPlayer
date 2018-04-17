@@ -140,7 +140,19 @@
     return [self.asset.assetURL.absoluteString containsString:@".m3u8"];
 }
 
-#pragma mark -
+- (NSURL *)assetURL {
+    return self.asset.assetURL;
+}
+
+- (NSIndexPath *)indexPath {
+    return self.asset.indexPath;
+}
+
+- (BOOL)isOtherAsset {
+    return self.asset.isOtherAsset;
+}
+
+#pragma mark - DEPRECATED
 - (BOOL)converted {
     return self.asset.converted;
 }
