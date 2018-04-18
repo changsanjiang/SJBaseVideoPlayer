@@ -167,13 +167,6 @@
 			remoteGlobalIDString = 0D96EABDEDCED9CCF68E4C4646101C33;
 			remoteInfo = SJUIFactory;
 		};
-		A6DF3B7E9882E48FED3F8033742EA8E0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9DC8D9E02903E93BD0B2FEC9D846EA20;
-			remoteInfo = Masonry;
-		};
 		AB42907B69EA8A2D916C0F929D1B331C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
@@ -1012,7 +1005,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				700EE5F589A27DA1532A5456A1535903 /* PBXTargetDependency */,
 			);
 			name = SJOrentationObserver;
 			productName = SJOrentationObserver;
@@ -1329,12 +1321,6 @@
 			name = SJOrentationObserver;
 			target = 7A40DE104B11EFEF0EC942A90988C875 /* SJOrentationObserver */;
 			targetProxy = 1604EE854A1679396B6BEDE3A223D1B5 /* PBXContainerItemProxy */;
-		};
-		700EE5F589A27DA1532A5456A1535903 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = Masonry;
-			target = 9DC8D9E02903E93BD0B2FEC9D846EA20 /* Masonry */;
-			targetProxy = A6DF3B7E9882E48FED3F8033742EA8E0 /* PBXContainerItemProxy */;
 		};
 		7B1FDDDC0F69E1C0700C2C6F2218AB54 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

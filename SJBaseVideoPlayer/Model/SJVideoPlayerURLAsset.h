@@ -17,14 +17,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL isOtherAsset;
 @end
 
-
 @interface SJVideoPlayerURLAsset : NSObject
+
+@property (nonatomic, assign, readonly) BOOL isM3u8;
 
 @property (nonatomic, strong, readonly) id<SJVideoPlayerAssetCarrier> carrier;
 
-@property (nonatomic, assign, readonly) BOOL isM3u8;
 @property (nonatomic, assign, readonly) SJViewHierarchyStack viewHierarchyStack;
-
 
 #pragma mark -
 
