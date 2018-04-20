@@ -32,8 +32,9 @@
 
     _videoPlayer.placeholder = [UIImage imageNamed:@"placeholder"];
     
-    _videoPlayer.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
+//    _videoPlayer.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
     
+    [_videoPlayer rotation];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
