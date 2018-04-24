@@ -104,14 +104,16 @@ typedef NS_ENUM(NSUInteger, SJMediaDownloadStatus) {
 
 @protocol SJMediaEntity <NSObject>
 
-@property (nonatomic, assign, readonly) NSInteger mediaId;
+@property (nonatomic, readonly) NSInteger mediaId;
 @property (nonatomic, strong, readonly) NSString *URLStr;
-@property (nonatomic, assign, readonly) SJMediaDownloadStatus downloadStatus;
+@property (nonatomic, readonly) SJMediaDownloadStatus downloadStatus;
 @property (nonatomic, strong, readonly, nullable) NSString *title;
 @property (nonatomic, strong, readonly, nullable) NSString *coverURLStr;
 @property (nonatomic, strong, readonly, nullable) NSString *filePath;
-@property (nonatomic, assign, readonly) float downloadProgress;
-
+@property (readonly) long long totalBytesWritten;
+@property (readonly) long long totalBytesExpectedToWrite;
+- (float)downloadProgress;
+@property (nonatomic, readonly) long long speed; // 下载速度, unit is`byte`.
 @end
 
 NS_ASSUME_NONNULL_END
