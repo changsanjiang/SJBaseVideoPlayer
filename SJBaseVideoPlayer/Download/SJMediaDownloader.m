@@ -644,17 +644,16 @@ NS_ASSUME_NONNULL_END
     _speedTimer = [NSTimer SJMediaDownloaderAdd_timerWithTimeInterval:1 block:^(NSTimer * _Nonnull timer) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( self.downloadProgress == 1 ) {
+        long long totalBytesWritten_new = self.totalBytesWritten;
+        long long totalBytesExpectedToWrite = self.totalBytesExpectedToWrite;
+
+        if ( task.state != NSURLSessionTaskStateRunning ||
+             totalBytesWritten_new == totalBytesExpectedToWrite ) {
             [self _clearSpeedTimer];
             self.speed = 0;
             return;
         }
-        if ( task.state != NSURLSessionTaskStateRunning ) {
-            [self _clearSpeedTimer];
-            return;
-        }
 
-        long long totalBytesWritten_new = self.totalBytesWritten;
         self.speed = totalBytesWritten_new - totalBytesWritten_old;
         totalBytesWritten_old = totalBytesWritten_new;
     } repeats:YES];
