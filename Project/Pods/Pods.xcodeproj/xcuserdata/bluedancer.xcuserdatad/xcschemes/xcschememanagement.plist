@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>FDFullscreenPopGesture.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Masonry.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -20,11 +25,6 @@
 			<false/>
 		</dict>
 		<key>SJBorderLineView.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>SJFullscreenPopGesture.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
