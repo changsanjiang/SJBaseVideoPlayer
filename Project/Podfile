@@ -8,7 +8,7 @@ target 'Project' do
   # Pods for Project
   pod 'SJUIFactory'
   pod 'Masonry'
-  pod 'FDFullscreenPopGesture'
+  pod 'SJFullscreenPopGesture'
   pod 'SJBorderLineView'
   pod 'SJPrompt'
   pod 'SJOrentationObserver'

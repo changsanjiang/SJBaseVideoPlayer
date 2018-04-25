@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F411F6BE4351ACFA53E61D76278796C7"
+               BlueprintIdentifier = "27D4FA1B285562DD0328C7F0C7952DF7"
                BlueprintName = "SJBorderLineView"
                ReferencedContainer = "container:Pods.xcodeproj"
                BuildableName = "libSJBorderLineView.a">

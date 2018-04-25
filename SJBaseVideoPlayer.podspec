@@ -12,7 +12,7 @@ s.frameworks  = "UIKit", "AVFoundation"
 s.requires_arc = true
 s.dependency 'SJUIFactory'
 s.dependency 'Masonry'
-s.dependency 'FDFullscreenPopGesture'
+s.dependency 'SJFullscreenPopGesture'
 s.dependency 'SJBorderLineView'
 s.dependency 'SJPrompt'
 s.dependency 'SJOrentationObserver'
