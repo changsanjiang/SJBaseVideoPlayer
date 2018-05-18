@@ -31,6 +31,19 @@ static float const __GeneratePreImgScale = 0.05;
                                     repeats:(BOOL)repeats;
 @end
 
+#pragma mark -
+@interface SJPlayerSuperViewHelper : NSObject
+- (BOOL)isShowWithCell:(UIView *)cell playerContainerView:(UIView *)playerContainerView scrollView:(UIScrollView *)scrollView;
+@end
+@implementation SJPlayerSuperViewHelper
+- (BOOL)isShowWithCell:(UIView *)cell playerContainerView:(UIView *)playerContainerView scrollView:(UIScrollView *)scrollView {
+    CGRect convertedRect = [playerContainerView.superview convertRect:playerContainerView.frame toView:scrollView.superview];
+    CGRect intersectionRect = CGRectIntersection(convertedRect, scrollView.frame);
+    return !CGRectIsNull(intersectionRect);
+}
+@end
+
+#pragma mark - 已弃用
 @interface SJAssetUIKitEctype: NSObject
 @property (nonatomic, assign) SJViewHierarchyStack viewHierarchyStack;
 @property (nonatomic, strong) NSIndexPath *indexPath;
@@ -80,6 +93,7 @@ NS_ASSUME_NONNULL_BEGIN
     id _itemEndObserver;
     NSTimer *_bufferRefreshTimer;
     NSTimer *_refreshProgressTimer;
+    SJPlayerSuperViewHelper *_superViewHelper;
 }
 @property (nonatomic, assign, readwrite) SJViewHierarchyStack viewHierarchyStack;
 @property (nonatomic, strong, readwrite, nullable) AVAssetImageGenerator *imageGenerator;
@@ -99,7 +113,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readwrite, nullable) NSTimer *refreshProgressTimer;
 @property (nonatomic, strong, nullable) SJGIFCreator *gifCreator;
 @property (nonatomic, weak, readonly, nullable) id <SJVideoPlayerAVAsset> otherAsset;
-
+@property (nonatomic, strong, readonly) SJPlayerSuperViewHelper *superViewHelper;
+@property (nonatomic, readwrite) CGPoint beforeContentOffset;
 @end
 NS_ASSUME_NONNULL_END
 
@@ -190,7 +205,7 @@ NS_ASSUME_NONNULL_END
         }
     }
     return [self initWithAssetURL:assetURL beginTime:beginTime indexPath:indexPath superviewTag:superviewTag scrollViewIndexPath:scrollViewIndexPath scrollViewTag:scrollViewTag scrollView:scrollView rootScrollView:rootScrollView];
-
+    
 }
 
 - (instancetype)initWithAssetURL:(NSURL *)assetURL
@@ -203,7 +218,7 @@ NS_ASSUME_NONNULL_END
                   rootScrollView:(__unsafe_unretained UIScrollView *__nullable)rootScrollView {
     self = [super init];
     if ( !self ) return nil;
-   
+    
     // views
     _scrollView = scrollView;
     _indexPath = indexPath;
@@ -303,6 +318,7 @@ NS_ASSUME_NONNULL_END
                     rootScrollView:(__unsafe_unretained UIScrollView *__nullable)rootScrollView {
     self = [self initWithAssetURL:[NSURL new] beginTime:0 indexPath:indexPath superviewTag:superviewTag scrollViewIndexPath:scrollViewIndexPath scrollViewTag:scrollViewTag scrollView:scrollView rootScrollView:rootScrollView];
     if ( !self ) return nil;
+    _assetURL = asset.assetURL;
     __weak typeof(self) _self = self;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         __strong typeof(_self) self = _self;
@@ -374,7 +390,7 @@ NS_ASSUME_NONNULL_END
 
 - (void)_clearAVPlayer {
     if ( !_otherAsset && 0 != _player.rate ) [_player pause];
-
+    
     [_playerItem removeObserver:self forKeyPath:@"status"];
     [_playerItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
     [_playerItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
@@ -432,8 +448,8 @@ NS_ASSUME_NONNULL_END
         }
         else if ( [keyPath isEqualToString:@"status"] ) {
             if ( !self->_jumped &&
-                 AVPlayerItemStatusReadyToPlay == self.playerItem.status &&
-                 0 != self.beginTime ) {
+                AVPlayerItemStatusReadyToPlay == self.playerItem.status &&
+                0 != self.beginTime ) {
                 // begin time
                 if ( self.beginTime > self.duration ) return ;
                 __weak typeof(self) _self = self;
@@ -850,6 +866,7 @@ NS_ASSUME_NONNULL_END
 
 - (void)_scrollViewDidScroll:(UIScrollView *)scrollView {
     if ( !_scrollView ) return;
+    if ( CGPointEqualToPoint(_beforeContentOffset, scrollView.contentOffset) ) return;
     if ( scrollView == _scrollView ) {
         if ( _scrollViewDidScroll ) _scrollViewDidScroll(self);
     }
@@ -860,15 +877,13 @@ NS_ASSUME_NONNULL_END
     else {
         [self playOnCell_scrollViewDidScroll:scrollView];
     }
+    _beforeContentOffset = scrollView.contentOffset;
 }
 
 - (void)playOnHeader_scrollViewDidScroll:(UIScrollView *)scrollView {
     if ( [self.tableHeaderSubView isKindOfClass:[UICollectionView class]] &&
         scrollView == self.tableHeaderSubView ) {
-        UICollectionView *collectionView = (UICollectionView *)scrollView;
-        UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:self.indexPath];
-        bool visable = [collectionView.visibleCells containsObject:cell];
-        self.scrollIn_bool = visable;
+        [self playOnCell_scrollViewDidScroll:scrollView];
     }
     else {
         CGFloat offsetY = scrollView.contentOffset.y;
@@ -877,9 +892,7 @@ NS_ASSUME_NONNULL_END
                 self.scrollIn_bool = YES;
             }
             else {
-                UICollectionView *collectionView = (UICollectionView *)self.scrollView;
-                UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:self.indexPath];
-                self.scrollIn_bool = [collectionView.visibleCells containsObject:cell];
+                [self playOnCell_scrollViewDidScroll:self.scrollView];
             }
         }
         else {
@@ -897,33 +910,29 @@ NS_ASSUME_NONNULL_END
         indexPath = _scrollViewIndexPath;
     }
     
+    __block BOOL visable = NO;
     if ( [scrollView isKindOfClass:[UITableView class]] ) {
         UITableView *tableView = (UITableView *)scrollView;
-        __block BOOL visable = NO;
         [tableView.indexPathsForVisibleRows enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ( [obj compare:indexPath] == NSOrderedSame ) {
-                visable = YES;
                 *stop = YES;
+                visable = [self.superViewHelper isShowWithCell:[self _getCell] playerContainerView:[self _getContainerView] scrollView:scrollView];
             }
         }];
-        if ( scrollView == _rootScrollView ) {
-            if ( visable == self.parent_scrollIn_bool ) return;
-            self.parent_scrollIn_bool = visable;
-            if ( visable ) [self _updateScrollView];
-        }
-        self.scrollIn_bool = self.parent_scrollIn_bool && visable;
     }
     else if ( [scrollView isKindOfClass:[UICollectionView class]] ) {
         UICollectionView *collectionView = (UICollectionView *)scrollView;
         UICollectionViewCell *cell = [collectionView cellForItemAtIndexPath:indexPath];
-        bool visable = [collectionView.visibleCells containsObject:cell];
-        if ( scrollView == _rootScrollView ) {
-            if ( visable == self.parent_scrollIn_bool ) return;
-            self.parent_scrollIn_bool = visable;
-            if ( visable ) [self _updateScrollView];
+        if ( [collectionView.visibleCells containsObject:cell] ) {
+            visable = [self.superViewHelper isShowWithCell:[self _getCell] playerContainerView:[self _getContainerView] scrollView:scrollView];
         }
-        self.scrollIn_bool = self.parent_scrollIn_bool && visable;
     }
+    if ( scrollView == _rootScrollView ) {
+        if ( visable == self.parent_scrollIn_bool ) return;
+        self.parent_scrollIn_bool = visable;
+        if ( visable ) [self _updateScrollView];
+    }
+    self.scrollIn_bool = self.parent_scrollIn_bool && visable;
 }
 
 - (void)setScrollIn_bool:(BOOL)scrollIn_bool {
@@ -971,6 +980,29 @@ NS_ASSUME_NONNULL_END
         superView = [cell.contentView viewWithTag:_superviewTag];
     }
     return superView;
+}
+
+- (SJPlayerSuperViewHelper *)superViewHelper {
+    if ( _superViewHelper ) return _superViewHelper;
+    _superViewHelper = [SJPlayerSuperViewHelper new];
+    return _superViewHelper;
+}
+
+- (UIView *)_getCell {
+    UIView *cell = nil;
+    if ( [_scrollView isKindOfClass:[UITableView class]] ) {
+        cell = [(UITableView *)_scrollView cellForRowAtIndexPath:_indexPath];
+        
+    }
+    else if ( [_scrollView isKindOfClass:[UICollectionView class]] ) {
+        cell = [(UICollectionView *)_scrollView cellForItemAtIndexPath:_indexPath];
+    }
+    return cell;
+}
+
+- (UIView *)_getContainerView {
+    UIView *cell = [self _getCell];
+    return [cell viewWithTag:_superviewTag];
 }
 
 - (void)_observeScrollView:(UIScrollView *)scrollView {
@@ -1138,7 +1170,7 @@ NS_ASSUME_NONNULL_END
 - (void)_convertingWithBlock:(void(^)(void))block {
     [self _clearUIKit];
     if ( block ) block();
-    [self _scrollViewObserving]; 
+    [self _scrollViewObserving];
     _converted = YES;
 }
 
@@ -1324,8 +1356,8 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
 - (void)addImage:(CGImageRef)imageRef {
     if ( !_firstImage ) _firstImage = [UIImage imageWithCGImage:imageRef];
     CGImageDestinationAddImage(_destination, imageRef, (__bridge CFDictionaryRef)_frameProperties);
-//    @autoreleasepool {
-//    }
+    //    @autoreleasepool {
+    //    }
 }
 - (BOOL)finalize {
     BOOL result = CGImageDestinationFinalize(_destination);
