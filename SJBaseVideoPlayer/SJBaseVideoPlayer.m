@@ -946,6 +946,11 @@ NS_ASSUME_NONNULL_END
     //
     //    };
     
+    _registrar.audioSessionInterruption = ^(SJVideoPlayerRegistrar * _Nonnull registrar) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        if ( self.state != SJVideoPlayerPlayState_Paused ) [self pause];
+    };
     return _registrar;
 }
 
