@@ -10,6 +10,7 @@
 #define SJVideoPlayerControlLayerProtocol_h
 #import <UIKit/UIKit.h>
 #import "SJNetworkStatus.h"
+#import "SJVideoPlayerState.h"
 @protocol SJPlayStatusControlDelegate, SJLoadingControlDelegate, SJNetworkStatusControlDelegate, SJLockScreenStateControlDelegate, SJAppActivityControlDelegate, SJVolumeBrightnessRateControlDelegate, SJGestureControlDelegate, SJRotationControlDelegate;
 @class SJBaseVideoPlayer, SJVideoPlayerURLAsset;
 

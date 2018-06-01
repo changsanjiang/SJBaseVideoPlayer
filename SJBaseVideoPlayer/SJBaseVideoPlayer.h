@@ -44,8 +44,6 @@
 #import "SJVideoPlayerControlLayerProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@protocol SJVideoPlayerControlLayerDataSource, SJVideoPlayerControlLayerDelegate;
-
 /**
  This enumeration lists some of the gesture types that the player has by default.
  When you don't want to use one of these gestures, you can set it like this:
