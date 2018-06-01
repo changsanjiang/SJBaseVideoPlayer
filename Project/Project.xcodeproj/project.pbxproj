@@ -68,6 +68,8 @@
 		77826C17203FAB8B009D5F2C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		77DE8360EA219A9C5A02BA5F /* Pods-Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.debug.xcconfig"; sourceTree = "<group>"; };
 		77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = SJBaseVideoPlayer.png; sourceTree = "<group>"; };
+		A6DD45D920C0FF8000E512EB /* SJVideoPlayerControlLayerProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SJVideoPlayerControlLayerProtocol.h; sourceTree = "<group>"; };
+		A6DD45DA20C0FFDD00E512EB /* SJNetworkStatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SJNetworkStatus.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,8 +173,10 @@
 		77826BF6203E743A009D5F2C /* Header */ = {
 			isa = PBXGroup;
 			children = (
+				A6DD45D920C0FF8000E512EB /* SJVideoPlayerControlLayerProtocol.h */,
 				77826BF7203E743A009D5F2C /* SJVideoPlayerPreviewInfo.h */,
 				77826BF8203E743A009D5F2C /* SJVideoPlayerState.h */,
+				A6DD45DA20C0FFDD00E512EB /* SJNetworkStatus.h */,
 			);
 			path = Header;
 			sourceTree = "<group>";
