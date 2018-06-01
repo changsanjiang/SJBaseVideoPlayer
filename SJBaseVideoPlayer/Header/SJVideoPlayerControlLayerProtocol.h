@@ -11,7 +11,7 @@
 #import <UIKit/UIKit.h>
 #import "SJNetworkStatus.h"
 @protocol SJPlayStatusControlDelegate, SJLoadingControlDelegate, SJNetworkStatusControlDelegate, SJLockScreenStateControlDelegate, SJAppActivityControlDelegate, SJVolumeBrightnessRateControlDelegate, SJGestureControlDelegate, SJRotationControlDelegate;
-@class SJBaseVideoPlayer;
+@class SJBaseVideoPlayer, SJVideoPlayerURLAsset;
 
 
 
