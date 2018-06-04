@@ -79,6 +79,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL initialization;
 
 /**
+ 重置`self.initialization`, 当播放新的资源时, 该方法会被调用.
+ */
+- (void)resetInitialization;
+
+/**
  当单击手势触发时, 会调用这个方法. 考虑是否显示或隐藏控制层, 或不做任何事情.
  */
 - (void)considerChangeState;
@@ -92,11 +97,6 @@ NS_ASSUME_NONNULL_BEGIN
  在`self.enabled == YES`的情况下, 立即隐藏控制层.
  */
 - (void)layerDisappear;
-
-/**
- 重置`self.initialization`, 当播放新的资源时, 改方法会被调用.
- */
-- (void)resetInitialization;
 
 /**
  当播放被暂停时, 是否保持控制层一直显示.  见 `videoPlayer.pausedToKeepAppearState`.
@@ -348,17 +348,12 @@ NS_ASSUME_NONNULL_END
         if ( !self ) return;
         if ( self.state == SJVideoPlayerPlayState_PlayEnd ) return;
         switch ( status ) {
-            case AVPlayerItemStatusUnknown: {
-                asset.startBuffering(asset);
-            }
-                break;
+            case AVPlayerItemStatusUnknown:  break;
             case AVPlayerItemStatusFailed: {
-                asset.cancelledBuffer(asset);
                 [self _itemPlayFailed];
             }
                 break;
             case AVPlayerItemStatusReadyToPlay: {
-                asset.completeBuffer(asset);
                 if ( !self.resignActive ) [self _itemReadyToPlay];
             }
                 break;
@@ -525,8 +520,13 @@ NS_ASSUME_NONNULL_END
 
 #pragma mark -
 - (void)_itemPrepareToPlay {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
+        [self.controlLayerDelegate startLoading:self];
+    }
+    
     self.userClickedPause = NO;
     self.state = SJVideoPlayerPlayState_Prepare;
+    self.suspend = NO;
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:prepareToPlay:)] ) {
         [self.controlLayerDelegate videoPlayer:self prepareToPlay:self.URLAsset];
@@ -534,13 +534,16 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)_itemPlayFailed {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(cancelLoading:)] ) {
+        [self.controlLayerDelegate cancelLoading:self];
+    }
+    
     self.error = self.asset.playerItem.error;
     
     self.state = SJVideoPlayerPlayState_PlayFailed;
 }
 
 - (void)_itemReadyToPlay {
-    
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:currentTime:currentTimeStr:totalTime:totalTimeStr:)] ) {
         [self.controlLayerDelegate videoPlayer:self currentTime:self.currentTime currentTimeStr:self.currentTimeStr totalTime:self.totalTime totalTimeStr:self.totalTimeStr];
     }
@@ -554,12 +557,6 @@ NS_ASSUME_NONNULL_END
     }
     
     [self.displayRecorder resetInitialization];
-    __weak typeof(self) _self = self;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( !self.displayRecorder.initialization && !self.displayRecorder.controlLayerAppearedState ) [self controlLayerNeedAppear];
-    });
 }
 
 - (void)_itemPlayDidToEnd {
@@ -1233,13 +1230,12 @@ NS_ASSUME_NONNULL_END
 }
 
 - (BOOL)play {
-    self.suspend = NO;
-    
-    if ( self.state ==  SJVideoPlayerPlayState_PlayFailed ||
-        self.state == SJVideoPlayerPlayState_Unknown ) return NO;
+    if ( !self.asset ) return NO;
+    if ( self.state == SJVideoPlayerPlayState_PlayFailed ||
+         self.state == SJVideoPlayerPlayState_Unknown ) return NO;
     
     self.userClickedPause = NO;
-    if ( !self.asset ) return NO;
+    self.suspend = NO;
     [self.asset play];
     self.state = SJVideoPlayerPlayState_Playing;
     [self.displayRecorder start];
@@ -1247,29 +1243,27 @@ NS_ASSUME_NONNULL_END
 }
 
 - (BOOL)pause {
-    self.suspend = YES;
-    
-    if ( self.state ==  SJVideoPlayerPlayState_PlayFailed ||
-        self.state == SJVideoPlayerPlayState_Unknown ) return NO;
+    if ( !self.asset ) return NO;
+    if ( self.state == SJVideoPlayerPlayState_PlayFailed ||
+         self.state == SJVideoPlayerPlayState_Unknown ) return NO;
     
     self.userClickedPause = NO;
-    if ( !self.asset ) return NO;
+    self.suspend = YES;
     [self.asset pause];
     if ( SJVideoPlayerPlayState_PlayEnd != self.state ) self.state = SJVideoPlayerPlayState_Paused;
     return YES;
 }
 
 - (void)stop {
-    self.suspend = YES;
-    
+    if ( !self.asset ) return;
     self.state = SJVideoPlayerPlayState_Unknown;
     
-    if ( !self.asset ) return;
+    self.suspend = YES;
     [self clearAsset];
 }
 
 - (void)stopAndFadeOut {
-    self.suspend = YES;
+    if ( !self.asset ) self.suspend = YES;
     
     [self.asset pause];
     [self.view sj_fadeOutAndCompletion:^(UIView *view) {
@@ -1659,7 +1653,7 @@ NS_ASSUME_NONNULL_END
 @implementation SJBaseVideoPlayer (ScrollView)
 
 - (BOOL)isPlayOnScrollView {
-    return self.asset.scrollView ? YES : NO;
+    return self.asset.isPlayOnScrollView;
 }
 
 - (BOOL)isScrollAppeared {
@@ -1800,6 +1794,12 @@ NS_ASSUME_NONNULL_END
 
 - (void)resetInitialization {
     _initialization = NO;
+    __weak typeof(self) _self = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( !self.initialization && !self.controlLayerAppearedState ) [self layerAppear];
+    });
 }
 
 - (SJTimerControl *)controlHiddenTimer {
