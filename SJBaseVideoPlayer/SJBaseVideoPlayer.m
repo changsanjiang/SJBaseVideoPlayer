@@ -368,6 +368,7 @@ NS_ASSUME_NONNULL_END
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:currentTime:currentTimeStr:totalTime:totalTimeStr:)] ) {
             [self.controlLayerDelegate videoPlayer:self currentTime:currentTime currentTimeStr:self.currentTimeStr totalTime:duration totalTimeStr:self.totalTimeStr];
         }
+        if ( self.playTimeDidChangeExeBlok ) self.playTimeDidChangeExeBlok(self);
     };
     
     asset.playDidToEnd = ^(SJVideoPlayerAssetCarrier * _Nonnull asset) {
@@ -1146,6 +1147,14 @@ NS_ASSUME_NONNULL_END
     return [self timeStringWithSeconds:self.totalTime];
 }
 
+- (void)setPlayTimeDidChangeExeBlok:(void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playTimeDidChangeExeBlok {
+    objc_setAssociatedObject(self, @selector(playTimeDidChangeExeBlok), playTimeDidChangeExeBlok, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+- (void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playTimeDidChangeExeBlok {
+    return objc_getAssociatedObject(self, _cmd);
+}
+
 - (void)jumpedToTime:(NSTimeInterval)time completionHandler:(void (^)(BOOL))completionHandler {
     if ( isnan(time) ) { return;}
     CMTime seekTime = CMTimeMakeWithSeconds(time, NSEC_PER_SEC);
@@ -1162,6 +1171,7 @@ NS_ASSUME_NONNULL_END
         if ( finished ) self.asset.completeBuffer(self.asset);
         else self.asset.cancelledBuffer(self.asset);
         if ( completionHandler ) completionHandler(finished);
+        if ( self.playTimeDidChangeExeBlok ) self.playTimeDidChangeExeBlok(self);
     }];
 }
 @end
