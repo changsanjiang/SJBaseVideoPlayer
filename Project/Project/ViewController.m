@@ -34,6 +34,8 @@
     
     _videoPlayer.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
     
+    _videoPlayer.disableAutoRotation = YES;
+    
 //    [_videoPlayer rotation];
     // Do any additional setup after loading the view, typically from a nib.
 }
