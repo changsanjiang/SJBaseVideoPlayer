@@ -40,7 +40,7 @@
 #import "SJVideoPlayerState.h"
 #import "SJVideoPlayerPreviewInfo.h"
 #import <SJPrompt/SJPrompt.h>
-#import <SJOrentationObserver/SJOrentationObserver.h>
+#import <SJOrentationObserver/SJRotationManager.h>
 #import "SJVideoPlayerControlLayerProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -186,6 +186,7 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
  */
 @property (nonatomic, copy, nullable) void(^assetDeallocExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
 
++ (NSString *)version;
 @end
 
 
@@ -458,6 +459,42 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
 @interface SJBaseVideoPlayer (Rotation)
 
 /**
+ Autorotation. Animated.
+ */
+- (void)rotate;
+
+/**
+ Rotate to the specified orientation.
+ 
+ @param orientation     Any value of SJOrientation.
+ @param animated        Whether or not animation.
+ */
+- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated;
+
+/**
+ Rotate to the specified orientation.
+ 
+ @param orientation     Any value of SJOrientation.
+ @param animated        Whether or not animation.
+ @param block           The block invoked when player rotated.
+ */
+- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completion:(void (^ _Nullable)(__kindof SJBaseVideoPlayer *player))block;
+
+/**
+ The block invoked When player will rotate.
+ 
+ readwrite.
+ */
+@property (nonatomic, copy, nullable) void(^willRotateScreen)(__kindof SJBaseVideoPlayer *player, BOOL isFullScreen);
+
+/**
+ The block invoked when player rotated.
+ 
+ readwrite.
+ */
+@property (nonatomic, copy, nullable) void(^rotatedScreen)(__kindof SJBaseVideoPlayer *player, BOOL isFullScreen);
+
+/**
  When Orientation is LandscapeLeft or LandscapeRight, this value is YES.
  
  readonly.
@@ -481,6 +518,14 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
  */
 @property (nonatomic) BOOL disableAutoRotation;
 
+/// 旋转的时间
+/// - 默认是0.4
+@property (nonatomic) NSTimeInterval rotationTime;
+
+/// 是否正在旋转
+@property (nonatomic, readonly) BOOL isTransitioning;
+
+
 /**
  This is the player supports orientation when autorotation. default is `SJAutoRotateSupportedOrientation_All`.
  
@@ -503,43 +548,6 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
  readonly.
  */
 @property (nonatomic, readonly) UIInterfaceOrientation currentOrientation;
-
-/**
- The block invoked When player will rotate.
- 
- readwrite.
- */
-@property (nonatomic, copy, nullable) void(^willRotateScreen)(__kindof SJBaseVideoPlayer *player, BOOL isFullScreen);
-
-/**
- The block invoked when player rotated.
- 
- readwrite.
- */
-@property (nonatomic, copy, nullable) void(^rotatedScreen)(__kindof SJBaseVideoPlayer *player, BOOL isFullScreen);
-
-/**
- Autorotation. Animated.
- */
-- (void)rotate;
-
-/**
- Rotate to the specified orientation.
- 
- @param orientation     Any value of SJOrientation.
- @param animated        Whether or not animation.
- */
-- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated;
-
-/**
- Rotate to the specified orientation.
- 
- @param orientation     Any value of SJOrientation.
- @param animated        Whether or not animation.
- @param block           The block invoked when player rotated.
- */
-- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completion:(void (^ _Nullable)(__kindof SJBaseVideoPlayer *player))block;
-
 @end
 
 
