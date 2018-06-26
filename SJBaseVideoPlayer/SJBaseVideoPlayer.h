@@ -133,6 +133,9 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
  */
 @property (nonatomic, strong) AVLayerVideoGravity videoGravity;
 
+
++ (NSString *)version;
+
 @end
 
 
@@ -186,7 +189,6 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
  */
 @property (nonatomic, copy, nullable) void(^assetDeallocExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
 
-+ (NSString *)version;
 @end
 
 
