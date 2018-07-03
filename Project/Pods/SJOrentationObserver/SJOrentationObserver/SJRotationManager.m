@@ -5,6 +5,12 @@
 //  Created by 畅三江 on 2018/6/25.
 //  Copyright © 2018年 SanJiang. All rights reserved.
 //
+//  GitHub:     https://github.com/changsanjiang/SJOrentationObserver
+//
+//  Contact:    changsanjiang@gmail.com
+//
+//  QQGroup:    719616775
+//
 
 #import "SJRotationManager.h"
 
@@ -64,6 +70,8 @@ NS_ASSUME_NONNULL_BEGIN
         case UIDeviceOrientationPortrait:
         case UIDeviceOrientationLandscapeLeft:
         case UIDeviceOrientationLandscapeRight: {
+            _rec_deviceOrientation = dev_orientation;
+        
             if ( self.disableAutorotation ) {
 #ifdef DEBUG
                 NSLog(@"%d - %s - SJRotationManager - 旋转被禁止, 暂时无法旋转!", (int)__LINE__, __func__);

@@ -12,7 +12,6 @@ target 'Project' do
   pod 'SJBorderLineView'
   pod 'SJPrompt'
   pod 'SJOrentationObserver'
-  pod 'SJVideoPlayerAssetCarrier'
   pod 'SJVolBrigControl'
   pod 'SJObserverHelper'
   pod 'Reachability'

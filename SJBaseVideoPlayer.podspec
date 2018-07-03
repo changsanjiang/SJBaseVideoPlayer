@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = 'SJBaseVideoPlayer'
-s.version      = '1.1.0.1'
+s.version      = '1.2.0'
 s.summary      = 'video player.'
 s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
 s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -15,7 +15,6 @@ s.dependency 'Masonry'
 s.dependency 'SJBorderLineView'
 s.dependency 'SJPrompt'
 s.dependency 'SJOrentationObserver'
-s.dependency 'SJVideoPlayerAssetCarrier'
 s.dependency 'SJVolBrigControl'
 s.dependency 'SJObserverHelper'
 s.dependency 'Reachability'
@@ -45,11 +44,13 @@ end
 
 s.subspec 'TimerControl' do |ss|
 ss.source_files = 'SJBaseVideoPlayer/TimerControl/*.{h,m}'
+ss.dependency 'SJBaseVideoPlayer/Category'
 end
 
 s.subspec 'Model' do |ss|
 ss.source_files = 'SJBaseVideoPlayer/Model/*.{h,m}'
-ss.dependency 'SJVideoPlayerAssetCarrier'
+ss.dependency 'SJBaseVideoPlayer/Category'
+ss.dependency 'SJBaseVideoPlayer/Header'
 end
 
 s.subspec 'Download' do |ss|

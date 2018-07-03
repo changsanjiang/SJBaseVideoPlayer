@@ -61,9 +61,9 @@
     [_videoPlayer refresh];
 }
 - (IBAction)sub:(id)sender {
-    [_videoPlayer jumpedToTime:_videoPlayer.currentTime -15 completionHandler:nil];
+    [_videoPlayer seekToTime:_videoPlayer.currentTime -15 completionHandler:nil];
 }
 - (IBAction)add:(id)sender {
-    [_videoPlayer jumpedToTime:_videoPlayer.currentTime +15 completionHandler:nil];
+    [_videoPlayer seekToTime:_videoPlayer.currentTime +15 completionHandler:nil];
 }
 @end
