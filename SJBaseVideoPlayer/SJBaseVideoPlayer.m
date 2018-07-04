@@ -252,31 +252,12 @@ NS_ASSUME_NONNULL_BEGIN
     [_presentView removeFromSuperview];
 }
 
-- (void)setControlLayerDataSource:(nullable id<SJVideoPlayerControlLayerDataSource>)controlLayerDataSource {
-    if ( controlLayerDataSource == _controlLayerDataSource ) return;
-    _controlLayerDataSource = controlLayerDataSource;
-    
-    if ( !controlLayerDataSource ) return;
-    
-    _controlLayerDataSource.controlView.clipsToBounds = YES;
-    
-    // install
-    [self.controlContentView addSubview:_controlLayerDataSource.controlView];
-    [_controlLayerDataSource.controlView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.offset(0);
-    }];
-    
-    if ( [self.controlLayerDataSource respondsToSelector:@selector(installedControlViewToVideoPlayer:)] ) {
-        [self.controlLayerDataSource installedControlViewToVideoPlayer:self];
-    }
-}
-
 - (void)setPlayStatus:(SJVideoPlayerPlayStatus)playStatus {
     /// 所有播放状态, 均在`PlayControl`分类中维护
     /// 所有播放状态, 均在`PlayControl`分类中维护
     _playStatus = playStatus;
     
-    if ( [self playStatus_isUnknown] || [self playStatus_isReadyToPlay] ) {
+    if ( [self playStatus_isUnknown] || [self playStatus_isPrepare] ) {
         [self.presentView showPlaceholder];
     }
     else if ( [self playStatus_isPlaying] ) {
@@ -289,6 +270,7 @@ NS_ASSUME_NONNULL_BEGIN
         case SJVideoPlayerPlayStatusUnknown:
             self.state = SJVideoPlayerPlayState_Unknown;
             break;
+        case SJVideoPlayerPlayStatusPrepare:
         case SJVideoPlayerPlayStatusReadyToPlay:
             self.state = SJVideoPlayerPlayState_Prepare;
             break;
@@ -328,27 +310,30 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     
-#if 1
+#ifdef DEBUG
     switch ( playStatus ) {
         case SJVideoPlayerPlayStatusUnknown:
-            printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.Unknown\n");
+            printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Unknown\n", self);
+            break;
+        case SJVideoPlayerPlayStatusPrepare:
+            printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Prepare\n", self);
             break;
         case SJVideoPlayerPlayStatusReadyToPlay:
-            printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.ReadyToPlay\n");
+            printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.ReadyToPlay\n", self);
             break;
         case SJVideoPlayerPlayStatusPlaying:
-            printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.Playing\n");
+            printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Playing\n", self);
             break;
         case SJVideoPlayerPlayStatusPaused: {
             switch ( self.pausedReason ) {
                 case SJVideoPlayerPausedReasonBuffering:
-                    printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.Paused(Reason: Buffering)\n");
+                    printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Paused(Reason: Buffering)\n", self);
                     break;
                 case SJVideoPlayerPausedReasonPause:
-                    printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.Paused(Reason: Pause)\n");
+                    printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Paused(Reason: Pause)\n", self);
                     break;
                 case SJVideoPlayerPausedReasonSeeking:
-                    printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.Paused(Reason: Seeking)\n");
+                    printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Paused(Reason: Seeking)\n", self);
                     break;
             }
         }
@@ -356,16 +341,36 @@ NS_ASSUME_NONNULL_BEGIN
         case SJVideoPlayerPlayStatusInactivity: {
             switch ( self.inactivityReason ) {
                 case SJVideoPlayerInactivityReasonPlayEnd :
-                    printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.Inactivity(Reason: PlayEnd)\n");
+                    printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Inactivity(Reason: PlayEnd)\n", self);
                     break;
                 case SJVideoPlayerInactivityReasonPlayFailed:
-                    printf("SJBaseVideoPlayer.SJVideoPlayerPlayStatus.Inactivity(Reason: PlayFailed)\n");
+                    printf("SJBaseVideoPlayer<%p>.SJVideoPlayerPlayStatus.Inactivity(Reason: PlayFailed)\n", self);
                     break;
             }
         }
             break;
     }
 #endif
+}
+
+
+- (void)setControlLayerDataSource:(nullable id<SJVideoPlayerControlLayerDataSource>)controlLayerDataSource {
+    if ( controlLayerDataSource == _controlLayerDataSource ) return;
+    _controlLayerDataSource = controlLayerDataSource;
+    
+    if ( !controlLayerDataSource ) return;
+    
+    _controlLayerDataSource.controlView.clipsToBounds = YES;
+    
+    // install
+    [self.controlContentView addSubview:_controlLayerDataSource.controlView];
+    [_controlLayerDataSource.controlView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.offset(0);
+    }];
+    
+    if ( [self.controlLayerDataSource respondsToSelector:@selector(installedControlViewToVideoPlayer:)] ) {
+        [self.controlLayerDataSource installedControlViewToVideoPlayer:self];
+    }
 }
 
 - (void)setControlLayerDelegate:(nullable id<SJVideoPlayerControlLayerDelegate>)controlLayerDelegate {
@@ -870,18 +875,19 @@ NS_ASSUME_NONNULL_BEGIN
         if ( self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
     }
     
-    self.playStatus = SJVideoPlayerPlayStatusUnknown;
+    [_URLAsset.playAsset.player pause];
+    _playAssetObserver = nil;
+    _playModelObserver = nil;
     
-    if ( !URLAsset ) {
-        [_URLAsset.playAsset.player pause];
-        _playAssetObserver = nil;
-        _playModelObserver = nil;
-    }
-    else {
-        __weak typeof(self) _self = self;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            __strong typeof(_self) self = _self;
-            if ( !self ) return ;
+    __weak typeof(self) _self = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        if ( !URLAsset ) {
+            self.playStatus = SJVideoPlayerPlayStatusUnknown;
+        }
+        else {
+            self.playStatus = SJVideoPlayerPlayStatusPrepare;
             if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
                 [self.controlLayerDelegate startLoading:self];
             }
@@ -895,8 +901,8 @@ NS_ASSUME_NONNULL_BEGIN
             if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:prepareToPlay:)] ) {
                 [self.controlLayerDelegate videoPlayer:self prepareToPlay:URLAsset];
             }
-        });
-    }
+        }
+    });
     
     _URLAsset = URLAsset;
 }
@@ -908,7 +914,7 @@ NS_ASSUME_NONNULL_BEGIN
 // 2.1
 - (void)_playerItemReadyToPlay {
     
-    if ( ![self playStatus_isUnknown] ) return;
+    if ( ![self playStatus_isPrepare] ) return;
     
     self.playStatus = SJVideoPlayerPlayStatusReadyToPlay;
     
@@ -1036,6 +1042,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)play {
+
     if ( !self.URLAsset ) return;
     
     if ( [self playStatus_isInactivity_ReasonPlayEnd] ) {
@@ -1050,7 +1057,7 @@ NS_ASSUME_NONNULL_BEGIN
         return;
     }
     
-    if ( [self playStatus_isUnknown] ) {
+    if ( [self playStatus_isPrepare] ) {
         // 记录操作, 待资源初始化完成后调用
         self.operationOfInitializing = ^(SJBaseVideoPlayer * _Nonnull player) {
             [player play];
@@ -1072,6 +1079,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)pause:(SJVideoPlayerPausedReason)reason {
+
     if ( !self.URLAsset ) return;
     
     if ( [self playStatus_isPaused_ReasonPause] ) return;
@@ -1080,7 +1088,7 @@ NS_ASSUME_NONNULL_BEGIN
     
     if ( [self playStatus_isInactivity_ReasonPlayFailed] ) return;
     
-    if ( [self playStatus_isUnknown] ) {
+    if ( [self playStatus_isPrepare] ) {
         
         __weak typeof(self) _self = self;
         self.operationOfInitializing = ^(SJBaseVideoPlayer * _Nonnull player) {
