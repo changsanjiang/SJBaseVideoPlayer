@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = 'SJBaseVideoPlayer'
-s.version      = '1.2.0.1'
+s.version      = '1.2.0.2'
 s.summary      = 'video player.'
 s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
 s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -12,7 +12,6 @@ s.frameworks  = "UIKit", "AVFoundation"
 s.requires_arc = true
 s.dependency 'SJUIFactory'
 s.dependency 'Masonry'
-s.dependency 'SJBorderLineView'
 s.dependency 'SJPrompt'
 s.dependency 'SJOrentationObserver'
 s.dependency 'SJVolBrigControl'
