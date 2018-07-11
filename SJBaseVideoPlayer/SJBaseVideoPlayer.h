@@ -33,7 +33,7 @@
 #import "SJVideoPlayerState.h"
 #import "SJVideoPlayerPreviewInfo.h"
 #import <SJPrompt/SJPrompt.h>
-#import <SJOrentationObserver/SJRotationManager.h>
+#import "SJRotationManager.h"
 #import "SJVideoPlayerControlLayerProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -113,6 +113,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)version;
 
+- (nullable __kindof UIViewController *)atViewController;
+
 @end
 
 
@@ -178,6 +180,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// 初始化完成后, 是否自动播放
 @property (nonatomic, getter=isAutoPlay) BOOL autoPlay;
 
+/// 播放器是否可以执行`play`
+/// - 当调用`play`时, 会回调该block, 如果返回YES, 则执行`play`方法, 否之.
+/// - 如果该block == nil, 则调用`play`时, 默认为执行.
+@property (nonatomic, copy, nullable) BOOL(^canPlayAnAsset)(__kindof SJBaseVideoPlayer *player);
 /// 使播放
 - (void)play;
 
@@ -222,6 +228,57 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)playWithURL:(NSURL *)URL; // 不再建议使用, 请使用`URLAsset`进行初始化
 @end
 
+
+
+#pragma mark - 关于视图控制器
+
+/// v1.3.0 新增
+/// 请在适当的时候调用这些方法
+@interface SJBaseVideoPlayer (UIViewController)
+
+/// You should call it when view did appear
+- (void)vc_viewDidAppear; 
+/// You should call it when view will disappear
+- (void)vc_viewWillDisappear;
+- (void)vc_viewDidDisappear;
+- (BOOL)vc_prefersStatusBarHidden;
+- (UIStatusBarStyle)vc_preferredStatusBarStyle;
+
+/// The code is fixed, you can copy it directly to the view controller
+/// 以下的代码都是固定的, 可以直接copy到视图控制器中
+//
+//- (void)viewDidAppear:(BOOL)animated {
+//    [super viewDidAppear:animated];
+//    [self.player vc_viewDidAppear];
+//}
+//
+//- (void)viewWillDisappear:(BOOL)animated {
+//    [super viewWillDisappear:animated];
+//    [self.player vc_viewWillDisappear];
+//}
+//
+//- (void)viewDidDisappear:(BOOL)animated {
+//    [super viewDidDisappear:animated];
+//    [self.player vc_viewDidDisappear];
+//}
+//
+//- (BOOL)prefersStatusBarHidden {
+//    return [self.player vc_prefersStatusBarHidden];
+//}
+//
+//- (UIStatusBarStyle)preferredStatusBarStyle {
+//    return [self.player vc_preferredStatusBarStyle];
+//}
+//
+//- (BOOL)prefersHomeIndicatorAutoHidden {
+//    return YES;
+//}
+
+/// 当调用`vc_viewDidDisappearExeBlock`时, 将设置为YES
+/// 当调用`vc_viewWillDisappearExeBlock`时, 将设置为NO
+@property (nonatomic) BOOL vc_isDisappeared;
+
+@end
 
 
 

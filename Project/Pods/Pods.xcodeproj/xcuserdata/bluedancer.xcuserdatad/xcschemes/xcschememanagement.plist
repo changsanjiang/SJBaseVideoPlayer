@@ -34,27 +34,12 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>SJOrentationObserver.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>SJPrompt.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
 		<key>SJUIFactory.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>SJVideoPlayerAssetCarrier.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>SJVolBrigControl.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
