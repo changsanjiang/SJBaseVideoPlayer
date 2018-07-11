@@ -53,6 +53,7 @@ static NSString *delegateKey = @"delegate";
 }
 - (void)observeValueForKeyPath:(nullable NSString *)keyPath ofObject:(nullable id)object change:(nullable NSDictionary<NSKeyValueChangeKey,id> *)change context:(nullable void *)context {
     if ( context == &delegateKey ) {
+        if ( change[NSKeyValueChangeOldKey] == change[NSKeyValueChangeNewKey] ) return;
         if ( _valueChangeExeBlock ) _valueChangeExeBlock(self);
     }
 }
@@ -99,7 +100,6 @@ static NSString *delegateKey = @"delegate";
 }
 
 - (void)sj_enableAutoplayWithConfig:(SJPlayerAutoplayConfig *)autoplayConfig {
-    autoplayConfig.animationType = SJAutoplayScrollAnimationTypeMiddle;
     
     self.sj_enabledAutoplay = YES;
     self.sj_autoplayConfig = autoplayConfig;
