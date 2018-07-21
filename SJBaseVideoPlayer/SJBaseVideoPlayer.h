@@ -453,6 +453,40 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
 
 
 
+/// 全屏或小屏, 但不触发旋转
+/// v1.3.1 新增
+@interface SJBaseVideoPlayer (FitOnScreen)
+
+/// Disable rotation, only full screen(`fitOnScreen==YES`) or small screen(`fitOnScreen==NO`) operation.
+/// 禁止旋转, 只进行全屏或小屏的操作.
+/// default is NO.
+@property (nonatomic) BOOL useFitOnScreenAndDisableRotation;
+
+/// Whether fullscreen or smallscreen, this method does not trigger rotation.
+/// 全屏或小屏, 此方法不触发旋转
+/// Animated
+@property (nonatomic, getter=isFitOnScreen) BOOL fitOnScreen;
+
+/// Whether fullscreen or smallscreen, this method does not trigger rotation.
+/// 全屏或小屏, 此方法不触发旋转
+/// - animated : 是否动画
+- (void)setFitOnScreen:(BOOL)fitOnScreen animated:(BOOL)animated;
+
+/// Whether fullscreen or smallscreen, this method does not trigger rotation.
+/// 全屏或小屏, 此方法不触发旋转
+/// - animated : 是否动画
+/// - completionHandler : 操作完成的回调
+- (void)setFitOnScreen:(BOOL)fitOnScreen animated:(BOOL)animated completionHandler:(nullable void(^)(__kindof SJBaseVideoPlayer *player))completionHandler;
+
+/// 全屏或小屏过程中的回调
+@property (nonatomic, copy, nullable) void(^fitOnScreenWillChangeExeBlock)(__kindof SJBaseVideoPlayer *player);
+
+/// 全屏或小屏过程中的回调
+@property (nonatomic, copy, nullable) void(^fitOnScreenDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player);;
+
+@end
+
+
 
 
 #pragma mark - 屏幕旋转
