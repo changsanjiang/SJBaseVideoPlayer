@@ -10,7 +10,6 @@ target 'Project' do
   pod 'Masonry'
   pod 'SJFullscreenPopGesture'
   pod 'SJBorderLineView'
-  pod 'SJPrompt'
   pod 'SJObserverHelper'
   pod 'Reachability'
 end

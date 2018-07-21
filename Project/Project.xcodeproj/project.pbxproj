@@ -37,6 +37,8 @@
 		77AA43B220F4F224001CF529 /* SJVolBrigResource.m in Sources */ = {isa = PBXBuildFile; fileRef = 77AA43AC20F4F224001CF529 /* SJVolBrigResource.m */; };
 		77AA43B320F4F224001CF529 /* SJVolBrigControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 77AA43AD20F4F224001CF529 /* SJVolBrigControl.m */; };
 		77EE06922047A20D00EA5A92 /* SJBaseVideoPlayer.png in Resources */ = {isa = PBXBuildFile; fileRef = 77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */; };
+		A61924202103514300CFAB5B /* SJPrompt.m in Sources */ = {isa = PBXBuildFile; fileRef = A619241C2103514200CFAB5B /* SJPrompt.m */; };
+		A61924212103514300CFAB5B /* SJPromptConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = A619241D2103514200CFAB5B /* SJPromptConfig.m */; };
 		A67595AB20EB869500BC69C6 /* NSTimer+SJAssetAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = A67595A720EB869500BC69C6 /* NSTimer+SJAssetAdd.m */; };
 		A67595AC20EB869500BC69C6 /* UIView+SJVideoPlayerAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = A67595A820EB869500BC69C6 /* UIView+SJVideoPlayerAdd.m */; };
 		A67595AD20EB869500BC69C6 /* SJPlayAsset+SJBaseVideoPlayerAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = A67595A920EB869500BC69C6 /* SJPlayAsset+SJBaseVideoPlayerAdd.m */; };
@@ -105,6 +107,10 @@
 		77AA43AE20F4F224001CF529 /* SJBorderLineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJBorderLineView.h; sourceTree = "<group>"; };
 		77DE8360EA219A9C5A02BA5F /* Pods-Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.debug.xcconfig"; sourceTree = "<group>"; };
 		77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = SJBaseVideoPlayer.png; sourceTree = "<group>"; };
+		A619241C2103514200CFAB5B /* SJPrompt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJPrompt.m; sourceTree = "<group>"; };
+		A619241D2103514200CFAB5B /* SJPromptConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJPromptConfig.m; sourceTree = "<group>"; };
+		A619241E2103514200CFAB5B /* SJPrompt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJPrompt.h; sourceTree = "<group>"; };
+		A619241F2103514200CFAB5B /* SJPromptConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJPromptConfig.h; sourceTree = "<group>"; };
 		A67595A320EB869500BC69C6 /* UIView+SJVideoPlayerAdd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+SJVideoPlayerAdd.h"; sourceTree = "<group>"; };
 		A67595A420EB869500BC69C6 /* NSTimer+SJAssetAdd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTimer+SJAssetAdd.h"; sourceTree = "<group>"; };
 		A67595A520EB869500BC69C6 /* SJPlayAsset+SJBaseVideoPlayerAdd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SJPlayAsset+SJBaseVideoPlayerAdd.h"; sourceTree = "<group>"; };
@@ -197,6 +203,7 @@
 				A67595AA20EB869500BC69C6 /* SJBaseVideoPlayer+PlayStatus.m */,
 				77AA437E20F4EF92001CF529 /* UIScrollView+ListViewAutoplaySJAdd.h */,
 				77AA437F20F4EF93001CF529 /* UIScrollView+ListViewAutoplaySJAdd.m */,
+				A619241B2103514200CFAB5B /* SJPrompt */,
 				77AA43A420F4F224001CF529 /* SJVolBrigControl */,
 				77AA438720F4F053001CF529 /* SJRotationManager */,
 				A67595AF20EB86B800BC69C6 /* Model */,
@@ -296,6 +303,17 @@
 				77AA43AC20F4F224001CF529 /* SJVolBrigResource.m */,
 			);
 			path = Resource;
+			sourceTree = "<group>";
+		};
+		A619241B2103514200CFAB5B /* SJPrompt */ = {
+			isa = PBXGroup;
+			children = (
+				A619241E2103514200CFAB5B /* SJPrompt.h */,
+				A619241C2103514200CFAB5B /* SJPrompt.m */,
+				A619241F2103514200CFAB5B /* SJPromptConfig.h */,
+				A619241D2103514200CFAB5B /* SJPromptConfig.m */,
+			);
+			path = SJPrompt;
 			sourceTree = "<group>";
 		};
 		A67595A220EB869500BC69C6 /* Category */ = {
@@ -460,12 +478,14 @@
 				77826C0E203E743B009D5F2C /* SJBaseVideoPlayer.m in Sources */,
 				77AA43B220F4F224001CF529 /* SJVolBrigResource.m in Sources */,
 				A67595BB20EB86B800BC69C6 /* SJVideoPlayerURLAsset.m in Sources */,
+				A61924212103514300CFAB5B /* SJPromptConfig.m in Sources */,
 				A67595AC20EB869500BC69C6 /* UIView+SJVideoPlayerAdd.m in Sources */,
 				77AA43AF20F4F224001CF529 /* SJBorderLineView.m in Sources */,
 				77AA438320F4EFA7001CF529 /* SJPlayerAutoplayConfig.m in Sources */,
 				77826C0B203E743B009D5F2C /* SJVideoPlayerPresentView.m in Sources */,
 				77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */,
 				A67595AD20EB869500BC69C6 /* SJPlayAsset+SJBaseVideoPlayerAdd.m in Sources */,
+				A61924202103514300CFAB5B /* SJPrompt.m in Sources */,
 				A67595AE20EB869500BC69C6 /* SJBaseVideoPlayer+PlayStatus.m in Sources */,
 				A67595AB20EB869500BC69C6 /* NSTimer+SJAssetAdd.m in Sources */,
 				77AA43B320F4F224001CF529 /* SJVolBrigControl.m in Sources */,
