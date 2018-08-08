@@ -215,7 +215,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 + (NSString *)version {
-    return @"1.3.1";
+    return @"1.3.2";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
