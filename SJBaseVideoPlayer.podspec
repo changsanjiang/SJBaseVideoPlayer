@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = 'SJBaseVideoPlayer'
-s.version      = '1.3.3'
+s.version      = '1.4.0'
 s.summary      = 'video player.'
 s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
 s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -21,37 +21,23 @@ s.subspec 'Header' do |ss|
     ss.source_files = 'SJBaseVideoPlayer/Header/*.{h}'
 end
 
-s.subspec 'Present' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/Present/*.{h,m}'
-    ss.dependency 'SJBaseVideoPlayer/Header'
-end
-
-s.subspec 'Category' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/Category/*.{h,m}'
-end
-
-s.subspec 'Registrar' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/Registrar/*.{h,m}'
-end
-
-s.subspec 'GestureControl' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/GestureControl/*.{h,m}'
-end
-
-s.subspec 'TimerControl' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/TimerControl/*.{h,m}'
-    ss.dependency 'SJBaseVideoPlayer/Category'
-end
-
 s.subspec 'Model' do |ss|
     ss.source_files = 'SJBaseVideoPlayer/Model/*.{h,m}'
-    ss.dependency 'SJBaseVideoPlayer/Category'
     ss.dependency 'SJBaseVideoPlayer/Header'
 end
 
-s.subspec 'Download' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/Download/*.{h,m}'
-    ss.ios.library = 'sqlite3'
+s.subspec 'SJAVMediaPlaybackController' do |ss|
+    ss.source_files = 'SJBaseVideoPlayer/SJAVMediaPlaybackController/*.{h,m}'
+    ss.subspec 'Core' do |sss|
+        sss.source_files = 'SJBaseVideoPlayer/SJAVMediaPlaybackController/Core/*.{h,m}'
+    end
+    ss.dependency 'SJBaseVideoPlayer/Tool'
+    ss.dependency 'SJBaseVideoPlayer/Header'
+    ss.dependency 'SJBaseVideoPlayer/Model'
+end
+
+s.subspec 'SJPrompt' do |ss|
+    ss.source_files = 'SJBaseVideoPlayer/SJPrompt/*.{h,m}'
 end
 
 s.subspec 'SJRotationManager' do |ss|
@@ -66,8 +52,9 @@ s.subspec 'SJVolBrigControl' do |ss|
     end
 end
 
-s.subspec 'SJPrompt' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/SJPrompt/*.{h,m}'
+s.subspec 'Tool' do |ss|
+    ss.source_files = 'SJBaseVideoPlayer/Tool/*.{h,m}'
+    ss.ios.library = 'sqlite3'
 end
 
 end

@@ -10,6 +10,12 @@
 #import "SJBaseVideoPlayer.h"
 #import <Masonry.h>
 
+@interface Test: NSObject
+@end
+
+@implementation Test
+@end
+
 @interface ViewController ()
 
 @property (nonatomic, strong) SJBaseVideoPlayer *videoPlayer;
@@ -27,16 +33,19 @@
     
     [_videoPlayer.view mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.leading.trailing.offset(0);
-        make.height.equalTo(_videoPlayer.view.mas_width).multipliedBy(9 / 16.0f);
+        make.height.equalTo(self->_videoPlayer.view.mas_width).multipliedBy(9 / 16.0f);
     }];
 
     _videoPlayer.placeholder = [UIImage imageNamed:@"placeholder"];
     
     _videoPlayer.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
     
-    _videoPlayer.disableAutoRotation = YES;
+    _videoPlayer.pauseWhenAppDidEnterBackground = NO;
     
 //    [_videoPlayer rotation];
+    
+    
+    
     // Do any additional setup after loading the view, typically from a nib.
 }
 

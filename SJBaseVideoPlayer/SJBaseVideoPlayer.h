@@ -29,12 +29,13 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "SJVideoPlayerURLAsset.h"
 #import "SJVideoPlayerState.h"
 #import "SJVideoPlayerPreviewInfo.h"
 #import "SJPrompt.h"
 #import "SJRotationManager.h"
 #import "SJVideoPlayerControlLayerProtocol.h"
+#import "SJMediaPlaybackProtocol.h"
+#import "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -149,7 +150,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - 播放控制
 
-@interface SJBaseVideoPlayer (PlayControl)
+@interface SJBaseVideoPlayer (PlayControl)<SJMediaPlaybackControllerDelegate>
+/// 管理对象: 播放控制
+@property (null_resettable, nonatomic, strong) id<SJMediaPlaybackController> playbackController;
 
 /// 资源
 /// - 使用资源URL及相关的视图信息进行初始化
@@ -355,7 +358,7 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
     SJDisablePlayerGestureTypes_DoubleTap = 1 << 1,
     SJDisablePlayerGestureTypes_Pan = 1 << 2,
     SJDisablePlayerGestureTypes_Pinch = 1 << 3,
-    SJDisablePlayerGestureTypes_All = 1 << 4
+    SJDisablePlayerGestureTypes_All = SJDisablePlayerGestureTypes_SingleTap | SJDisablePlayerGestureTypes_DoubleTap | SJDisablePlayerGestureTypes_Pan | SJDisablePlayerGestureTypes_Pinch,
 };
 
 
