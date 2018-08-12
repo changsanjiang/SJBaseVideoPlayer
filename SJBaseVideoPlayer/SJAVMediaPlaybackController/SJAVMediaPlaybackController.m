@@ -210,6 +210,7 @@ void setAVMediaPlayAsset(id<SJMediaModelProtocol> media, SJAVMediaPlayAsset *_Nu
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer playerItemStatusDidChange:(AVPlayerItemStatus)playerItemStatus {
     _isPreparing = NO;
     _prepareStatus = (SJMediaPlaybackPrepareStatus)playerItemStatus;
+    _error = _playAsset.playerItem.error;
     if ( playerItemStatus == AVPlayerItemStatusReadyToPlay ) {
         if ( self.registrar.state != SJVideoPlayerAppState_Background ) {
             ((SJAVPlayerLayerPresentView *)self.playerView).player = self.playAsset.player;
