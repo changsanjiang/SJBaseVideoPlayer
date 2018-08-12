@@ -801,7 +801,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ( _playbackController ) return _playbackController;
     _playbackController = [SJAVMediaPlaybackController new];
     _playbackController.delegate = self;
-    _playbackController.playerView.frame = _presentView.bounds;
+    _playbackController.playerView.frame = self.presentView.bounds;
     _playbackController.playerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [_presentView insertSubview:_playbackController.playerView atIndex:0];
     [self _needUpdatePlaybackControllerProperties];
