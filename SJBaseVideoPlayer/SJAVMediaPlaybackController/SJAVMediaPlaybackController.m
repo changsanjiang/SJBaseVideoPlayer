@@ -123,6 +123,7 @@ NS_ASSUME_NONNULL_BEGIN
     _playAssetObserver = nil;
     _playAsset = nil;
     _error = nil;
+    _prepareStatus = SJMediaPlaybackPrepareStatusUnknown;
     _media = media;
 }
 
@@ -210,7 +211,6 @@ void setAVMediaPlayAsset(id<SJMediaModelProtocol> media, SJAVMediaPlayAsset *_Nu
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer playerItemStatusDidChange:(AVPlayerItemStatus)playerItemStatus {
     _isPreparing = NO;
     _prepareStatus = (SJMediaPlaybackPrepareStatus)playerItemStatus;
-    _error = _playAsset.playerItem.error;
     if ( playerItemStatus == AVPlayerItemStatusReadyToPlay ) {
         if ( self.registrar.state != SJVideoPlayerAppState_Background ) {
             ((SJAVPlayerLayerPresentView *)self.playerView).player = self.playAsset.player;
@@ -234,9 +234,7 @@ void setAVMediaPlayAsset(id<SJMediaModelProtocol> media, SJAVMediaPlayAsset *_Nu
         [self.delegate playbackController:self prepareToPlayStatusDidChange:_prepareStatus];
     }
 }
-- (void)assetLoadIsCompletedForObserver:(SJAVMediaPlayAssetPropertiesObserver *)observer {
-
-}
+- (void)assetLoadIsCompletedForObserver:(SJAVMediaPlayAssetPropertiesObserver *)observer { /* nothing */ }
 - (void)playDidToEndForObserver:(SJAVMediaPlayAssetPropertiesObserver *)observer {
     if ( [self.delegate respondsToSelector:@selector(mediaDidPlayToEndForPlaybackController:)] ) {
         [self.delegate mediaDidPlayToEndForPlaybackController:self];

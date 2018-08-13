@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL mute;
 
 @property (nonatomic, readonly) SJMediaPlaybackPrepareStatus prepareStatus;
-@property (nonatomic, strong, nullable) NSError *error;
+@property (nonatomic, strong, readonly, nullable) NSError *error;
 - (void)prepareToPlay;
 - (void)play;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;

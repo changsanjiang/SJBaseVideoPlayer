@@ -10,7 +10,6 @@ s.platform     = :ios, '8.0'
 s.source       = { :git => 'https://gitee.com/changsanjiang/SJBaseVideoPlayer.git', :tag => "v#{s.version}" }
 s.frameworks  = "UIKit", "AVFoundation"
 s.requires_arc = true
-s.dependency 'SJUIFactory'
 s.dependency 'Masonry'
 s.dependency 'SJObserverHelper'
 s.dependency 'Reachability'

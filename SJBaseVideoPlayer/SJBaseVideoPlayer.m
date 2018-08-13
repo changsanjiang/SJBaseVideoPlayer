@@ -800,15 +800,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (id<SJMediaPlaybackController>)playbackController {
     if ( _playbackController ) return _playbackController;
     _playbackController = [SJAVMediaPlaybackController new];
-    _playbackController.delegate = self;
-    _playbackController.playerView.frame = self.presentView.bounds;
-    _playbackController.playerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [_presentView insertSubview:_playbackController.playerView atIndex:0];
     [self _needUpdatePlaybackControllerProperties];
     return _playbackController;
 }
 
 - (void)_needUpdatePlaybackControllerProperties {
+    _playbackController.delegate = self;
+    if ( _playbackController.playerView.superview != self.presentView ) {
+        _playbackController.playerView.frame = self.presentView.bounds;
+        _playbackController.playerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [_presentView insertSubview:_playbackController.playerView atIndex:0];
+    }
     if ( _playbackController.rate != self.rate ) _playbackController.rate = self.rate;
     if ( _playbackController.pauseWhenAppDidEnterBackground != self.pauseWhenAppDidEnterBackground ) _playbackController.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
     if ( _playbackController.mute != self.mute ) _playbackController.mute = self.mute;
