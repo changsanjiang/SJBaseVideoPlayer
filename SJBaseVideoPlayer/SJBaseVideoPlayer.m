@@ -325,23 +325,27 @@ NS_ASSUME_NONNULL_BEGIN
     }
 #pragma clang diagnostic pop
     
-    
     __weak typeof(self) _self = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( [self playStatus_isUnknown] || [self playStatus_isPrepare] ) {
-            if ( !self.URLAsset.otherMedia ) {
+    if ( [self playStatus_isUnknown] || [self playStatus_isPrepare] ) {
+        if ( !self.URLAsset.otherMedia ) {
+            dispatch_async(dispatch_get_main_queue(), ^{
                 [UIView animateWithDuration:0.4 animations:^{
                     [self.presentView showPlaceholder];
                 }];
-            }
+            });
         }
-        else if ( [self playStatus_isReadyToPlay] ) {
+    }
+    else if ( [self playStatus_isReadyToPlay] ) {
+        dispatch_async(dispatch_get_main_queue(), ^{
             [UIView animateWithDuration:0.4 animations:^{
                 [self.presentView hiddenPlaceholder];
             }];
-        }
+        });
+    }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:statusDidChanged:)] ) {
             [self.controlLayerDelegate videoPlayer:self statusDidChanged:playStatus];
         }
