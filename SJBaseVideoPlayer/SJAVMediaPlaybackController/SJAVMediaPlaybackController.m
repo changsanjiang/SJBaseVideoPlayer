@@ -132,6 +132,12 @@ NS_ASSUME_NONNULL_BEGIN
     _media = media;
 }
 
+- (void)setMute:(BOOL)mute {
+    if ( mute == _mute ) return;
+    _mute = mute;
+    _playAsset.player.muted = mute;
+}
+
 - (void)setRate:(float)rate {
     _rate = rate;
     _playAsset.player.rate = self.rate;
