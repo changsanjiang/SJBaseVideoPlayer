@@ -96,6 +96,7 @@ NS_ASSUME_NONNULL_BEGIN
 #ifdef DEBUG
     NSLog(@"%d - %s", (int)__LINE__, __func__);
 #endif
+    [_playerView removeFromSuperview];
     [self _cancelOperations];
 }
 
@@ -273,10 +274,11 @@ void setAVMediaPlayAsset(id<SJMediaModelProtocol> media, SJAVMediaPlayAsset *_Nu
     [_playAsset.player pause];
 }
 - (void)stop {
-    if ( !_playAsset.isOtherAsset ) {
+    [_playAsset.player pause];
+    
+    if ( !self.media.otherMedia ) {
         [((SJAVPlayerLayerPresentView *)self.playerView).player replaceCurrentItemWithPlayerItem:nil];
         ((SJAVPlayerLayerPresentView *)self.playerView).player = nil;
-        [_playAsset.player pause];
     }
 
     [self _cancelOperations];
