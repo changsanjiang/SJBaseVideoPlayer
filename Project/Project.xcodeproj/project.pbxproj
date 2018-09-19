@@ -49,6 +49,7 @@
 		A61B6C0021201A9B0094B5BC /* UINavigationController+SJExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6BDB21201A9B0094B5BC /* UINavigationController+SJExtension.m */; };
 		A61B6C0721202C270094B5BC /* UIView+SJVideoPlayerAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6C0621202C270094B5BC /* UIView+SJVideoPlayerAdd.m */; };
 		A61B6C0A21202D300094B5BC /* SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6C0921202D300094B5BC /* SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.m */; };
+		A640CDCC2152BBEC0018E08A /* SJVCRotationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A640CDCA2152BBEC0018E08A /* SJVCRotationManager.m */; };
 		C72090F66CE012968A1699AF /* libPods-Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3783465EF81E7A5838D5F3FF /* libPods-Project.a */; };
 /* End PBXBuildFile section */
 
@@ -139,6 +140,9 @@
 		A61B6C0621202C270094B5BC /* UIView+SJVideoPlayerAdd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+SJVideoPlayerAdd.m"; sourceTree = "<group>"; };
 		A61B6C0821202D300094B5BC /* SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h"; sourceTree = "<group>"; };
 		A61B6C0921202D300094B5BC /* SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.m"; sourceTree = "<group>"; };
+		A640CDC92152BBE10018E08A /* SJRotationManagerProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SJRotationManagerProtocol.h; path = ../../../SJVideoPlayer/SJVideoPlayerProject/Pods/SJBaseVideoPlayer/SJBaseVideoPlayer/Header/SJRotationManagerProtocol.h; sourceTree = "<group>"; };
+		A640CDCA2152BBEC0018E08A /* SJVCRotationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SJVCRotationManager.m; path = ../../../SJVideoPlayer/SJVideoPlayerProject/Pods/SJBaseVideoPlayer/SJBaseVideoPlayer/SJRotationManager/SJVCRotationManager.m; sourceTree = "<group>"; };
+		A640CDCB2152BBEC0018E08A /* SJVCRotationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SJVCRotationManager.h; path = ../../../SJVideoPlayer/SJVideoPlayerProject/Pods/SJBaseVideoPlayer/SJBaseVideoPlayer/SJRotationManager/SJVCRotationManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -270,6 +274,8 @@
 		A61B6BD421201A9B0094B5BC /* SJRotationManager */ = {
 			isa = PBXGroup;
 			children = (
+				A640CDCB2152BBEC0018E08A /* SJVCRotationManager.h */,
+				A640CDCA2152BBEC0018E08A /* SJVCRotationManager.m */,
 				A61B6BD821201A9B0094B5BC /* SJRotationManager.h */,
 				A61B6BDA21201A9B0094B5BC /* SJRotationManager.m */,
 				A61B6BD721201A9B0094B5BC /* UINavigationController+SJExtension.h */,
@@ -285,6 +291,7 @@
 		A61B6BDE21201A9B0094B5BC /* Header */ = {
 			isa = PBXGroup;
 			children = (
+				A640CDC92152BBE10018E08A /* SJRotationManagerProtocol.h */,
 				A61B6BCE21201A9B0094B5BC /* SJMediaPlaybackProtocol.h */,
 				A61B6BE321201A9B0094B5BC /* SJNetworkStatus.h */,
 				A61B6BE121201A9B0094B5BC /* SJVideoPlayerControlLayerProtocol.h */,
@@ -486,6 +493,7 @@
 				A61B6BE521201A9B0094B5BC /* SJPrompt.m in Sources */,
 				A61B6C0021201A9B0094B5BC /* UINavigationController+SJExtension.m in Sources */,
 				77826BE9203E7427009D5F2C /* main.m in Sources */,
+				A640CDCC2152BBEC0018E08A /* SJVCRotationManager.m in Sources */,
 				A61B6BEE21201A9B0094B5BC /* SJBorderLineView.m in Sources */,
 				A61B6BFE21201A9B0094B5BC /* UITabBarController+SJExtension.m in Sources */,
 				A61B6BE421201A9B0094B5BC /* SJVideoPlayerPresentView.m in Sources */,

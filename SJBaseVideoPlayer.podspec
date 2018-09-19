@@ -41,6 +41,7 @@ end
 
 s.subspec 'SJRotationManager' do |ss|
     ss.source_files = 'SJBaseVideoPlayer/SJRotationManager/*.{h,m}'
+    ss.dependency 'SJBaseVideoPlayer/Header'
 end
 
 s.subspec 'SJVolBrigControl' do |ss|
