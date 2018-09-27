@@ -141,7 +141,7 @@
 		A61B6C0821202D300094B5BC /* SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h"; sourceTree = "<group>"; };
 		A61B6C0921202D300094B5BC /* SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.m"; sourceTree = "<group>"; };
 		A640CDC92152BBE10018E08A /* SJRotationManagerProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SJRotationManagerProtocol.h; path = ../../../SJVideoPlayer/SJVideoPlayerProject/Pods/SJBaseVideoPlayer/SJBaseVideoPlayer/Header/SJRotationManagerProtocol.h; sourceTree = "<group>"; };
-		A640CDCA2152BBEC0018E08A /* SJVCRotationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SJVCRotationManager.m; path = ../../../SJVideoPlayer/SJVideoPlayerProject/Pods/SJBaseVideoPlayer/SJBaseVideoPlayer/SJRotationManager/SJVCRotationManager.m; sourceTree = "<group>"; };
+		A640CDCA2152BBEC0018E08A /* SJVCRotationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJVCRotationManager.m; sourceTree = "<group>"; };
 		A640CDCB2152BBEC0018E08A /* SJVCRotationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SJVCRotationManager.h; path = ../../../SJVideoPlayer/SJVideoPlayerProject/Pods/SJBaseVideoPlayer/SJBaseVideoPlayer/SJRotationManager/SJVCRotationManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
