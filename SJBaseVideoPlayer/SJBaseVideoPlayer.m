@@ -46,6 +46,17 @@
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
+static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel) {
+    if ( playModel.isPlayInTableView || playModel.isPlayInCollectionView ) {
+        __kindof UIView *superview = playModel.playerSuperview;
+        while ( superview && ![superview isKindOfClass:[UIScrollView class]] ) {
+            superview = superview.superview;
+        }
+        return superview;
+    }
+    return nil;
+}
+
 
 /**
  管理类: 控制层显示与隐藏
@@ -377,11 +388,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)_considerShowOrHiddenPlaceholder {
     if ( [self playStatus_isUnknown] || [self playStatus_isPrepare] ) {
         if ( !self.URLAsset.otherMedia ) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [UIView animateWithDuration:0.4 animations:^{
+            if ( [NSThread.currentThread isMainThread] ) [self.presentView showPlaceholder];
+            else {
+                dispatch_async(dispatch_get_main_queue(), ^{
                     [self.presentView showPlaceholder];
-                }];
-            });
+                });
+            }
         }
     }
     else if ( [self playStatus_isPlaying] ) {
@@ -940,17 +952,9 @@ NS_ASSUME_NONNULL_BEGIN
     _URLAsset = URLAsset;
     
     // 维护当前播放的indexPath
-    if ( [URLAsset.playModel isKindOfClass:[SJUITableViewCellPlayModel class]] ) {
-        SJUITableViewCellPlayModel *playModel = (id)URLAsset.playModel;
-        if ( playModel.tableView.sj_enabledAutoplay ) {
-            playModel.tableView.sj_currentPlayingIndexPath = playModel.indexPath;
-        }
-    }
-    else if ( [URLAsset.playModel isKindOfClass:[SJUICollectionViewCellPlayModel class]] ) {
-        SJUICollectionViewCellPlayModel *playModel = (id)URLAsset.playModel;
-        if ( playModel.collectionView.sj_enabledAutoplay ) {
-            playModel.collectionView.sj_currentPlayingIndexPath = playModel.indexPath;
-        }
+    UIScrollView *scrollView = _getScrollViewOfPlayModel(URLAsset.playModel);
+    if ( scrollView.sj_enabledAutoplay ) {
+        scrollView.sj_currentPlayingIndexPath = [URLAsset.playModel performSelector:@selector(indexPath)];
     }
     
     self.playbackController.media = URLAsset;
@@ -964,7 +968,7 @@ NS_ASSUME_NONNULL_BEGIN
         self.playModelObserver = [[SJPlayModelPropertiesObserver alloc] initWithPlayModel:URLAsset.playModel];
         self.playModelObserver.delegate = (id)self;
         [self.playbackController prepareToPlay];
-        
+
         dispatch_async(dispatch_get_main_queue(), ^{
             if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
                 [self.controlLayerDelegate startLoading:self];
@@ -1036,22 +1040,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)_mediaDidPlayToEnd {
     if ( !self.vc_isDisappeared ) {
-        SJVideoPlayerURLAsset *URLAsset = self.URLAsset;
-        if ( [URLAsset.playModel isKindOfClass:[SJUITableViewCellPlayModel class]] ) {
-            SJUITableViewCellPlayModel *playModel = (id)URLAsset.playModel;
-            if ( playModel.tableView.sj_enabledAutoplay ) {
-                if ( self.playDidToEndExeBlock ) self.playDidToEndExeBlock(self);
-                [playModel.tableView sj_needPlayNextAsset];
-                return;
-            }
-        }
-        else if ( [URLAsset.playModel isKindOfClass:[SJUICollectionViewCellPlayModel class]] ) {
-            SJUICollectionViewCellPlayModel *playModel = (id)URLAsset.playModel;
-            if ( playModel.collectionView.sj_enabledAutoplay ) {
-                if ( self.playDidToEndExeBlock ) self.playDidToEndExeBlock(self);
-                [playModel.collectionView sj_needPlayNextAsset];
-                return;
-            }
+        UIScrollView *scrollView = _getScrollViewOfPlayModel(_URLAsset.playModel);
+        if ( scrollView.sj_enabledAutoplay ) {
+            if ( self.playDidToEndExeBlock ) self.playDidToEndExeBlock(self);
+            [scrollView sj_needPlayNextAsset];
+            return;
         }
     }
     
