@@ -45,6 +45,10 @@
 #import "Reachability.h"
 #endif
 
+#if __has_include(<SJFullscreenPopGesture/UINavigationController+SJVideoPlayerAdd.h>)
+#import <SJFullscreenPopGesture/UINavigationController+SJVideoPlayerAdd.h>
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel) {
     if ( playModel.isPlayInTableView || playModel.isPlayInCollectionView ) {
@@ -57,6 +61,16 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     return nil;
 }
 
+@interface SJPlayerView : UIView
+@property (nonatomic, copy, nullable) void(^willMoveToWindowExeBlock)(SJPlayerView *view, UIWindow *_Nullable window);
+@end
+
+@implementation SJPlayerView
+- (void)willMoveToWindow:(nullable UIWindow *)newWindow {
+    [super willMoveToWindow:newWindow];
+    if ( _willMoveToWindowExeBlock ) _willMoveToWindowExeBlock(self, newWindow);
+}
+@end
 
 /**
  管理类: 控制层显示与隐藏
@@ -221,6 +235,12 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 
 @property (nonatomic, strong, nullable) NSString *playStatusStr;
 
+@property (nonatomic) BOOL isTriggeringForPopGesture;
+
+/// 临时显示状态栏
+@property (nonatomic) BOOL tmpShowStatusBar;
+/// 临时隐藏状态栏
+@property (nonatomic) BOOL tmpHiddenStatusBar;
 @end
 
 @implementation SJBaseVideoPlayer {
@@ -246,7 +266,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 }
 
 + (NSString *)version {
-    return @"1.4.9";
+    return @"1.6.1";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -278,6 +298,41 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     [self reachabilityObserver];
     [self addInterceptTapGR];
     return self;
+}
+
+static NSString *_kGestureState = @"state";
+- (void)_observeFullscreenPopGestureState {
+    UINavigationController *nav = self.atViewController.navigationController;
+    if ( !nav ) return;
+    UIGestureRecognizer *gesture = nil;
+#if __has_include(<SJFullscreenPopGesture/UINavigationController+SJVideoPlayerAdd.h>)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+    if ( nav.sj_gestureType == SJFullscreenPopGestureType_Full ) {
+        if ( [nav respondsToSelector:@selector(SJ_pan)] ) {
+            gesture = [nav performSelector:@selector(SJ_pan)];
+        }
+    }
+    else {
+        if ( [nav respondsToSelector:@selector(SJ_edgePan)] ) {
+            gesture = [nav performSelector:@selector(SJ_edgePan)];
+        }
+    }
+#pragma clang diagnostic pop
+#else
+    gesture = nav.interactivePopGestureRecognizer;
+#endif
+    if ( !gesture ) return;
+    
+    [gesture sj_addObserver:self forKeyPath:_kGestureState context:&_kGestureState];
+}
+
+- (void)observeValueForKeyPath:(nullable NSString *)keyPath ofObject:(nullable id)object change:(nullable NSDictionary<NSKeyValueChangeKey,id> *)change context:(nullable void *)context {
+    if ( context == &_kGestureState ) {
+        UIGestureRecognizer *g = object;
+        _isTriggeringForPopGesture = (g.state == UIGestureRecognizerStateChanged);
+    }
 }
 
 - (void)dealloc {
@@ -363,7 +418,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     
     // install
     [self.controlContentView addSubview:_controlLayerDataSource.controlView];
-    [_controlLayerDataSource.controlView mas_makeConstraints:^(MASConstraintMaker *make) {
+    [_controlLayerDataSource.controlView mas_remakeConstraints:^(MASConstraintMaker *make) {
         make.edges.offset(0);
     }];
     
@@ -426,16 +481,26 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 #pragma mark -
 - (UIView *)view {
     if ( _view ) return _view;
-    _view = [UIView new];
+    _view = [SJPlayerView new];
     _view.backgroundColor = [UIColor blackColor];
     [_view addSubview:self.presentView];
     [_presentView addSubview:self.controlContentView];
     _presentView.autoresizingMask = _controlContentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    __weak typeof(self) _self = self;
+    [(SJPlayerView *)_view setWillMoveToWindowExeBlock:^(SJPlayerView * _Nonnull view, UIWindow * _Nullable window) {
+        if ( !window ) return;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(_self) self = _self;
+            if ( !self ) return ;
+            [self _observeFullscreenPopGestureState];
+        });
+    }];
     return _view;
 }
 
 - (void)addInterceptTapGR {
     UITapGestureRecognizer *intercept = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleInterceptTapGR:)];
+
     [self.view addGestureRecognizer:intercept];
 }
 
@@ -482,6 +547,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
         if ( self.registrar.state == SJVideoPlayerAppState_ResignActive ) return NO;
         if ( self.useFitOnScreenAndDisableRotation ) return NO;
         if ( self.vc_isDisappeared ) return NO;
+        if ( self.isTriggeringForPopGesture ) return NO;
         return YES;
     };
     rotationManager.delegate = self;
@@ -858,6 +924,156 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 
 @end
 
+
+@interface _SJViewFlipTransitionServer : NSObject<CAAnimationDelegate>
+- (instancetype)initWithView:(__weak UIView *)view;
+@property (nonatomic) NSTimeInterval flipTransitionDuration;
+@property (nonatomic) SJViewFlipTransition direction;
+@property (nonatomic, readonly) BOOL isFlipTransitioning;
+- (void)setDirection:(SJViewFlipTransition)direction animated:(BOOL)animated;
+- (void)setDirection:(SJViewFlipTransition)direction animated:(BOOL)animated completionHandler:(void(^_Nullable)(__kindof _SJViewFlipTransitionServer *s))completionHandler;
+
+@property (nonatomic, copy, nullable) void(^flipTransitionDidStartExeBlock)(__kindof _SJViewFlipTransitionServer *s);
+@property (nonatomic, copy, nullable) void(^flipTransitionDidStopExeBlock)(__kindof _SJViewFlipTransitionServer *s);
+@end
+
+@implementation _SJViewFlipTransitionServer {
+    __weak UIView *_view;
+    void(^_Nullable _completionHandler)(__kindof _SJViewFlipTransitionServer *s);
+}
+- (instancetype)initWithView:(__weak UIView *)view {
+    self = [super init];
+    if ( !self ) return nil;
+    _view = view;
+    _flipTransitionDuration = 1.0;
+    return self;
+}
+
+- (void)setDirection:(SJViewFlipTransition)direction {
+    [self setDirection:direction animated:YES];
+}
+
+- (void)setDirection:(SJViewFlipTransition)direction animated:(BOOL)animated {
+    [self setDirection:direction animated:animated completionHandler:nil];
+}
+
+- (void)setDirection:(SJViewFlipTransition)direction animated:(BOOL)animated completionHandler:(void(^_Nullable)(__kindof _SJViewFlipTransitionServer *s))completionHandler {
+    if ( direction == _direction ) return;
+    if ( _isFlipTransitioning ) return;
+    _direction = direction;
+    
+    CATransform3D transform = CATransform3DIdentity;
+    switch ( direction ) {
+        case SJViewFlipTransition_Identity: {
+            transform = CATransform3DIdentity;
+        }
+            break;
+        case SJViewFlipTransition_Horizontally: {
+            transform = CATransform3DConcat(CATransform3DMakeRotation(M_PI, 0, 1, 0), CATransform3DMakeTranslation(0, 0, -10000));
+        }
+            break;
+    }
+
+    CABasicAnimation *rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform"];
+    rotationAnimation.fromValue = [NSValue valueWithCATransform3D:_view.layer.transform];
+    rotationAnimation.toValue = [NSValue valueWithCATransform3D:transform];
+    rotationAnimation.duration = _flipTransitionDuration;
+    rotationAnimation.cumulative = YES;
+    rotationAnimation.delegate = self;
+    [_view.layer addAnimation:rotationAnimation forKey:nil];
+    _view.layer.transform = transform;
+    _isFlipTransitioning = YES;
+    _completionHandler = completionHandler;
+}
+
+- (void)animationDidStart:(CAAnimation *)anim {
+    _isFlipTransitioning = YES;
+    if ( _flipTransitionDidStartExeBlock ) _flipTransitionDidStartExeBlock(self);
+}
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    _isFlipTransitioning = NO;
+    
+    if ( _completionHandler ) {
+        _completionHandler(self);
+        _completionHandler = nil;
+    }
+    if ( _flipTransitionDidStopExeBlock ) _flipTransitionDidStopExeBlock(self);
+}
+@end
+
+
+@implementation SJBaseVideoPlayer (VideoFlipTransition)
+
+- (_SJViewFlipTransitionServer *)flipTransitionServer {
+    _SJViewFlipTransitionServer *s = objc_getAssociatedObject(self, _cmd);
+    if ( !s ) {
+        s = [[_SJViewFlipTransitionServer alloc] initWithView:_playbackController.playerView];
+        objc_setAssociatedObject(self, _cmd, s, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return s;
+}
+
+- (SJViewFlipTransition)flipTransition {
+    return self.flipTransitionServer.direction;
+}
+
+- (void)setFlipTransition:(SJViewFlipTransition)t {
+    self.flipTransitionServer.direction = t;
+}
+- (void)setFlipTransition:(SJViewFlipTransition)t animated:(BOOL)animated {
+    [self.flipTransitionServer setDirection:t animated:animated];
+}
+- (void)setFlipTransition:(SJViewFlipTransition)t animated:(BOOL)animated completionHandler:(void(^_Nullable)(__kindof SJBaseVideoPlayer *player))completionHandler {
+    __weak typeof(self) _self = self;
+    [self.flipTransitionServer setDirection:t animated:animated completionHandler:^(__kindof _SJViewFlipTransitionServer * _Nonnull s) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( completionHandler ) completionHandler(self);
+    }];
+}
+- (BOOL)isFlipTransitioning {
+    return self.flipTransitionServer.isFlipTransitioning;
+}
+
+- (void)setFlipTransitionDidStartExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))block {
+    objc_setAssociatedObject(self, @selector(flipTransitionDidStartExeBlock), block, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    __weak typeof(self) _self = self;
+    self.flipTransitionServer.flipTransitionDidStartExeBlock = ^(__kindof _SJViewFlipTransitionServer * _Nonnull s) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( block ) block(self);
+    };
+}
+
+- (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))flipTransitionDidStartExeBlock {
+    return objc_getAssociatedObject(self, _cmd);
+}
+
+- (void)setFlipTransitionDidStopExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))block {
+    objc_setAssociatedObject(self, @selector(flipTransitionDidStopExeBlock), block, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    __weak typeof(self) _self = self;
+    self.flipTransitionServer.flipTransitionDidStopExeBlock = ^(__kindof _SJViewFlipTransitionServer * _Nonnull s) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( block ) block(self);
+    };
+}
+
+- (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))flipTransitionDidStopExeBlock {
+    return objc_getAssociatedObject(self, _cmd);
+}
+
+- (void)setFlipTransitionDuration:(NSTimeInterval)flipTransitionDuration {
+    self.flipTransitionServer.flipTransitionDuration = flipTransitionDuration;
+}
+
+- (NSTimeInterval)flipTransitionDuration {
+    return self.flipTransitionServer.flipTransitionDuration;
+}
+@end
+
+
 #pragma mark - Network
 
 @implementation SJBaseVideoPlayer (Network)
@@ -1087,6 +1303,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     else {
         [self.controlLayerDataSource.controlView removeGestureRecognizer:self.lockStateTapGesture];
     }
+    
     if      ( lockedScreen && [self.controlLayerDelegate respondsToSelector:@selector(lockedVideoPlayer:)] ) {
         [self.controlLayerDelegate lockedVideoPlayer:self];
     }
@@ -1303,6 +1520,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 }
 
 - (void)setRate:(float)rate {
+    if ( self.canPlayAnAsset && !self.canPlayAnAsset(self) ) return;
     if ( _rate == rate ) return;
     _rate = rate;
     _playbackController.rate = rate;
@@ -1314,6 +1532,8 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     if ( self.rateChanged ) self.rateChanged(self);
     
     if ( [self playStatus_isInactivity_ReasonPlayEnd] ) [self replay];
+    
+    if ( [self playStatus_isPaused] ) [self play];
 }
 
 - (float)rate {
@@ -1360,6 +1580,9 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     if ( ![self playStatus_isPaused_ReasonPause] ) [self pause];
 }
 - (BOOL)vc_prefersStatusBarHidden {
+    if ( _tmpShowStatusBar ) return NO;
+    if ( _tmpHiddenStatusBar ) return YES;
+    if ( self.lockedScreen ) return YES;
     if ( self.rotationManager.transitioning ) {
         if ( self.enableControlLayerDisplayController && self.controlLayerAppeared ) return NO;
         return YES;
@@ -1379,6 +1602,24 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 }
 - (BOOL)vc_isDisappeared {
     return [objc_getAssociatedObject(self, _cmd) boolValue];
+}
+
+- (void)needShowStatusBar {
+    if ( _tmpShowStatusBar ) return;
+    _tmpShowStatusBar = YES;
+    [self.atViewController setNeedsStatusBarAppearanceUpdate];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.tmpShowStatusBar = NO;
+    });
+}
+
+- (void)needHiddenStatusBar {
+    if ( _tmpHiddenStatusBar ) return;
+    _tmpHiddenStatusBar = YES;
+    [self.atViewController setNeedsStatusBarAppearanceUpdate];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.tmpHiddenStatusBar = NO;
+    });
 }
 @end
 
@@ -1993,9 +2234,10 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     _controlHiddenTimer.exeBlock = ^(SJTimerControl * _Nonnull control) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
+        if ( !self.isEnabled ) return;
         // 如果控制层显示, 当达到隐藏的条件, `timer`将控制层隐藏. 否则, 清除`timer`.
         if ( self.controlLayerAppearedState &&
-            self.videoPlayer.controlLayerDataSource.controlLayerDisappearCondition )
+             self.videoPlayer.controlLayerDataSource.controlLayerDisappearCondition )
             [self layerDisappear];
         else [control clear];
     };
@@ -2004,7 +2246,6 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 
 #pragma mark -
 - (void)_changing:(BOOL)status {
-    if ( !self.isEnabled ) return;
     if ( !self.videoPlayer.controlLayerDataSource ) return;
     self.controlLayerAppearedState = status;
     if ( status && [self.videoPlayer.controlLayerDelegate respondsToSelector:@selector(controlLayerNeedAppear:)] ) {

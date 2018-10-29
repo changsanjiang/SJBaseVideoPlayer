@@ -119,6 +119,30 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
+#pragma mark - 镜像翻转
+
+typedef enum : NSUInteger {
+    /// 恢复
+    SJViewFlipTransition_Identity,
+    /// 水平翻转
+    SJViewFlipTransition_Horizontally,
+} SJViewFlipTransition;
+
+/// 镜像翻转
+@interface SJBaseVideoPlayer (VideoFlipTransition)
+
+@property (nonatomic, readonly) BOOL isFlipTransitioning;
+@property (nonatomic) NSTimeInterval flipTransitionDuration; // default is 1.0
+@property (nonatomic) SJViewFlipTransition flipTransition; // Animated.
+- (void)setFlipTransition:(SJViewFlipTransition)t animated:(BOOL)animated;
+- (void)setFlipTransition:(SJViewFlipTransition)t animated:(BOOL)animated completionHandler:(void(^_Nullable)(__kindof SJBaseVideoPlayer *player))completionHandler;
+
+@property (nonatomic, copy, nullable) void(^flipTransitionDidStartExeBlock)(__kindof SJBaseVideoPlayer *player);
+@property (nonatomic, copy, nullable) void(^flipTransitionDidStopExeBlock)(__kindof SJBaseVideoPlayer *player);
+
+@end
+
+
 #pragma mark - 时间
 
 @interface SJBaseVideoPlayer (Time)
@@ -281,6 +305,15 @@ NS_ASSUME_NONNULL_BEGIN
 /// 当调用`vc_viewDidAppear`时, 将设置为NO
 @property (nonatomic) BOOL vc_isDisappeared;
 
+
+/// v1.6.0 新增
+/// 临时显示状态栏
+/// Animatable. 可动画的
+- (void)needShowStatusBar;
+
+/// 临时隐藏状态栏
+/// Animatable. 可动画的
+- (void)needHiddenStatusBar;
 @end
 
 
@@ -451,7 +484,6 @@ typedef NS_ENUM(NSUInteger, SJDisablePlayerGestureTypes) {
  - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;
  */
 - (void)controlLayerNeedDisappear;
-
 @end
 
 
