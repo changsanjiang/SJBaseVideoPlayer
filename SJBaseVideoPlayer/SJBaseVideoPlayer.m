@@ -297,6 +297,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     [self gestureControl];
     [self reachabilityObserver];
     [self addInterceptTapGR];
+    [self _considerShowOrHiddenPlaceholder];
     return self;
 }
 
@@ -460,13 +461,12 @@ static NSString *_kGestureState = @"state";
     }
 }
 
-- (void)setPlaceholder:(nullable UIImage *)placeholder {
-    self.presentView.placeholder = placeholder;
-    [self _considerShowOrHiddenPlaceholder];
-}
-
-- (nullable UIImage *)placeholder {
-    return self.presentView.placeholder;
+///
+/// Thanks @chjsun
+/// https://github.com/changsanjiang/SJVideoPlayer/issues/42
+///
+- (UIImageView *)placeholderImageView {
+    return self.presentView.placeholderImageView;
 }
 
 - (void)setVideoGravity:(AVLayerVideoGravity)videoGravity {
@@ -2360,6 +2360,15 @@ static NSString *_kGestureState = @"state";
 - (nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))rotatedScreen  __deprecated_msg("use `viewDidRotateExeBlock`") {
     return self.viewDidRotateExeBlock;
 }
+
+- (void)setPlaceholder:(nullable UIImage *)placeholder __deprecated_msg("use `player.placeholderImageView`") {
+    self.placeholderImageView.image = placeholder;
+}
+
+- (nullable UIImage *)placeholder __deprecated_msg("use `player.placeholderImageView`") {
+    return self.placeholderImageView.image;
+}
+
 @end
 
 
