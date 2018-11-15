@@ -27,7 +27,6 @@
 		A61B6BEA21201A9B0094B5BC /* SJBaseVideoPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6BA721201A9B0094B5BC /* SJBaseVideoPlayer.m */; };
 		A61B6BEB21201A9B0094B5BC /* SJPlayerGestureControl.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6BAA21201A9B0094B5BC /* SJPlayerGestureControl.m */; };
 		A61B6BEC21201A9B0094B5BC /* SJTimerControl.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6BAE21201A9B0094B5BC /* SJTimerControl.m */; };
-		A61B6BED21201A9B0094B5BC /* SJMediaDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6BB121201A9B0094B5BC /* SJMediaDownloader.m */; };
 		A61B6BEE21201A9B0094B5BC /* SJBorderLineView.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6BB421201A9B0094B5BC /* SJBorderLineView.m */; };
 		A61B6BEF21201A9B0094B5BC /* SJVideoPlayerTipsView.m in Sources */ = {isa = PBXBuildFile; fileRef = A61B6BB621201A9B0094B5BC /* SJVideoPlayerTipsView.m */; };
 		A61B6BF021201A9B0094B5BC /* SJVolBrigResource.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A61B6BB821201A9B0094B5BC /* SJVolBrigResource.bundle */; };
@@ -90,8 +89,6 @@
 		A61B6BAB21201A9B0094B5BC /* SJPlayerGestureControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJPlayerGestureControl.h; sourceTree = "<group>"; };
 		A61B6BAD21201A9B0094B5BC /* SJTimerControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJTimerControl.h; sourceTree = "<group>"; };
 		A61B6BAE21201A9B0094B5BC /* SJTimerControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJTimerControl.m; sourceTree = "<group>"; };
-		A61B6BB021201A9B0094B5BC /* SJMediaDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJMediaDownloader.h; sourceTree = "<group>"; };
-		A61B6BB121201A9B0094B5BC /* SJMediaDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJMediaDownloader.m; sourceTree = "<group>"; };
 		A61B6BB321201A9B0094B5BC /* SJVideoPlayerTipsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJVideoPlayerTipsView.h; sourceTree = "<group>"; };
 		A61B6BB421201A9B0094B5BC /* SJBorderLineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJBorderLineView.m; sourceTree = "<group>"; };
 		A61B6BB521201A9B0094B5BC /* SJVolBrigControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJVolBrigControl.h; sourceTree = "<group>"; };
@@ -340,8 +337,6 @@
 				A61B6BA621201A9B0094B5BC /* SJVideoPlayerRegistrar.m */,
 				A61B6BAD21201A9B0094B5BC /* SJTimerControl.h */,
 				A61B6BAE21201A9B0094B5BC /* SJTimerControl.m */,
-				A61B6BB021201A9B0094B5BC /* SJMediaDownloader.h */,
-				A61B6BB121201A9B0094B5BC /* SJMediaDownloader.m */,
 				A61B6BA121201A9B0094B5BC /* NSTimer+SJAssetAdd.h */,
 				A61B6BA221201A9B0094B5BC /* NSTimer+SJAssetAdd.m */,
 			);
@@ -502,7 +497,6 @@
 				A61B6BE721201A9B0094B5BC /* NSTimer+SJAssetAdd.m in Sources */,
 				77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */,
 				A61B6BFB21201A9B0094B5BC /* UIScrollView+ListViewAutoplaySJAdd.m in Sources */,
-				A61B6BED21201A9B0094B5BC /* SJMediaDownloader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
