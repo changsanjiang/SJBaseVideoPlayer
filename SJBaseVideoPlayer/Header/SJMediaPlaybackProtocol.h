@@ -16,10 +16,17 @@
 
 @protocol SJMediaPlaybackControllerDelegate, SJMediaModelProtocol;
 
-typedef NS_ENUM(NSUInteger, SJMediaPlaybackPrepareStatus) {
+typedef NS_ENUM(NSInteger, SJMediaPlaybackPrepareStatus) {
     SJMediaPlaybackPrepareStatusUnknown = AVPlayerItemStatusUnknown,
     SJMediaPlaybackPrepareStatusReadyToPlay =  AVPlayerItemStatusReadyToPlay,
     SJMediaPlaybackPrepareStatusFailed = AVPlayerItemStatusFailed,
+};
+
+typedef NS_ENUM(NSInteger, SJMediaPlaybackSwitchDefinitionStatus) {
+    SJMediaPlaybackSwitchDefinitionStatusUnknown,
+    SJMediaPlaybackSwitchDefinitionStatusSwitching,
+    SJMediaPlaybackSwitchDefinitionStatusFinished,
+    SJMediaPlaybackSwitchDefinitionStatusFailed,
 };
 
 typedef AVLayerVideoGravity SJVideoGravity;
@@ -50,13 +57,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pause;
 - (void)stop;
 - (void)seekToTime:(NSTimeInterval)secs completionHandler:(void (^ __nullable)(BOOL finished))completionHandler;
-
 - (nullable UIImage *)screenshot;
 
+- (void)switchVideoDefinitionByURL:(NSURL *)URL;
 @optional
 - (void)cancelPendingSeeks;
 @end
-
 
 /// screenshot
 @protocol SJMediaPlaybackScreenshotController
@@ -109,6 +115,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)playbackController:(id<SJMediaPlaybackController>)controller presentationSizeDidChange:(CGSize)presentationSize;
 
+- (void)playbackController:(id<SJMediaPlaybackController>)controller switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;
+
 @optional
 - (void)pausedForAppDidEnterBackgroundOfPlaybackController:(id<SJMediaPlaybackController>)controller;
 
@@ -118,7 +126,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// media
 @protocol SJMediaModelProtocol
 /// played by URL
-@property (nonatomic, strong, readonly, nullable) NSURL *mediaURL;
+@property (nonatomic, strong, nullable) NSURL *mediaURL;
 
 /// played by other media
 @property (nonatomic, weak, readonly, nullable) id<SJMediaModelProtocol> otherMedia;

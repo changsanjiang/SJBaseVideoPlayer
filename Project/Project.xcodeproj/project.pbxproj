@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		774125DA21AD1A100033D8CD /* SJAVMediaPresentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 774125D821AD1A0F0033D8CD /* SJAVMediaPresentView.m */; };
 		77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDA203E7427009D5F2C /* AppDelegate.m */; };
 		77826BDE203E7427009D5F2C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDD203E7427009D5F2C /* ViewController.m */; };
 		77826BE1203E7427009D5F2C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 77826BDF203E7427009D5F2C /* Main.storyboard */; };
@@ -55,6 +56,8 @@
 /* Begin PBXFileReference section */
 		04C647CC6AA139DA4312FCCE /* Pods-Project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.release.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.release.xcconfig"; sourceTree = "<group>"; };
 		3783465EF81E7A5838D5F3FF /* libPods-Project.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Project.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		774125D821AD1A0F0033D8CD /* SJAVMediaPresentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SJAVMediaPresentView.m; sourceTree = "<group>"; };
+		774125D921AD1A100033D8CD /* SJAVMediaPresentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SJAVMediaPresentView.h; sourceTree = "<group>"; };
 		77826BD6203E7427009D5F2C /* Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77826BD9203E7427009D5F2C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		77826BDA203E7427009D5F2C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -320,6 +323,8 @@
 				A61B6BBE21201A9B0094B5BC /* SJAVMediaPlayAsset+SJAVMediaPlaybackControllerAdd.h */,
 				A61B6BC721201A9B0094B5BC /* SJAVMediaPlayAsset+SJAVMediaPlaybackControllerAdd.m */,
 				A61B6BC621201A9B0094B5BC /* SJAVMediaPlayAssetProtocol.h */,
+				774125D921AD1A100033D8CD /* SJAVMediaPresentView.h */,
+				774125D821AD1A0F0033D8CD /* SJAVMediaPresentView.m */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -488,6 +493,7 @@
 				A61B6BE521201A9B0094B5BC /* SJPrompt.m in Sources */,
 				A61B6C0021201A9B0094B5BC /* UINavigationController+SJExtension.m in Sources */,
 				77826BE9203E7427009D5F2C /* main.m in Sources */,
+				774125DA21AD1A100033D8CD /* SJAVMediaPresentView.m in Sources */,
 				A640CDCC2152BBEC0018E08A /* SJVCRotationManager.m in Sources */,
 				A61B6BEE21201A9B0094B5BC /* SJBorderLineView.m in Sources */,
 				A61B6BFE21201A9B0094B5BC /* UITabBarController+SJExtension.m in Sources */,

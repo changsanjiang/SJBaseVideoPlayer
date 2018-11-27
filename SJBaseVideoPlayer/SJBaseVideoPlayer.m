@@ -254,11 +254,11 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
     SJVideoPlayerRegistrar *_registrar;
     _SJReachabilityObserver *_reachabilityObserver;
     UITapGestureRecognizer *_lockStateTapGesture;
-    SJVideoPlayerURLAsset *_URLAsset;
     CGFloat _rate;
     SJVideoPlayerPlayStatus _playStatus;
     SJVideoPlayerPausedReason _pausedReason;
     SJVideoPlayerInactivityReason _inactivityReason;
+    SJVideoPlayerURLAsset *_URLAsset;
 }
 
 + (instancetype)player {
@@ -266,7 +266,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 }
 
 + (NSString *)version {
-    return @"1.6.3";
+    return @"1.7.0";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -282,10 +282,13 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 - (instancetype)init {
     self = [super init];
     if ( !self ) return nil;
-    NSError *error = nil;
-    // 使播放器在静音状态下也能放出声音
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error];
-    if ( error ) NSLog(@"%@", error.userInfo);
+    if ( AVAudioSession.sharedInstance.category != AVAudioSessionCategoryPlayback ||
+         AVAudioSession.sharedInstance.category != AVAudioSessionCategoryPlayAndRecord ) {
+        NSError *error = nil;
+        // 使播放器在静音状态下也能放出声音
+        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error];
+        if ( error ) NSLog(@"%@", error.userInfo);
+    }
     self.rate = 1;
     self.autoPlay = YES; // 是否自动播放, 默认yes
     self.pauseWhenAppDidEnterBackground = YES; // App进入后台是否暂停播放, 默认yes
@@ -923,6 +926,8 @@ static NSString *_kGestureState = @"state";
 @end
 
 
+#pragma mark -
+
 @interface _SJViewFlipTransitionServer : NSObject<CAAnimationDelegate>
 - (instancetype)initWithView:(__weak UIView *)view;
 @property (nonatomic) NSTimeInterval flipTransitionDuration;
@@ -1087,6 +1092,10 @@ static NSString *_kGestureState = @"state";
 #pragma mark - 控制
 @implementation SJBaseVideoPlayer (PlayControl)
 
+- (void)switchVideoDefinitionByURL:(NSURL *)URL {
+    [self.playbackController switchVideoDefinitionByURL:URL];
+}
+
 - (void)playbackController:(id<SJMediaPlaybackController>)controller prepareToPlayStatusDidChange:(SJMediaPlaybackPrepareStatus)prepareStatus {
     switch ( prepareStatus ) {
         case SJMediaPlaybackPrepareStatusUnknown: break;
@@ -1155,11 +1164,17 @@ static NSString *_kGestureState = @"state";
     }
 }
 
+- (void)playbackController:(id<SJMediaPlaybackController>)controller switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:switchVideoDefinitionByURL:statusDidChange:)] ) {
+        [self.controlLayerDelegate videoPlayer:self switchVideoDefinitionByURL:URL statusDidChange:status];
+    }
+}
+
 #pragma mark -
 
 // 1.
 - (void)setURLAsset:(nullable SJVideoPlayerURLAsset *)URLAsset {
-    if ( self.URLAsset ) {
+    if ( _URLAsset ) {
         if ( self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
     }
     
@@ -1201,44 +1216,43 @@ static NSString *_kGestureState = @"state";
 // 2.1
 - (void)_playerReadyToPlay {
     
-    if ( ![self playStatus_isPrepare] ) return;
+    if ( ![self playStatus_isPrepare] )
+        return;
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:currentTime:currentTimeStr:totalTime:totalTimeStr:)] ) {
         [self.controlLayerDelegate videoPlayer:self currentTime:self.currentTime currentTimeStr:self.currentTimeStr totalTime:self.totalTime totalTimeStr:self.totalTimeStr];
     }
+
+    if ( self.registrar.state == SJVideoPlayerAppState_Background &&
+         self.pauseWhenAppDidEnterBackground ) {
+        [self pause:SJVideoPlayerPausedReasonPause];
+        return;
+    }
     
-    __weak typeof(self) _self = self;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.9 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
-            [self.controlLayerDelegate loadCompletion:self];
-        }
-        
-        self.playStatus = SJVideoPlayerPlayStatusReadyToPlay;
-        
-        if ( self.registrar.state == SJVideoPlayerAppState_Background &&
-            self.pauseWhenAppDidEnterBackground ) {
-            [self pause:SJVideoPlayerPausedReasonPause];
-            return;
-        }
-        
-        if ( self.operationOfInitializing ) {
-            self.operationOfInitializing(self);
-            self.operationOfInitializing = nil;
-        }
-        else if ( self.autoPlay ) {
-            if ( self.isPlayOnScrollView ) {
-                if ( self.isScrollAppeared ) [self play];
-                else [self pause];
-            }
-            else {
+    if ( !self.isLockedScreen )
+        [self.displayRecorder resetInitialization];
+    
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
+        [self.controlLayerDelegate loadCompletion:self];
+    }
+    
+    self.playStatus = SJVideoPlayerPlayStatusReadyToPlay;
+    
+    if ( self.operationOfInitializing ) {
+        self.operationOfInitializing(self);
+        self.operationOfInitializing = nil;
+    }
+    else if ( self.autoPlay ) {
+        if ( self.isPlayOnScrollView ) {
+            if ( self.isScrollAppeared )
                 [self play];
-            }
+            else
+                [self pause];
         }
-        
-        if ( !self.isLockedScreen ) [self.displayRecorder resetInitialization];
-    });
+        else {
+            [self play];
+        }
+    }
 }
 
 // 2.2
@@ -1566,7 +1580,7 @@ static NSString *_kGestureState = @"state";
 /// You should call it when view did appear
 - (void)vc_viewDidAppear {
     if ( !self.isPlayOnScrollView || (self.isPlayOnScrollView && self.isScrollAppeared) ) {
-        [self play];
+        if ( ![self playStatus_isPlaying] ) [self play];
     }
     self.vc_isDisappeared = NO;
 }
