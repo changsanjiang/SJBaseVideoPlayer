@@ -266,7 +266,7 @@ static UIScrollView *_Nullable _getScrollViewOfPlayModel(SJPlayModel *playModel)
 }
 
 + (NSString *)version {
-    return @"1.7.1";
+    return @"1.7.2";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -1580,7 +1580,7 @@ static NSString *_kGestureState = @"state";
 /// You should call it when view did appear
 - (void)vc_viewDidAppear {
     if ( !self.isPlayOnScrollView || (self.isPlayOnScrollView && self.isScrollAppeared) ) {
-        if ( ![self playStatus_isPlaying] ) [self play];
+        [self play];
     }
     self.vc_isDisappeared = NO;
 }
