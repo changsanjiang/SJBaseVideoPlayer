@@ -473,7 +473,7 @@ static NSString *_kGestureState = @"state";
 }
 
 - (void)setVideoGravity:(AVLayerVideoGravity)videoGravity {
-    _playbackController.videoGravity = videoGravity;
+    self.playbackController.videoGravity = videoGravity;
 }
 
 - (AVLayerVideoGravity)videoGravity {
