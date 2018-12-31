@@ -1,0 +1,1 @@
+../../../../../SJBaseVideoPlayer/SJVolBrigControl/Resource/SJVolBrigResource.h

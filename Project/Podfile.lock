@@ -1,6 +1,63 @@
 PODS:
   - Masonry (1.1.0)
   - Reachability (3.2)
+  - SJBaseVideoPlayer (1.8.0):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/Header (= 1.8.0)
+    - SJBaseVideoPlayer/Model (= 1.8.0)
+    - SJBaseVideoPlayer/SJAVMediaPlaybackController (= 1.8.0)
+    - SJBaseVideoPlayer/SJPrompt (= 1.8.0)
+    - SJBaseVideoPlayer/SJRotationManager (= 1.8.0)
+    - SJBaseVideoPlayer/SJVolBrigControl (= 1.8.0)
+    - SJBaseVideoPlayer/Tool (= 1.8.0)
+    - SJObserverHelper
+  - SJBaseVideoPlayer/Header (1.8.0):
+    - Masonry
+    - Reachability
+    - SJObserverHelper
+  - SJBaseVideoPlayer/Model (1.8.0):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/Header
+    - SJObserverHelper
+  - SJBaseVideoPlayer/SJAVMediaPlaybackController (1.8.0):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/Header
+    - SJBaseVideoPlayer/Model
+    - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (= 1.8.0)
+    - SJBaseVideoPlayer/Tool
+    - SJObserverHelper
+  - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (1.8.0):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/Header
+    - SJBaseVideoPlayer/Model
+    - SJBaseVideoPlayer/Tool
+    - SJObserverHelper
+  - SJBaseVideoPlayer/SJPrompt (1.8.0):
+    - Masonry
+    - Reachability
+    - SJObserverHelper
+  - SJBaseVideoPlayer/SJRotationManager (1.8.0):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/Header
+    - SJObserverHelper
+  - SJBaseVideoPlayer/SJVolBrigControl (1.8.0):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/SJVolBrigControl/Resource (= 1.8.0)
+    - SJObserverHelper
+  - SJBaseVideoPlayer/SJVolBrigControl/Resource (1.8.0):
+    - Masonry
+    - Reachability
+    - SJObserverHelper
+  - SJBaseVideoPlayer/Tool (1.8.0):
+    - Masonry
+    - Reachability
+    - SJObserverHelper
   - SJBorderLineView (0.0.6)
   - SJObserverHelper (1.0.5.1)
   - SJUIFactory (0.0.16):
@@ -10,6 +67,7 @@ PODS:
 DEPENDENCIES:
   - Masonry
   - Reachability
+  - SJBaseVideoPlayer (from `../../SJBaseVideoPlayer`)
   - SJBorderLineView
   - SJObserverHelper
   - SJUIFactory
@@ -22,13 +80,18 @@ SPEC REPOS:
     - SJObserverHelper
     - SJUIFactory
 
+EXTERNAL SOURCES:
+  SJBaseVideoPlayer:
+    :path: "../../SJBaseVideoPlayer"
+
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  SJBaseVideoPlayer: 74e5702a4b7b2780eaef5565503d4a42a6e1cae1
   SJBorderLineView: 5878e67fb57e812a2d5d029ca666068784b5448a
   SJObserverHelper: b8dcf2653dca2538bb601f558bde72c229e08737
   SJUIFactory: b3e973c5e2ae08bc5a1bd2c68d94c00f81e01a0b
 
-PODFILE CHECKSUM: dd97e555efe39e692ef88f9b56851ecec3f81935
+PODFILE CHECKSUM: 3acf55712538c3bc9903b771d0234622bbd2055f
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.6.0.beta.2

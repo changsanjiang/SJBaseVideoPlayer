@@ -11,4 +11,6 @@ target 'Project' do
   pod 'SJBorderLineView'
   pod 'SJObserverHelper'
   pod 'Reachability'
+  
+  pod 'SJBaseVideoPlayer', :path => '../../SJBaseVideoPlayer'
 end

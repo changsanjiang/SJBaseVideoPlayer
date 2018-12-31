@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = 'SJBaseVideoPlayer'
-s.version      = '1.7.7'
+s.version      = '1.8.0'
 s.summary      = 'video player.'
 s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
 s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -20,6 +20,12 @@ s.subspec 'Header' do |ss|
     ss.source_files = 'SJBaseVideoPlayer/Header/*.{h}'
 end
 
+s.subspec 'Tool' do |ss|
+    ss.source_files = 'SJBaseVideoPlayer/Tool/*.{h,m}'
+    ss.dependency 'SJBaseVideoPlayer/Header'
+    ss.dependency 'SJBaseVideoPlayer/Model'
+end
+
 s.subspec 'Model' do |ss|
     ss.source_files = 'SJBaseVideoPlayer/Model/*.{h,m}'
     ss.dependency 'SJBaseVideoPlayer/Header'
@@ -31,8 +37,6 @@ s.subspec 'SJAVMediaPlaybackController' do |ss|
         sss.source_files = 'SJBaseVideoPlayer/SJAVMediaPlaybackController/Core/*.{h,m}'
     end
     ss.dependency 'SJBaseVideoPlayer/Tool'
-    ss.dependency 'SJBaseVideoPlayer/Header'
-    ss.dependency 'SJBaseVideoPlayer/Model'
 end
 
 s.subspec 'SJPrompt' do |ss|
@@ -51,10 +55,4 @@ s.subspec 'SJVolBrigControl' do |ss|
         sss.source_files = "SJBaseVideoPlayer/SJVolBrigControl/Resource/*.{h,m}"
     end
 end
-
-s.subspec 'Tool' do |ss|
-    ss.source_files = 'SJBaseVideoPlayer/Tool/*.{h,m}'
-    ss.ios.library = 'sqlite3'
-end
-
 end

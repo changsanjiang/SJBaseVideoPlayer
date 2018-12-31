@@ -36,7 +36,7 @@
         make.height.equalTo(self->_videoPlayer.view.mas_width).multipliedBy(9 / 16.0f);
     }];
 
-    _videoPlayer.placeholder = [UIImage imageNamed:@"placeholder"];
+    _videoPlayer.placeholderImageView.image = [UIImage imageNamed:@"placeholder"];
     
     _videoPlayer.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
     
