@@ -1,0 +1,1 @@
+../../../../../SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core/SJDeviceBrightnessView.h

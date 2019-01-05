@@ -41,6 +41,18 @@
       "source_files": "SJBaseVideoPlayer/Header/*.{h}"
     },
     {
+      "name": "Tool",
+      "source_files": "SJBaseVideoPlayer/Tool/*.{h,m}",
+      "dependencies": {
+        "SJBaseVideoPlayer/Header": [
+
+        ],
+        "SJBaseVideoPlayer/Model": [
+
+        ]
+      }
+    },
+    {
       "name": "Model",
       "source_files": "SJBaseVideoPlayer/Model/*.{h,m}",
       "dependencies": {
@@ -54,12 +66,6 @@
       "source_files": "SJBaseVideoPlayer/SJAVMediaPlaybackController/*.{h,m}",
       "dependencies": {
         "SJBaseVideoPlayer/Tool": [
-
-        ],
-        "SJBaseVideoPlayer/Header": [
-
-        ],
-        "SJBaseVideoPlayer/Model": [
 
         ]
       },
@@ -84,22 +90,24 @@
       }
     },
     {
-      "name": "SJVolBrigControl",
-      "source_files": "SJBaseVideoPlayer/SJVolBrigControl/*.{h,m}",
-      "resources": "SJBaseVideoPlayer/SJVolBrigControl/Resource/SJVolBrigResource.bundle",
+      "name": "SJDeviceVolumeAndBrightnessManager",
+      "source_files": "SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/*.{h,m}",
       "subspecs": [
         {
-          "name": "Resource",
-          "source_files": "SJBaseVideoPlayer/SJVolBrigControl/Resource/*.{h,m}"
+          "name": "Core",
+          "source_files": "SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core/*.{h,m}",
+          "dependencies": {
+            "SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader": [
+
+            ]
+          }
+        },
+        {
+          "name": "ResourceLoader",
+          "source_files": "SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader/*.{h,m}",
+          "resources": "SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader/SJDeviceVolumeAndBrightnessManager.bundle"
         }
       ]
-    },
-    {
-      "name": "Tool",
-      "source_files": "SJBaseVideoPlayer/Tool/*.{h,m}",
-      "ios": {
-        "libraries": "sqlite3"
-      }
     }
   ]
 }
