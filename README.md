@@ -200,7 +200,7 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;<br/>
 ___
 
 # 1. 可在以下视图层次中播放
-为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化即可. 
+为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化对应场景即可. 
 
 1.1 在普通 View 上播放 <br/>
 ```Objective-C
@@ -240,7 +240,15 @@ SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCe
 ___
 
 # 2. 创建资源进行播放
+播放器的播放一个视频资源时, 是通过 SJVideoPlayerURLAsset 进行初始化的. 
+
+它包含两个部分: 一个是视频资源地址, 另一个是第一部分中的视图场景(SJPlayModel). 
+
 2.1 通过 URL 创建资源进行播放<br/>
+```Objective-C
+_player.assetURL = [[SJVideoPlayerURLAsset alloc] initWithURL:[NSURL URLWithString:@"https://....mp4"]];
+```
+
 2.2 通过 AVAsset 或其子类进行播放<br/>
 2.3 指定开始播放的时间<br/>
 2.4 续播. 进入下个页面时, 继续播放<br/>
