@@ -1,3 +1,31 @@
+# SJBaseVideoPlayer
+
+___
+
+### Installation
+```ruby
+# Player with default control layer.
+pod 'SJVideoPlayer'
+
+# The base player, without the control layer, can be used if you need a custom control layer.
+pod 'SJBaseVideoPlayer'
+```
+___
+
+## Contact
+* Email: changsanjiang@gmail.com
+* QQ: 1779609779
+* QQ群: 719616775  
+
+___
+
+## License
+SJBaseVideoPlayer is available under the MIT license. See the LICENSE file for more info.
+
+___
+
+## Documents
+
 #### <a href="#1-可在以下视图层次中播放-1">1. 可在以下视图层次中播放</a>
 1.1 在普通 View 上播放<br/>
 1.2 在 TableViewCell 上播放<br/>
@@ -7,7 +35,7 @@
 1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放<br/>
 1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放<br/>
 
-#### 2. 创建资源进行播放
+#### <a href="#2-创建资源进行播放-1>2. 创建资源进行播放</a>
 2.1 通过 URL 创建资源进行播放<br/>
 2.2 通过 AVAsset 或其子类进行播放<br/>
 2.3 指定开始播放的时间<br/>
@@ -172,5 +200,48 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;<br/>
 ___
 
 # 1. 可在以下视图层次中播放
+为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化即可. 
+
 1.1 在普通 View 上播放 <br/>
+```Objective-C
+SJPlayModel *playModel = [SJPlayModel new];
+```
+
 1.2 在 TableViewCell 上播放<br/>
+```Objective-C
+SJPlayModel *playModel =[SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
+```
+
+1.3 在 TableViewHeaderView 上播放<br/>
+```Objective-C
+SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:view.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
+```
+
+1.4 在 CollectionViewCell 上播放<br/>
+```Objective-C
+SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
+```
+
+1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放<br/>
+```Objective-C
+SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
+```
+
+1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放<br/>
+```Objective-C
+SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath tableView:self.tableView];
+```
+
+1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放<br/>
+```Objective-C
+SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
+```
+
+___
+
+# 2. 创建资源进行播放
+2.1 通过 URL 创建资源进行播放<br/>
+2.2 通过 AVAsset 或其子类进行播放<br/>
+2.3 指定开始播放的时间<br/>
+2.4 续播. 进入下个页面时, 继续播放<br/>
+2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长<br/>
