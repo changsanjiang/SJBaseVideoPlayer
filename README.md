@@ -26,7 +26,8 @@ ___
 
 ## Documents
 
-<a href="# 1. 可在以下视图层次中播放">1. 可在以下视图层次中播放</a>
+<a href="#1. 可在以下视图层次中播放">1. 可在以下视图层次中播放</a>
+
 1.1 在普通 View 上播放
 1.2 在 TableViewCell 上播放
 1.3 在 TableViewHeaderView 上播放
@@ -199,3 +200,10 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;
 ___
 
 # 1. 可在以下视图层次中播放
+1.1 在普通 View 上播放
+1.2 在 TableViewCell 上播放
+1.3 在 TableViewHeaderView 上播放
+1.4 在 CollectionViewCell 上播放
+1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放
+1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放
+1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放
