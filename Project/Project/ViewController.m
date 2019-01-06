@@ -38,7 +38,7 @@
 
     _videoPlayer.placeholderImageView.image = [UIImage imageNamed:@"placeholder"];
     
-    _videoPlayer.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
+    _videoPlayer.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:[[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"] specifyStartTime:20];
     
     _videoPlayer.pauseWhenAppDidEnterBackground = NO;
     

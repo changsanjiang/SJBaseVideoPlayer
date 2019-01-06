@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SJBaseVideoPlayer'
-  s.version      = '1.8.0'
+  s.version      = '1.8.1'
   s.summary      = 'video player.'
   s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
   s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -49,6 +49,7 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'SJDeviceVolumeAndBrightnessManager' do |ss|
+      ss.dependency 'SJBaseVideoPlayer/Header'
       ss.source_files = 'SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/*.{h,m}'
       ss.subspec 'Core' do |sss|
         sss.source_files = 'SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core/*.{h,m}'
