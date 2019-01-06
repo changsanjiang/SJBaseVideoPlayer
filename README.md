@@ -1,35 +1,6 @@
-# SJBaseVideoPlayer
-
-___
-
-### Installation
-```ruby
-# Player with default control layer.
-pod 'SJVideoPlayer'
-
-# The base player, without the control layer, can be used if you need a custom control layer.
-pod 'SJBaseVideoPlayer'
-```
-___
-
-## Contact
-* Email: changsanjiang@gmail.com
-* QQ: 1779609779
-* QQ群: 719616775  
-
-___
-
-## License
-SJBaseVideoPlayer is available under the MIT license. See the LICENSE file for more info.
-
-___
-
-## Documents
-
-#### <a href="#1-可在以下视图层次中播放">1. 可在以下视图层次中播放</a>
-
-1.1 在普通 View 上播放
-1.2 在 TableViewCell 上播放
+#### <a href="#1-可在以下视图层次中播放-1">1. 可在以下视图层次中播放</a>
+<a href="1-1在普通 View 上播放-1">1.1 在普通 View 上播放</a>
+<a href="1-2在 TableViewCell 上播放-1">1.2 在 TableViewCell 上播放</a>
 1.3 在 TableViewHeaderView 上播放
 1.4 在 CollectionViewCell 上播放
 1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放
@@ -200,10 +171,6 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;
 ___
 
 # 1. 可在以下视图层次中播放
-1.1 在普通 View 上播放
+1.1 在普通 View 上播放 
+
 1.2 在 TableViewCell 上播放
-1.3 在 TableViewHeaderView 上播放
-1.4 在 CollectionViewCell 上播放
-1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放
-1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放
-1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放
