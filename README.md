@@ -35,7 +35,7 @@ ___
 1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放<br/>
 1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放<br/>
 
-#### <a href="#2-创建资源进行播放-1>2. 创建资源进行播放</a>
+#### <a href="#2-创建资源进行播放-1">2. 创建资源进行播放</a>
 2.1 通过 URL 创建资源进行播放<br/>
 2.2 通过 AVAsset 或其子类进行播放<br/>
 2.3 指定开始播放的时间<br/>
