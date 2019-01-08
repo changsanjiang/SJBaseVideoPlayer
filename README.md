@@ -29,11 +29,12 @@ ___
 #### [1 可在以下视图层次中播放](#1)
 * [1.1 在普通 View 上播放](#1.1)
 * [1.2 在 TableViewCell 上播放](#1.2)
-* [1.3 在 TableViewHeaderView 上播放](#1.3)
+* [1.3 在 TableHeaderView 或者 TableFooterView  上播放](#1.3)
 * [1.4 在 CollectionViewCell 上播放](#1.4)
 * [1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放](#1.5)
 * [1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放](#1.6)
 * [1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放](#1.7)
+* [1.8 在 UITableViewHeaderFooterView 上播放](#1.8)
 
 #### [2. 创建资源进行播放](#2)
 * [2.1 通过 URL 创建资源进行播放](#2.1)
@@ -201,46 +202,112 @@ ___
 # <h2 id="1">1. 可在以下视图层次中播放</h2>
 为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化对应场景即可. 
 
+___
+
 <h3 id="1.1">1.1 在普通 View 上播放</h3>
+
+在普通视图中播放时, 直接创建PlayModel即可.
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel new];
 ```
 
+___
+
 <h3 id="1.2">1.2 在 TableViewCell 上播放</h3>
 
+--  UITableView
+    --  UITableViewCell
+        --  Player.superview
+            --  Player.view
+
 ```Objective-C
-SJPlayModel *playModel =[SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
+SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
 ```
 
-<h3 id="1.3">1.3 在 TableViewHeaderView 上播放</h3>
+___
+
+<h3 id="1.3">1.3 在 TableHeaderView 或者 TableFooterView  上播放</h3>
+
+--  UITableView
+    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  
+        --  Player.superview
+            --  Player.view
 
 ```Objective-C
-SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:view.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
+SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:view.coverImageView tableView:self.tableView];
 ```
+
+___
 
 <h3 id="1.4">1.4 在 CollectionViewCell 上播放</h3>
+
+--  UICollectionView
+    --  UICollectionViewCell
+        --  Player.superview
+            --  Player.view
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
 ```
 
+___
+
 <h3 id="1.5">1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放</h3>
+
+--  UITableView
+    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  
+        --  tableHeaderView.UICollectionView
+            --  UICollectionViewCell
+                --  Player.superview
+                    --  Player.view
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
 ```
 
+___
+
 <h3 id="1.6">1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放</h3>
 
+--  UITableView
+    --  UITableViewCell
+        --  UITableViewCell.UICollectionView
+            --  UICollectionViewCell
+                --  Player.superview
+                    --  Player.view
+
 ```Objective-C
-SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath tableView:self.tableView];
+SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:tableViewCellAtIndexPath tableView:self.tableView];
 ```
+
+___
 
 <h3 id="1.7">1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放</h3>
 
+--  UICollectionView
+    --  UICollectionViewCell
+        --  UICollectionViewCell.UICollectionView
+            --  UICollectionViewCell
+                --  Player.superview
+                    --  Player.view
+
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
+```
+
+___
+
+<h3 id="1.8">1.8 在 UITableViewHeaderFooterView 上播放</h3>
+
+--  UITableView
+    --  UITableViewHeaderFooterView 
+        --  Player.superview
+            --  Player.view            
+
+```Objective-C
+/// isHeader: 当在header中播放时, 传YES, 在footer时, 传NO.
+SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPlayerSuperviewTag:sectionHeaderView.coverImageView.tag inSection:section isHeader:YES tableView:self.tableView];
 ```
 
 ___
