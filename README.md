@@ -1,7 +1,5 @@
 # SJBaseVideoPlayer
 
-___
-
 ### Installation
 ```ruby
 # Player with default control layer.
@@ -41,7 +39,7 @@ ___
 * [2.2 通过 AVAsset 或其子类进行播放](#2.2)
 * [2.3 指定开始播放的时间](#2.3)
 * [2.4 续播. 进入下个页面时, 继续播放](#2.4)
-* [2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长](#2.5)
+* [2.5 销毁时的回调. 可在此时做一些记录工作, 如播放位置](#2.5)
 
 #### 3. 播放控制
 * [3.1 当前时间和时长](#3.1)
@@ -319,12 +317,12 @@ SJBaseVideoPlayer 播放的视频资源是通过 SJVideoPlayerURLAsset 进行初
 - 资源地址 (可以是本地资源/远程URL/AVAsset)
 - 视图层次 (第一部分中的SJPlayModel)
 
-默认情况下, 创建 SJVideoPlayerURLAsset 后, 赋值给播放器后即可播放. 如下示例:
+默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放. 如下示例:
 </p>
 
 ```Objective-C
 SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
-self.player.URLAsset = asset;
+_player.URLAsset = asset;
 ```
 
 <h3 id="2.1">2.1 通过 URL 创建资源进行播放</h3>
@@ -354,14 +352,14 @@ _player.URLAsset.specifyStartTime = 25.0; // unit is seconds
 
 ```Objective-C
 /// otherAsset即为上一个页面播放的Asset
-/// 除了需要一个otherAsset, 其他方面同开始的示例一模一样
+/// 除了需要一个otherAsset, 其他方面同以上的示例一模一样
 _player.URLAsset = [SJVideoPlayerURLAsset initWithOtherAsset:otherAsset playModel:playModel]; 
 ```
 
-<h3 id="2.5">2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长</h3>
+<h3 id="2.5">2.5 销毁时的回调. 可在此时做一些记录工作, 如播放位置</h3>
 
 <p>
-我们有时候想存储某个视频的播放记录, 以便下次, 能够从指定的位置进行播放. 那什么时候存储合适呢? 最好的时机就是资源被释放时. SJBaseVideoPlayer 提供了每个资源在 Dealloc 时, 进行的回调, 如下:
+我们有时候想存储某个视频的播放记录, 以便下次, 能够从指定的位置进行播放. 那什么时候存储合适呢? 最好的时机就是资源被释放时. SJBaseVideoPlayer 提供了每个资源在 Dealloc 时的回调, 如下:
 </p>
 
 ```Objective-C
@@ -370,3 +368,95 @@ _player.assetDeallocExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlay
     // .....
 };
 ```
+
+<h2 id="3">3. 播放控制</h2>
+
+<p>
+播放控制: 对播放进行的操作. 此部分的内容由 id<SJMediaPlaybackController> playbackController 提供支持.
+大多数对播放进行的操作, 均在协议 SJMediaPlaybackController 进行了声明. 正常来说实现了此协议的任何对象, 均可赋值给 player.playbackController 来替换原始实现.
+</p>
+
+<h3 id="3.1">3.1 当前时间和时长</h3>
+
+```Objective-C
+/// 当前时间
+_player.currentTime
+
+/// 时长
+_player.totalTime
+
+/// 字符串化, 
+/// - 格式为 00:00(小于 1 小时) 或者 00:00:00 (大于 1 小时)
+_player.currentTimeStr
+_player.totalTimeStr
+```
+
+<h3 id="3.2">3.2 时间改变时的回调</h3>
+
+```Objective-C
+_player.playTimeDidChangeExeBlok = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
+    /// ...
+};
+```
+
+<h3 id="3.3">3.3 播放结束后的回调</h3>
+
+```Objective-C
+_player.playDidToEndExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
+    /// ...
+};
+```
+
+<h3 id="3.4">3.4 播放状态 - 未知/准备/准备就绪/播放中/暂停的/不活跃的</h3>
+
+<p>
+播放状态有两个状态需要注意一下, 分别是 暂停和不活跃状态
+
+当状态为暂停时, 目前有3种可能: 
+
+- 正在缓冲
+- 主动暂停
+- 正在跳转
+
+当状态为不活跃时, 目前有2种可能:
+
+- 播放完毕
+- 播放失败
+
+</p>
+
+```Objective-C
+/**
+ 当前播放的状态
+
+ - SJVideoPlayerPlayStatusUnknown:      未播放任何资源时的状态
+ - SJVideoPlayerPlayStatusPrepare:      准备播放一个资源
+ - SJVideoPlayerPlayStatusReadyToPlay:  准备就绪, 可以播放
+ - SJVideoPlayerPlayStatusPlaying:      播放中
+ - SJVideoPlayerPlayStatusPaused:       暂停状态, 请通过`SJVideoPlayerPausedReason`, 查看暂停原因
+ - SJVideoPlayerPlayStatusInactivity:   不活跃状态, 请通过`SJVideoPlayerInactivityReason`, 查看暂停原因
+ */
+typedef NS_ENUM(NSUInteger, SJVideoPlayerPlayStatus) {
+    SJVideoPlayerPlayStatusUnknown,
+    SJVideoPlayerPlayStatusPrepare,
+    SJVideoPlayerPlayStatusReadyToPlay,
+    SJVideoPlayerPlayStatusPlaying,
+    SJVideoPlayerPlayStatusPaused,
+    SJVideoPlayerPlayStatusInactivity,
+};
+```
+
+* [3.5 暂停的原因 - 缓冲/跳转/暂停](#3.5)
+* [3.6 不活跃的原因 - 加载失败/播放完毕](#3.6)
+* [3.7 播放状态改变的回调](#3.7)
+* [3.8 是否自动播放 - 当资源初始化完成后](#3.8)
+* [3.9 刷新 ](#3.9)
+* [3.10 播放器的声音设置 & 静音](#3.1)
+* [3.11 播放](#3.1)
+* [3.12 暂停](#3.1)
+* [3.13 是否暂停 - 当App进入后台后](#3.1)
+* [3.14 停止播放](#3.1)
+* [3.15 重播](#3.1)
+* [3.16 跳转到指定的时间播放](#3.1)
+* [3.17 调速 & 速率改变时的回调](#3.1)
+* [3.18 自己动手撸一个 SJMediaPlaybackController 或接入别的视频 SDK, 替换作者原始实现](#3.1)
