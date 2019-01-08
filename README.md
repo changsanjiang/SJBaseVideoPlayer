@@ -216,10 +216,10 @@ ___
 
 <h3 id="1.2">1.2 在 TableViewCell 上播放</h3>
 
---  UITableView
-    --  UITableViewCell
-        --  Player.superview
-            --  Player.view
+--  UITableView</br>
+    --  UITableViewCell</br>
+        --  Player.superview</br>
+            --  Player.view</br>
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
@@ -229,10 +229,10 @@ ___
 
 <h3 id="1.3">1.3 在 TableHeaderView 或者 TableFooterView  上播放</h3>
 
---  UITableView
-    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  
-        --  Player.superview
-            --  Player.view
+--  UITableView</br>
+    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  </br>
+        --  Player.superview</br>
+            --  Player.view</br>
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:view.coverImageView tableView:self.tableView];
@@ -242,10 +242,10 @@ ___
 
 <h3 id="1.4">1.4 在 CollectionViewCell 上播放</h3>
 
---  UICollectionView
-    --  UICollectionViewCell
-        --  Player.superview
-            --  Player.view
+--  UICollectionView</br>
+    --  UICollectionViewCell</br>
+        --  Player.superview</br>
+            --  Player.view</br>
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
@@ -255,12 +255,12 @@ ___
 
 <h3 id="1.5">1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放</h3>
 
---  UITableView
-    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  
-        --  tableHeaderView.UICollectionView
-            --  UICollectionViewCell
-                --  Player.superview
-                    --  Player.view
+--  UITableView</br>
+    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  </br>
+        --  tableHeaderView.UICollectionView</br>
+            --  UICollectionViewCell</br>
+                --  Player.superview</br>
+                    --  Player.view</br>
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
@@ -270,12 +270,12 @@ ___
 
 <h3 id="1.6">1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放</h3>
 
---  UITableView
-    --  UITableViewCell
-        --  UITableViewCell.UICollectionView
-            --  UICollectionViewCell
-                --  Player.superview
-                    --  Player.view
+--  UITableView</br>
+    --  UITableViewCell</br>
+        --  UITableViewCell.UICollectionView</br>
+            --  UICollectionViewCell</br>
+                --  Player.superview</br>
+                    --  Player.view</br>
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:tableViewCellAtIndexPath tableView:self.tableView];
@@ -285,12 +285,12 @@ ___
 
 <h3 id="1.7">1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放</h3>
 
---  UICollectionView
-    --  UICollectionViewCell
-        --  UICollectionViewCell.UICollectionView
-            --  UICollectionViewCell
-                --  Player.superview
-                    --  Player.view
+--  UICollectionView</br>
+    --  UICollectionViewCell</br>
+        --  UICollectionViewCell.UICollectionView</br>
+            --  UICollectionViewCell</br>
+                --  Player.superview</br>
+                    --  Player.view</br>
 
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
@@ -300,10 +300,10 @@ ___
 
 <h3 id="1.8">1.8 在 UITableViewHeaderFooterView 上播放</h3>
 
---  UITableView
-    --  UITableViewHeaderFooterView 
-        --  Player.superview
-            --  Player.view            
+--  UITableView</br>
+    --  UITableViewHeaderFooterView </br>
+        --  Player.superview</br>
+            --  Player.view            </br>
 
 ```Objective-C
 /// isHeader: 当在header中播放时, 传YES, 在footer时, 传NO.
