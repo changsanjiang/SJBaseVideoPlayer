@@ -198,9 +198,9 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;<br/>
 ___
 
 <h2 id="1">1. 视图层次</h2>
-我将以下视图层次封装进了 SJPlayModel 中, 使用它初始化对应层次即可. 
-
-___
+<p>
+我将以下视图层次封装进了 SJPlayModel 中, 使用它初始化对应层次即可.
+</p>
 
 <h3 id="1.1">1.1 在普通 View 上播放</h3>
 
@@ -209,8 +209,6 @@ ___
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel new];
 ```
-
-___
 
 <h3 id="1.2">1.2 在 TableViewCell 上播放</h3>
 
@@ -223,8 +221,6 @@ ___
 SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
 ```
 
-___
-
 <h3 id="1.3">1.3 在 TableHeaderView 或者 TableFooterView  上播放</h3>
 
 ```Objective-C
@@ -236,8 +232,6 @@ ___
 SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:view.coverImageView tableView:self.tableView];
 ```
 
-___
-
 <h3 id="1.4">1.4 在 CollectionViewCell 上播放</h3>
 
 ```Objective-C
@@ -248,8 +242,6 @@ ___
 
 SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
 ```
-
-___
 
 <h3 id="1.5">1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放</h3>
 
@@ -264,8 +256,6 @@ ___
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
 ```
 
-___
-
 <h3 id="1.6">1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放</h3>
 
 ```Objective-C
@@ -279,8 +269,6 @@ ___
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:tableViewCellAtIndexPath tableView:self.tableView];
 ```
 
-___
-
 <h3 id="1.7">1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放</h3>
 
 ```Objective-C
@@ -293,8 +281,6 @@ ___
 
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
 ```
-
-___
 
 <h3 id="1.8">1.8 在 UITableViewHeaderFooterView 上播放</h3>
 
@@ -369,10 +355,13 @@ _player.assetDeallocExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlay
 };
 ```
 
+___
+
 <h2 id="3">3. 播放控制</h2>
 
 <p>
-播放控制: 对播放进行的操作. 此部分的内容由 id<SJMediaPlaybackController> playbackController 提供支持.
+播放控制: 对播放进行的操作. 此部分的内容由 `id<SJMediaPlaybackController> playbackController` 提供支持.
+
 大多数对播放进行的操作, 均在协议 SJMediaPlaybackController 进行了声明. 正常来说实现了此协议的任何对象, 均可赋值给 player.playbackController 来替换原始实现.
 </p>
 
@@ -446,9 +435,81 @@ typedef NS_ENUM(NSUInteger, SJVideoPlayerPlayStatus) {
 };
 ```
 
-* [3.5 暂停的原因 - 缓冲/跳转/暂停](#3.5)
-* [3.6 不活跃的原因 - 加载失败/播放完毕](#3.6)
-* [3.7 播放状态改变的回调](#3.7)
+<h3 id="3.5">3.5 暂停的原因 - 缓冲/跳转/暂停</h3>
+
+```Objective-C
+/**
+ 暂停的理由
+
+ - SJVideoPlayerPausedReasonBuffering:   正在缓冲
+ - SJVideoPlayerPausedReasonPause:       被暂停
+ - SJVideoPlayerPausedReasonSeeking:     正在跳转(调用seekToTime:时)
+ */
+typedef NS_ENUM(NSUInteger, SJVideoPlayerPausedReason) {
+    SJVideoPlayerPausedReasonBuffering,
+    SJVideoPlayerPausedReasonPause,
+    SJVideoPlayerPausedReasonSeeking,
+};
+```
+
+<h3 id="3.6">3.6 不活跃的原因 - 加载失败/播放完毕</h3>
+
+```Objective-C
+/**
+ 不活跃的原因
+ 
+ - SJVideoPlayerInactivityReasonPlayEnd:    播放完毕
+ - SJVideoPlayerInactivityReasonPlayFailed: 播放失败
+ */
+typedef NS_ENUM(NSUInteger, SJVideoPlayerInactivityReason) {
+    SJVideoPlayerInactivityReasonPlayEnd,
+    SJVideoPlayerInactivityReasonPlayFailed,
+};
+
+```
+
+<h3 id="3.7">3.7 播放状态改变的回调</h3>
+
+<p>
+对播放状态的判断我添加了一个便利的分类 `SJBaseVideoPlayer (PlayStatus)`, 如需判断状态, 可导入头文件 `#import "SJBaseVideoPlayer+PlayStatus.h"` 使用. 
+</p>
+
+```Objective-C
+/// 播放状态改变的回调
+_player.playStatusDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
+
+};
+
+/// 对播放状态的判断我添加了一个便利的分类
+@interface SJBaseVideoPlayer (PlayStatus)
+
+- (NSString *)getPlayStatusStr:(SJVideoPlayerPlayStatus)status;
+
+- (BOOL)playStatus_isUnknown;
+
+- (BOOL)playStatus_isPrepare;
+
+- (BOOL)playStatus_isReadyToPlay;
+
+- (BOOL)playStatus_isPlaying;
+
+- (BOOL)playStatus_isPaused;
+
+- (BOOL)playStatus_isPaused_ReasonBuffering;
+
+- (BOOL)playStatus_isPaused_ReasonPause;
+
+- (BOOL)playStatus_isPaused_ReasonSeeking;
+
+- (BOOL)playStatus_isInactivity;
+
+- (BOOL)playStatus_isInactivity_ReasonPlayEnd;
+
+- (BOOL)playStatus_isInactivity_ReasonPlayFailed;
+
+@end
+```
+
 * [3.8 是否自动播放 - 当资源初始化完成后](#3.8)
 * [3.9 刷新 ](#3.9)
 * [3.10 播放器的声音设置 & 静音](#3.1)
