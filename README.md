@@ -313,12 +313,13 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 ___
 
 <h2 id="2">2. 创建资源进行播放</h2>
-播放视频资源时, 是通过 SJVideoPlayerURLAsset 进行初始化的.  它由两部分组成: 
+SJBaseVideoPlayer 播放的视频资源是通过 SJVideoPlayerURLAsset 进行初始化的.  SJVideoPlayerURLAsset 由两部分组成, 如下: 
 
-- 视频资源地址(可以是本地资源/远程URL/AVAsset)
-- 视图层次(SJPlayModel)
 
-默认情况下, 创建 SJVideoPlayerURLAsset 后, 赋值给 播放器后即可播放. 如下示例:
+- 视频资源地址 (可以是本地资源/远程URL/AVAsset)
+- 视图层次 (SJPlayModel)
+
+默认情况下, 创建 SJVideoPlayerURLAsset 后, 赋值给播放器后即可播放. 如下示例:
 
 ```Objective-C
 SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
