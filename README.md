@@ -317,7 +317,7 @@ ___
 SJBaseVideoPlayer 播放的视频资源是通过 SJVideoPlayerURLAsset 进行初始化的.  SJVideoPlayerURLAsset 由两部分组成: 
 
 - 资源地址 (可以是本地资源/远程URL/AVAsset)
-- 视图层次 (第一部分中的<a id="1">SJPlayModel</a>)
+- 视图层次 (第一部分中的SJPlayModel)
 
 默认情况下, 创建 SJVideoPlayerURLAsset 后, 赋值给播放器后即可播放. 如下示例:
 </p>
@@ -327,12 +327,46 @@ SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL pl
 self.player.URLAsset = asset;
 ```
 
-* [2.1 通过 URL 创建资源进行播放](#2.1)
+<h3 id="2.1">2.1 通过 URL 创建资源进行播放</h3>
+
 ```Objective-C
-_player.assetURL = [[SJVideoPlayerURLAsset alloc] initWithURL:[NSURL URLWithString:@"https://....mp4"]];
+_player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
 ```
 
-* [2.2 通过 AVAsset 或其子类进行播放](#2.2)
-* [2.3 指定开始播放的时间](#2.3)
-* [2.4 续播. 进入下个页面时, 继续播放](#2.4)
-* [2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长](#2.5)
+<h3 id="2.2">2.2 通过 AVAsset 或其子类进行播放</h3>
+
+```Objective-C
+_player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithAVAsset:avAsset playModel:playModel];
+```
+
+<h3 id="2.3">2.3 指定开始播放的时间</h3>
+
+```Objective-C
+_player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
+_player.URLAsset.specifyStartTime = 25.0; // unit is seconds
+```
+
+<h3 id="2.4">2.4 续播. 进入下个页面时, 继续播放</h3>
+
+<p>
+在播放时, 我们可能需要切换界面, 而希望视频能够在下一个界面无缝的进行播放. 针对此种情况 SJVideoPlayerURLAsset 提供了便利的初始化方法. 请看片段:
+</p>
+
+```Objective-C
+/// otherAsset即为上一个页面播放的Asset
+/// 除了需要一个otherAsset, 其他方面同开始的示例一模一样
+_player.URLAsset = [SJVideoPlayerURLAsset initWithOtherAsset:otherAsset playModel:playModel]; 
+```
+
+<h3 id="2.5">2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长</h3>
+
+<p>
+我们有时候想存储某个视频的播放记录, 以便下次, 能够从指定的位置进行播放. 那什么时候存储合适呢? 最好的时机就是资源被释放时. SJBaseVideoPlayer 提供了每个资源在 Dealloc 时, 进行的回调, 如下:
+</p>
+
+```Objective-C
+// 每个资源dealloc时的回调
+_player.assetDeallocExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
+    // .....
+};
+```
