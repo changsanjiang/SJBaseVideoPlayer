@@ -29,82 +29,82 @@ ___
 #### * [1 可在以下视图层次中播放](#1)
 * [1.1 在普通 View 上播放](#1.1)
 * [1.2 在 TableViewCell 上播放](#1.2)
-1.3 在 TableViewHeaderView 上播放<br/>
-1.4 在 CollectionViewCell 上播放<br/>
-1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放<br/>
-1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放<br/>
-1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放<br/>
+* [1.3 在 TableViewHeaderView 上播放](#1.3)
+* [1.4 在 CollectionViewCell 上播放](#1.4)
+* [1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放](#1.5)
+* [1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放](#1.6)
+* [1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放](#1.7)
 
-#### <a href="#2-创建资源进行播放-1">2. 创建资源进行播放</a>
-2.1 通过 URL 创建资源进行播放<br/>
-2.2 通过 AVAsset 或其子类进行播放<br/>
-2.3 指定开始播放的时间<br/>
-2.4 续播. 进入下个页面时, 继续播放<br/>
-2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长<br/>
+#### * [2. 创建资源进行播放](#2)
+* [2.1 通过 URL 创建资源进行播放](#2.1)
+* [2.2 通过 AVAsset 或其子类进行播放](#2.2)
+* [2.3 指定开始播放的时间](#2.3)
+* [2.4 续播. 进入下个页面时, 继续播放](#2.4)
+* [2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长](#2.5)
 
 #### 3. 播放控制
-3.1 当前时间和时长<br/>
-3.2 时间改变时的回调<br/>
-3.3 播放结束后的回调<br/>
-3.4 播放状态 - 未知/准备/准备就绪/播放中/暂停的/不活跃的<br/>
-3.5 暂停的原因 - 缓冲/跳转/暂停<br/>
-3.6 不活跃的原因 - 加载失败/播放完毕<br/>
-3.7 播放状态改变的回调<br/>
-3.8 是否自动播放 - 当资源初始化完成后<br/>
-3.9 刷新 <br/>
-3.10 播放器的声音设置 & 静音<br/>
-3.11 播放<br/>
-3.12 暂停<br/>
-3.13 是否暂停 - 当App进入后台后<br/>
-3.14 停止播放<br/>
-3.15 重播<br/>
-3.16 跳转到指定的时间播放<br/>
-3.17 调速 & 速率改变时的回调<br/>
-3.18 自己动手撸一个 SJMediaPlaybackController 或接入别的视频 SDK, 替换作者原始实现<br/>
+* [3.1 当前时间和时长](#3.1)
+* [3.2 时间改变时的回调](#3.2)
+* [3.3 播放结束后的回调](#3.3)
+* [3.4 播放状态 - 未知/准备/准备就绪/播放中/暂停的/不活跃的](#3.4)
+* [3.5 暂停的原因 - 缓冲/跳转/暂停](#3.5)
+* [3.6 不活跃的原因 - 加载失败/播放完毕](#3.6)
+* [3.7 播放状态改变的回调](#3.7)
+* [3.8 是否自动播放 - 当资源初始化完成后](#3.8)
+* [3.9 刷新 ](#3.9)
+* [3.10 播放器的声音设置 & 静音](#3.1)
+* [3.11 播放](#3.1)
+* [3.12 暂停](#3.1)
+* [3.13 是否暂停 - 当App进入后台后](#3.1)
+* [3.14 停止播放](#3.1)
+* [3.15 重播](#3.1)
+* [3.16 跳转到指定的时间播放](#3.1)
+* [3.17 调速 & 速率改变时的回调](#3.1)
+* [3.18 自己动手撸一个 SJMediaPlaybackController 或接入别的视频 SDK, 替换作者原始实现](#3.1)
 
 #### 4. 控制层的显示和隐藏
-4.1 让控制层显示<br/>
-4.2 让控制层隐藏<br/>
-4.3 控制层是否显示中<br/>
-4.4 是否在暂停时保持控制层显示<br/>
-4.5 是否自动显示控制层 - 资源初始化完成后<br/>
-4.6 控制层显示状态改变的回调<br/>
-4.7 禁止管理控制层的显示和隐藏<br/>
-4.8 自己动手撸一个 SJControlLayerAppearManager, 替换作者原始实现<br/>
+* [4.1 让控制层显示](#4.1)
+* [4.2 让控制层隐藏](#4.2)
+* [4.3 控制层是否显示中](#4.3)
+* [4.4 是否在暂停时保持控制层显示](#4.4)
+* [4.5 是否自动显示控制层 - 资源初始化完成后](#4.5)
+* [4.6 控制层显示状态改变的回调](#4.6)
+* [4.7 禁止管理控制层的显示和隐藏](#4.7)
+* [4.8 自己动手撸一个 SJControlLayerAppearManager, 替换作者原始实现](#4.8)
 
 #### 5. 设备亮度和音量
-5.1 调整设备亮度<br/>
-5.2 调整设备声音<br/>
-5.3 亮度 & 声音改变后的回调<br/>
-5.3 自己动手撸一个 SJDeviceVolumeAndBrightnessManager, 替换作者原始实现<br/>
+* [5.1 调整设备亮度](#5.1)
+* [5.2 调整设备声音](#5.2)
+* [5.3 亮度 & 声音改变后的回调](#5.3)
+* [5.3 自己动手撸一个 SJDeviceVolumeAndBrightnessManager, 替换作者原始实现](#5.3)
 
 #### 6. 旋转<br/>
-6.1 自动旋转<br/>
-6.2 设置自动旋转支持的方向
-6.3 禁止自动旋转<br/>
-6.4 主动调用旋转<br/>
-6.5 是否全屏<br/>
-6.6 是否正在旋转<br/>
-6.7 当前旋转的方向 <br/>
-6.8 旋转开始和结束的回调<br/>
-6.9 使 ViewController 一起旋转<br/>
-6.10 自己动手撸一个 SJRotationManager, 替换作者原始实现<br/>
+* [6.1 自动旋转](#6.1)
+* [6.2 设置自动旋转支持的方向](#6.2)
+* [6.3 禁止自动旋转](#6.3)
+* [6.4 主动调用旋转](#6.4)
+* [6.5 是否全屏](#6.5)
+* [6.6 是否正在旋转](#6.6)
+* [6.7 当前旋转的方向 ](#6.7)
+* [6.8 旋转开始和结束的回调](#6.8)
+* [6.9 使 ViewController 一起旋转](#6.9)
+* [6.10 自己动手撸一个 SJRotationManager, 替换作者原始实现](#6.1)
 
 #### 7. 直接全屏而不旋转
-7.1 全屏和恢复<br/>
-7.2 开始和结束的回调<br/>
-7.3 是否是全屏<br/>
-7.4 自己动手撸一个 SJFitOnScreenManager, 替换作者原始实现<br/>
+* [7.1 全屏和恢复](#7.1)
+* [7.2 开始和结束的回调](#7.2)
+* [7.3 是否是全屏](#7.3)
+* [7.4 自己动手撸一个 SJFitOnScreenManager, 替换作者原始实现](#7.4)
 
 #### 8. 镜像翻转
-8.1 翻转和恢复<br/>
-8.2 开始和结束的回调<br/>
-8.3  自己动手撸一个 SJFlipTransitionManager, 替换作者原始实现<br/>
+* [8.1 翻转和恢复](#8.1)
+* [8.2 开始和结束的回调](#8.2)
+* [8.3  自己动手撸一个 SJFlipTransitionManager, 替换作者原始实现](#8.3)
 
 #### 9. 网络状态
-9.1 当前的网络状态<br/>
-9.2 网络状态改变的回调<br/>
-9.3 自己动手撸一个 SJReachability, 替换作者原始实现<br/>
+* [9.1 当前的网络状态](#9.1)
+* [9.2 网络状态改变的回调](#9.2)
+* [9.3 自己动手撸一个 SJReachability, 替换作者原始实现](#9.3)
 
 #### 10. 手势
 10.1 单击手势<br/>
@@ -202,37 +202,37 @@ ___
 # <h2 id="1">1. 可在以下视图层次中播放</h2>
 为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化对应场景即可. 
 
-1.1 在普通 View 上播放 <br/>
+* [1.1 在普通 View 上播放 ](#1.1)
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel new];
 ```
 
-1.2 在 TableViewCell 上播放<br/>
+* [1.2 在 TableViewCell 上播放](#1.2)
 ```Objective-C
 SJPlayModel *playModel =[SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
 ```
 
-1.3 在 TableViewHeaderView 上播放<br/>
+* [1.3 在 TableViewHeaderView 上播放](#1.3)
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:view.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
 ```
 
-1.4 在 CollectionViewCell 上播放<br/>
+* [1.4 在 CollectionViewCell 上播放](#1.4)
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
 ```
 
-1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放<br/>
+* [1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放](#1.5)
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
 ```
 
-1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放<br/>
+* [1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放](#1.6)
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath tableView:self.tableView];
 ```
 
-1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放<br/>
+* [1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放](#1.7)
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
 ```
@@ -244,12 +244,12 @@ ___
 
 它包含两个部分: 一个是视频资源地址, 另一个是第一部分中的视图场景(SJPlayModel). 
 
-2.1 通过 URL 创建资源进行播放<br/>
+* [2.1 通过 URL 创建资源进行播放](#2.1)
 ```Objective-C
 _player.assetURL = [[SJVideoPlayerURLAsset alloc] initWithURL:[NSURL URLWithString:@"https://....mp4"]];
 ```
 
-2.2 通过 AVAsset 或其子类进行播放<br/>
-2.3 指定开始播放的时间<br/>
-2.4 续播. 进入下个页面时, 继续播放<br/>
-2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长<br/>
+* [2.2 通过 AVAsset 或其子类进行播放](#2.2)
+* [2.3 指定开始播放的时间](#2.3)
+* [2.4 续播. 进入下个页面时, 继续播放](#2.4)
+* [2.5 销毁时的回调. 可在此时做一些记录工作, 如播放时长](#2.5)
