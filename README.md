@@ -26,7 +26,7 @@ ___
 
 ## Documents
 
-#### [1 可在以下视图层次中播放](#1)
+#### [1 视图层次](#1)
 * [1.1 在普通 View 上播放](#1.1)
 * [1.2 在 TableViewCell 上播放](#1.2)
 * [1.3 在 TableHeaderView 或者 TableFooterView  上播放](#1.3)
@@ -199,8 +199,8 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;<br/>
 
 ___
 
-# <h2 id="1">1. 可在以下视图层次中播放</h2>
-为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化对应场景即可. 
+<h2 id="1">1. 视图层次</h2>
+我将以下视图层次封装进了 SJPlayModel 中, 使用它初始化对应层次即可. 
 
 ___
 
@@ -312,10 +312,17 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 
 ___
 
-# 2. 创建资源进行播放
-播放器的播放一个视频资源时, 是通过 SJVideoPlayerURLAsset 进行初始化的. 
+<h2 id="2">2. 创建资源进行播放</h2>
+播放视频资源时, 是通过 SJVideoPlayerURLAsset 进行初始化的.  它由两部分组成: 
+- 视频资源地址(可以是本地资源/远程URL/AVAsset)
+- 视图层次(SJPlayModel)
 
-它包含两个部分: 一个是视频资源地址, 另一个是第一部分中的视图场景(SJPlayModel). 
+默认情况下, 创建好 SJVideoPlayerURLAsset 后, 赋值给 播放器后即可播放. 如下示例:
+
+```Objective-C
+SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
+self.player.URLAsset = asset;
+```
 
 * [2.1 通过 URL 创建资源进行播放](#2.1)
 ```Objective-C
