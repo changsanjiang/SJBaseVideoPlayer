@@ -26,9 +26,9 @@ ___
 
 ## Documents
 
-#### <a href="#1-可在以下视图层次中播放-1">1. 可在以下视图层次中播放</a>
-1.1 在普通 View 上播放<br/>
-1.2 在 TableViewCell 上播放<br/>
+#### * [1 可在以下视图层次中播放](#1)
+* [1.1 在普通 View 上播放](#1.1)
+* [1.2 在 TableViewCell 上播放](#1.2)
 1.3 在 TableViewHeaderView 上播放<br/>
 1.4 在 CollectionViewCell 上播放<br/>
 1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放<br/>
@@ -199,7 +199,7 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;<br/>
 
 ___
 
-# 1. 可在以下视图层次中播放
+# <h2 id="1">1. 可在以下视图层次中播放</h2>
 为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化对应场景即可. 
 
 1.1 在普通 View 上播放 <br/>
