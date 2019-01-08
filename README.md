@@ -75,7 +75,8 @@ ___
 * [5.1 调整设备亮度](#5.1)
 * [5.2 调整设备声音](#5.2)
 * [5.3 亮度 & 声音改变后的回调](#5.3)
-* [5.3 自己动手撸一个 SJDeviceVolumeAndBrightnessManager, 替换作者原始实现](#5.3)
+* [5.4 禁止播放器设置](#5.4)
+* [5.5 自己动手撸一个 SJDeviceVolumeAndBrightnessManager, 替换作者原始实现](#5.5)
 
 #### [6. 旋转](#6)
 * [6.1 自动旋转](#6.1)
@@ -366,7 +367,7 @@ ___
 <h2 id="3">3. 播放控制</h2>
 
 <p>
-播放控制: 对播放进行的操作. 此部分的内容由 "id<SJMediaPlaybackController\> playbackController" 提供支持.
+播放控制: 对播放进行的操作. 此部分的内容由 "id &lt;SJMediaPlaybackController&lt; playbackController" 提供支持.
 
 大多数对播放进行的操作, 均在协议 SJMediaPlaybackController 进行了声明. 
 
@@ -637,10 +638,12 @@ _player.rateDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull player) 
 _player.playbackController = Your PlaybackController.
 ```
 
+___
+
 <h2 id="4">4. 控制层的显示和隐藏</h4>
 
 <p>
-控制层的显示和隐藏, 此部分的内容由 "id<SJControlLayerAppearManager> controlLayerAppearManager" 提供支持.
+控制层的显示和隐藏, 此部分的内容由 "id &lt;SJControlLayerAppearManager&lt; controlLayerAppearManager" 提供支持.
 
 controlLayerAppearManager 内部存在一个定时器, 当控制层显示时, 会开启此定时器. 一定间隔后,  会尝试隐藏控制层.
 
@@ -656,7 +659,7 @@ controlLayerAppearManager 内部存在一个定时器, 当控制层显示时, �
 
  "- (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;"
  
- 代理方法中, 将会对当前的控制层进行显示处理.
+ 代理将会对当前的控制层进行显示处理.
 </p>
 
 ```Objective-C
@@ -672,7 +675,7 @@ controlLayerAppearManager 内部存在一个定时器, 当控制层显示时, �
 
 "- (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;"
 
-代理方法中, 将会对当前的控制层进行隐藏处理.
+代理将会对当前的控制层进行隐藏处理.
 </p>
 
 ```Objective-C
@@ -724,4 +727,50 @@ _player.controlLayerAutoAppearWhenAssetInitialized = YES;
 
 ```Objective-C
 _player.controlLayerAppearManager = Your controlLayerAppearManager; 
+```
+
+___
+
+<h2 id="5">5. 设备亮度和音量</h2>
+
+<p>
+设备亮度和音量的调整, 此部分的内容由 "id &lt;SJDeviceVolumeAndBrightnessManager&lt; deviceVolumeAndBrightnessManager" 提供支持.
+</p>
+
+<h3 id="5.1">5.1 调整设备亮度</h2>
+
+```Objective-C
+_player.deviceBrightness = 1.0;
+```
+
+<h3 id="5.2">5.2 调整设备声音</h2>
+
+```Objective-C
+_player.deviceVolume = 1.0;
+```
+
+<h3 id="5.3">5.3 亮度 & 声音改变后的回调</h2>
+
+```Objective-C
+_observer = [_player.deviceVolumeAndBrightnessManager getObserver];
+
+observer.volumeDidChangeExeBlock = ...;
+observer.brightnessDidChangeExeBlock = ...;
+```
+
+<h3 id="5.4">5.4 禁止播放器设置</h2>
+
+```Objective-C
+_player.disableBrightnessSetting = YES;
+_player.disableVolumeSetting = YES;
+```
+
+<h3 id="5.5">5.5 自己动手撸一个 SJDeviceVolumeAndBrightnessManager, 替换作者原始实现</h2>
+
+<p>
+当需要对设备音量视图进行自定义时, 可以自己动手撸一个 SJDeviceVolumeAndBrightnessManager. 
+</p>
+
+```Objective-C
+_player.deviceVolumeAndBrightnessManager = Yout deviceVolumeAndBrightnessManager;
 ```
