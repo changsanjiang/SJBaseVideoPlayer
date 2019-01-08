@@ -41,7 +41,7 @@ ___
 * [2.4 续播. 进入下个页面时, 继续播放](#2.4)
 * [2.5 销毁时的回调. 可在此时做一些记录工作, 如播放位置](#2.5)
 
-#### 3. 播放控制
+#### [3. 播放控制](#3)
 * [3.1 当前时间和时长](#3.1)
 * [3.2 时间改变时的回调](#3.2)
 * [3.3 播放结束后的回调](#3.3)
@@ -55,13 +55,13 @@ ___
 * [3.11 播放](#3.1)
 * [3.12 暂停](#3.1)
 * [3.13 是否暂停 - 当App进入后台后](#3.1)
-* [3.14 停止播放](#3.1)
+* [3.14 停止](#3.1)
 * [3.15 重播](#3.1)
 * [3.16 跳转到指定的时间播放](#3.1)
 * [3.17 调速 & 速率改变时的回调](#3.1)
-* [3.18 自己动手撸一个 SJMediaPlaybackController 或接入别的视频 SDK, 替换作者原始实现](#3.1)
+* [3.18 接入别的视频 SDK, 自己动手撸一个 SJMediaPlaybackController, 替换作者原始实现](#3.1)
 
-#### 4. 控制层的显示和隐藏
+#### [4. 控制层的显示和隐藏](#4)
 * [4.1 让控制层显示](#4.1)
 * [4.2 让控制层隐藏](#4.2)
 * [4.3 控制层是否显示中](#4.3)
@@ -71,13 +71,13 @@ ___
 * [4.7 禁止管理控制层的显示和隐藏](#4.7)
 * [4.8 自己动手撸一个 SJControlLayerAppearManager, 替换作者原始实现](#4.8)
 
-#### 5. 设备亮度和音量
+#### [5. 设备亮度和音量](#5)
 * [5.1 调整设备亮度](#5.1)
 * [5.2 调整设备声音](#5.2)
 * [5.3 亮度 & 声音改变后的回调](#5.3)
 * [5.3 自己动手撸一个 SJDeviceVolumeAndBrightnessManager, 替换作者原始实现](#5.3)
 
-#### 6. 旋转<br/>
+#### [6. 旋转](#6)
 * [6.1 自动旋转](#6.1)
 * [6.2 设置自动旋转支持的方向](#6.2)
 * [6.3 禁止自动旋转](#6.3)
@@ -89,23 +89,23 @@ ___
 * [6.9 使 ViewController 一起旋转](#6.9)
 * [6.10 自己动手撸一个 SJRotationManager, 替换作者原始实现](#6.1)
 
-#### 7. 直接全屏而不旋转
+#### [7. 直接全屏而不旋转](#7)
 * [7.1 全屏和恢复](#7.1)
 * [7.2 开始和结束的回调](#7.2)
 * [7.3 是否是全屏](#7.3)
 * [7.4 自己动手撸一个 SJFitOnScreenManager, 替换作者原始实现](#7.4)
 
-#### 8. 镜像翻转
+#### [8. 镜像翻转](#8)
 * [8.1 翻转和恢复](#8.1)
 * [8.2 开始和结束的回调](#8.2)
 * [8.3  自己动手撸一个 SJFlipTransitionManager, 替换作者原始实现](#8.3)
 
-#### 9. 网络状态
+#### [9. 网络状态](#9)
 * [9.1 当前的网络状态](#9.1)
 * [9.2 网络状态改变的回调](#9.2)
 * [9.3 自己动手撸一个 SJReachability, 替换作者原始实现](#9.3)
 
-#### 10. 手势
+#### [10. 手势](#10)
 * [10.1 单击手势](#10.1)
 * [10.2 双击手势](#10.2)
 * [10.3 移动手势](#10.3)
@@ -114,15 +114,15 @@ ___
 * [10.6 自定义某个手势的处理](#10.6)
 * [10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现](#10.7)
 
-#### 11. 占位图
+#### [11. 占位图](#11)
 * [11.1 设置本地占位图](#11.1)
 * [11.2 设置网络占位图](#11.2)
 
-#### 12. 显示提示文本
+#### [12. 显示提示文本](#12)
 * [12.1 显示文本及持续时间 - (NSString or NSAttributedString)](#12.1)
 * [12.2 配置提示文本](#12.2)
 
-#### 13. 一些固定代码
+#### [13. 一些固定代码](#13)
 * [13.1 - (void)vc_viewDidAppear; ](#13.1)
 * [13.2 - (void)vc_viewWillDisappear;](#13.2)
 * [13.3 - (void)vc_viewDidDisappear;](#13.3)
@@ -131,34 +131,34 @@ ___
 * [13.6 - 临时显示状态栏](#13.6)
 * [13.7 - 临时隐藏状态栏](#13.7)
 
-#### 14. 截屏
+#### [14. 截屏](#14)
 * [14.1 当前时间截图](#14.1)
 * [14.2 指定时间截图](#14.2)
 * [14.3 生成预览视图, 大约20张](#14.3)
 
-#### 15. 导出视频或GIF
+#### [15. 导出视频或GIF](#15)
 * [15.1 导出视频](#15.1)
 * [15.2 导出GIF](#15.2)
 * [15.3 取消操作](#15.3)
 
-#### 16. 滚动相关
+#### [16. 滚动相关](#16)
 * [16.1 是否在 UICollectionView 或者 UITableView 中播放](#16.1)
 * [16.2 是否滚动显示](#16.2)
 * [16.3 播放器视图将要滚动显示和消失的回调](#16.3)
 
-#### 17. 自动播放 - 在 UICollectionView 或者 UITableView 中
+#### [17. 自动播放 - 在 UICollectionView 或者 UITableView 中](#17)
 * [17.1 开启](#17.1)
 * [17.2 配置](#17.2)
 * [17.3 关闭](#17.3)
 * [17.4 主动调用播放下一个资源](#17.4)
 
-#### 18. 控制层数据源, 每个方法介绍
+#### [18. 控制层数据源, 每个方法介绍](#18)
 * [18.1 - (UIView *)controlView;](#18.1)
 * [18.2 - (BOOL)controlLayerDisappearCondition;](#18.2)
 * [18.3 - (BOOL)triggerGesturesCondition:(CGPoint)location;](#18.3)
 * [18.4 - (void)installedControlViewToVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#18.4)
 
-#### 19. 控制层代理, 每个方法介绍
+#### [19. 控制层代理, 每个方法介绍](#19)
 * [19.1 - (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.1)
 * [19.2 - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.2)
 * [19.3 - (void)videoPlayerWillAppearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.3)
@@ -327,7 +327,9 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithAVAsset:avAsset playMo
 
 ```Objective-C
 _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
-_player.URLAsset.specifyStartTime = 25.0; // unit is seconds
+
+NSTimeInterval secs = 20.0;
+_player.URLAsset.specifyStartTime = secs;
 ```
 
 <h3 id="2.4">2.4 续播. 进入下个页面时, 继续播放</h3>
@@ -345,7 +347,11 @@ _player.URLAsset = [SJVideoPlayerURLAsset initWithOtherAsset:otherAsset playMode
 <h3 id="2.5">2.5 销毁时的回调. 可在此时做一些记录工作, 如播放位置</h3>
 
 <p>
-我们有时候想存储某个视频的播放记录, 以便下次, 能够从指定的位置进行播放. 那什么时候存储合适呢? 最好的时机就是资源被释放时. SJBaseVideoPlayer 提供了每个资源在 Dealloc 时的回调, 如下:
+我们有时候想存储某个视频的播放记录, 以便下次, 能够从指定的位置进行播放. 
+
+那什么时候存储合适呢? 最好的时机就是资源被释放时. 
+
+SJBaseVideoPlayer 提供了每个资源在 Dealloc 时的回调, 如下:
 </p>
 
 ```Objective-C
@@ -360,9 +366,11 @@ ___
 <h2 id="3">3. 播放控制</h2>
 
 <p>
-播放控制: 对播放进行的操作. 此部分的内容由 `id<SJMediaPlaybackController> playbackController` 提供支持.
+播放控制: 对播放进行的操作. 此部分的内容由 `id\<SJMediaPlaybackController\> playbackController` 提供支持.
 
-大多数对播放进行的操作, 均在协议 SJMediaPlaybackController 进行了声明. 正常来说实现了此协议的任何对象, 均可赋值给 player.playbackController 来替换原始实现.
+大多数对播放进行的操作, 均在协议 SJMediaPlaybackController 进行了声明. 
+
+正常来说实现了此协议的任何对象, 均可赋值给 player.playbackController 来替换原始实现.
 </p>
 
 <h3 id="3.1">3.1 当前时间和时长</h3>
@@ -471,7 +479,9 @@ typedef NS_ENUM(NSUInteger, SJVideoPlayerInactivityReason) {
 <h3 id="3.7">3.7 播放状态改变的回调</h3>
 
 <p>
-对播放状态的判断我添加了一个便利的分类 `SJBaseVideoPlayer (PlayStatus)`, 如需判断状态, 可导入头文件 `#import "SJBaseVideoPlayer+PlayStatus.h"` 使用. 
+对播放状态的判断我添加了一个便利的分类 `SJBaseVideoPlayer (PlayStatus)`
+
+如需判断状态, 可导入头文件 `#import "SJBaseVideoPlayer+PlayStatus.h"` 使用. 
 </p>
 
 ```Objective-C
@@ -510,14 +520,118 @@ _player.playStatusDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull vi
 @end
 ```
 
-* [3.8 是否自动播放 - 当资源初始化完成后](#3.8)
-* [3.9 刷新 ](#3.9)
-* [3.10 播放器的声音设置 & 静音](#3.1)
-* [3.11 播放](#3.1)
-* [3.12 暂停](#3.1)
-* [3.13 是否暂停 - 当App进入后台后](#3.1)
-* [3.14 停止播放](#3.1)
-* [3.15 重播](#3.1)
-* [3.16 跳转到指定的时间播放](#3.1)
-* [3.17 调速 & 速率改变时的回调](#3.1)
-* [3.18 自己动手撸一个 SJMediaPlaybackController 或接入别的视频 SDK, 替换作者原始实现](#3.1)
+<h3 id="3.8">3.8 是否自动播放 - 当资源初始化完成后</h3>
+
+```Objective-C
+_player.autoPlayWhenPlayStatusIsReadyToPlay = YES;
+```
+
+<h3 id="3.9">3.9 刷新</h3>
+
+<p>
+在播放一个资源时, 可能有一些意外情况导致播放失败(如网络环境差). 
+
+此时当用户点击刷新按钮, 我们需要对当前的资源(Asset)进行刷新. 
+
+SJVideoPlayer提供了直接的方法去刷新, 不需要开发者再重复的去创建新的Asset.
+</p>
+
+```Objective-C
+[_player refresh];
+```
+
+<h3 id="3.10">3.10 播放器的声音设置 & 静音</h3>
+
+```Objective-C
+/// 默认值为 1.0, 最小为 0.0
+_player.playerVolume = 1.0;
+
+/// 设置静音
+_player.mute = YES;
+```
+
+<h3 id="3.11">3.11 播放</h3>
+
+```Objective-C
+[_player play];
+```
+
+<h3 id="3.12">3.12 暂停</h3>
+
+```Objective-C
+[_player pause];
+```
+
+<h3 id="3.13">3.13 是否暂停 - 当App进入后台后</h3>
+
+<p>
+关于后台播放视频, 引用自: https://juejin.im/post/5a38e1a0f265da4327185a26
+
+当您想在后台播放视频时:
+
+1. 需要设置 videoPlayer.pauseWhenAppDidEnterBackground = NO; (该值默认为YES, 即App进入后台默认暂停).
+
+2. 前往 `TARGETS` -> `Capability` -> enable `Background Modes` -> select this mode `Audio, AirPlay, and Picture in Picture`
+</p>
+
+```Objective-C
+_player.pauseWhenAppDidEnterBackground = NO; // 默认值为 YES, 即进入后台后 暂停.
+```
+
+<h3 id="3.14">3.14 停止</h3>
+
+<p>
+注意, 调用此方法后, 当前的 asset 将会被清空. 也就是说, 调用 play等播放操作将会无效.
+</p>
+
+```Objective-C
+[_player stop];
+```
+
+<h3 id="3.15">3.15 重播</h3>
+
+<p>
+从头开始重新播放
+</p>
+
+```Objective-C
+[_player replay];
+```
+
+<h3 id="3.16">3.16 跳转到指定的时间播放</h3>
+
+```Objective-C
+NSTimeInterval secs = 20.0;
+[_player seekToTime:secs completionHandler:^(BOOL finished) {
+    // ....
+}];
+```
+
+<h3 id="3.17">3.17 调速 & 速率改变时的回调</h3>
+
+```Objective-C
+
+/// 默认值为 1.0
+_player.rate = 1.0;
+
+
+_player.rateDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull player) {
+    /// .. 
+}
+```
+
+<h3 id="3.18">3.18 接入别的视频 SDK, 自己动手撸一个 SJMediaPlaybackController, 替换作者原始实现</h3>
+
+<p>
+某些时候, 我们需要接入第三方的视频SDK, 但是又想使用 SJBaseVideoPlayer 封装的其他的功能. 
+
+这个时候, 我们可以自己动手, 将第三方的SDK封装一下, 实现 SJMediaPlaybackController 协议中声明的方法, 间接实现替换 SJBaseVideoPlayer 中的实现.
+
+可以参考 SJAVMediaPlaybackController 中的实现.
+
+封装 ijkplayer 的示例:  https://gitee.com/changsanjiang/SJIJKMediaPlaybackController
+</p>
+
+```Objective-C
+_player.playbackController = Your PlaybackController.
+```
