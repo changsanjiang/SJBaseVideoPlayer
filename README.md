@@ -367,7 +367,7 @@ ___
 <h2 id="3">3. 播放控制</h2>
 
 <p>
-播放控制: 对播放进行的操作. 此部分的内容由 "id &lt;SJMediaPlaybackController&lt; playbackController" 提供支持.
+播放控制: 对播放进行的操作. 此部分的内容由 "id &lt;SJMediaPlaybackController&gt; playbackController" 提供支持.
 
 大多数对播放进行的操作, 均在协议 SJMediaPlaybackController 进行了声明. 
 
@@ -643,7 +643,7 @@ ___
 <h2 id="4">4. 控制层的显示和隐藏</h4>
 
 <p>
-控制层的显示和隐藏, 此部分的内容由 "id &lt;SJControlLayerAppearManager&lt; controlLayerAppearManager" 提供支持.
+控制层的显示和隐藏, 此部分的内容由 "id &lt;SJControlLayerAppearManager&gt; controlLayerAppearManager" 提供支持.
 
 controlLayerAppearManager 内部存在一个定时器, 当控制层显示时, 会开启此定时器. 一定间隔后,  会尝试隐藏控制层.
 
@@ -734,7 +734,7 @@ ___
 <h2 id="5">5. 设备亮度和音量</h2>
 
 <p>
-设备亮度和音量的调整, 此部分的内容由 "id &lt;SJDeviceVolumeAndBrightnessManager&lt; deviceVolumeAndBrightnessManager" 提供支持.
+设备亮度和音量的调整, 此部分的内容由 "id &lt;SJDeviceVolumeAndBrightnessManager&gt; deviceVolumeAndBrightnessManager" 提供支持.
 </p>
 
 <h3 id="5.1">5.1 调整设备亮度</h2>
@@ -774,3 +774,18 @@ _player.disableVolumeSetting = YES;
 ```Objective-C
 _player.deviceVolumeAndBrightnessManager = Yout deviceVolumeAndBrightnessManager;
 ```
+
+___
+
+/// 明天继续....
+#### [6. 旋转](#6)
+* [6.1 自动旋转](#6.1)
+* [6.2 设置自动旋转支持的方向](#6.2)
+* [6.3 禁止自动旋转](#6.3)
+* [6.4 主动调用旋转](#6.4)
+* [6.5 是否全屏](#6.5)
+* [6.6 是否正在旋转](#6.6)
+* [6.7 当前旋转的方向 ](#6.7)
+* [6.8 旋转开始和结束的回调](#6.8)
+* [6.9 使 ViewController 一起旋转](#6.9)
+* [6.10 自己动手撸一个 SJRotationManager, 替换作者原始实现](#6.1)
