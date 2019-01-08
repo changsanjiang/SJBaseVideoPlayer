@@ -26,7 +26,7 @@ ___
 
 ## Documents
 
-#### * [1 可在以下视图层次中播放](#1)
+#### [1 可在以下视图层次中播放](#1)
 * [1.1 在普通 View 上播放](#1.1)
 * [1.2 在 TableViewCell 上播放](#1.2)
 * [1.3 在 TableViewHeaderView 上播放](#1.3)
@@ -35,7 +35,7 @@ ___
 * [1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放](#1.6)
 * [1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放](#1.7)
 
-#### * [2. 创建资源进行播放](#2)
+#### [2. 创建资源进行播放](#2)
 * [2.1 通过 URL 创建资源进行播放](#2.1)
 * [2.2 通过 AVAsset 或其子类进行播放](#2.2)
 * [2.3 指定开始播放的时间](#2.3)
@@ -107,95 +107,94 @@ ___
 * [9.3 自己动手撸一个 SJReachability, 替换作者原始实现](#9.3)
 
 #### 10. 手势
-10.1 单击手势<br/>
-10.2 双击手势<br/>
-10.3 移动手势<br/>
-10.4 捏合手势<br/>
-10.5 禁止某些手势<br/>
-10.6 自定义某个手势的处理<br/>
-10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现<br/>
+* [10.1 单击手势](#10.1)
+* [10.2 双击手势](#10.2)
+* [10.3 移动手势](#10.3)
+* [10.4 捏合手势](#10.4)
+* [10.5 禁止某些手势](#10.5)
+* [10.6 自定义某个手势的处理](#10.6)
+* [10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现](#10.7)
 
 #### 11. 占位图
-11.1 设置本地占位图<br/>
-11.2 设置网络占位图<br/>
+* [11.1 设置本地占位图](#11.1)
+* [11.2 设置网络占位图](#11.2)
 
 #### 12. 显示提示文本
-12.1 显示文本及持续时间 - (NSString or NSAttributedString)<br/>
-12.2 配置提示文本<br/>
+* [12.1 显示文本及持续时间 - (NSString or NSAttributedString)](#12.1)
+* [12.2 配置提示文本](#12.2)
 
 #### 13. 一些固定代码
-13.1 - (void)vc_viewDidAppear; <br/>
-13.2 - (void)vc_viewWillDisappear;<br/>
-13.3 - (void)vc_viewDidDisappear;<br/>
-13.4 - (BOOL)vc_prefersStatusBarHidden;<br/>
-13.5 - (UIStatusBarStyle)vc_preferredStatusBarStyle;<br/>
-13.6 - 临时显示状态栏<br/>
-13.7 - 临时隐藏状态栏<br/>
+* [13.1 - (void)vc_viewDidAppear; ](#13.1)
+* [13.2 - (void)vc_viewWillDisappear;](#13.2)
+* [13.3 - (void)vc_viewDidDisappear;](#13.3)
+* [13.4 - (BOOL)vc_prefersStatusBarHidden;](#13.4)
+* [13.5 - (UIStatusBarStyle)vc_preferredStatusBarStyle;](#13.5)
+* [13.6 - 临时显示状态栏](#13.6)
+* [13.7 - 临时隐藏状态栏](#13.7)
 
 #### 14. 截屏
-14.1 当前时间截图<br/>
-14.2 指定时间截图<br/>
-14.3 生成预览视图, 大约20张<br/>
+* [14.1 当前时间截图](#14.1)
+* [14.2 指定时间截图](#14.2)
+* [14.3 生成预览视图, 大约20张](#14.3)
 
 #### 15. 导出视频或GIF
-15.1 导出视频<br/>
-15.2 导出GIF<br/>
-15.3 取消操作<br/>
+* [15.1 导出视频](#15.1)
+* [15.2 导出GIF](#15.2)
+* [15.3 取消操作](#15.3)
 
 #### 16. 滚动相关
-16.1 是否在 UICollectionView 或者 UITableView 中播放<br/>
-16.2 是否滚动显示<br/>
-16.3 播放器视图将要滚动显示和消失的回调<br/>
+* [16.1 是否在 UICollectionView 或者 UITableView 中播放](#16.1)
+* [16.2 是否滚动显示](#16.2)
+* [16.3 播放器视图将要滚动显示和消失的回调](#16.3)
 
 #### 17. 自动播放 - 在 UICollectionView 或者 UITableView 中
-17.1 开启<br/>
-17.2 配置<br/>
-17.3 关闭<br/>
-17.4 主动调用播放下一个资源<br/>
+* [17.1 开启](#17.1)
+* [17.2 配置](#17.2)
+* [17.3 关闭](#17.3)
+* [17.4 主动调用播放下一个资源](#17.4)
 
 #### 18. 控制层数据源, 每个方法介绍
-18.1 - (UIView *)controlView;<br/>
-18.2 - (BOOL)controlLayerDisappearCondition;<br/>
-18.3 - (BOOL)triggerGesturesCondition:(CGPoint)location;<br/>
-18.4 - (void)installedControlViewToVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
+* [18.1 - (UIView *)controlView;](#18.1)
+* [18.2 - (BOOL)controlLayerDisappearCondition;](#18.2)
+* [18.3 - (BOOL)triggerGesturesCondition:(CGPoint)location;](#18.3)
+* [18.4 - (void)installedControlViewToVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#18.4)
 
 #### 19. 控制层代理, 每个方法介绍
-19.1 - (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.2 - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.3 - (void)videoPlayerWillAppearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.4 - (void)videoPlayerWillDisappearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.5 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer prepareToPlay:(SJVideoPlayerURLAsset *)asset;<br/>
-19.6 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer statusDidChanged:(SJVideoPlayerPlayStatus)status;<br/>
-19.7 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer<br/>
+* [19.1 - (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.1)
+* [19.2 - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.2)
+* [19.3 - (void)videoPlayerWillAppearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.3)
+* [19.4 - (void)videoPlayerWillDisappearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.4)
+* [19.5 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer prepareToPlay:(SJVideoPlayerURLAsset *)asset;](#19.5)
+* [19.6 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer statusDidChanged:(SJVideoPlayerPlayStatus)status;](#19.6)
+* [19.7 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer](#19.7)
 currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeStr<br/>
 totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;<br/>
-19.8 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer presentationSize:(CGSize)size;<br/>
-19.9 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer muteChanged:(BOOL)mute;<br/>
-19.11 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer volumeChanged:(float)volume;<br/>
-19.12 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer brightnessChanged:(float)brightness;<br/>
-19.13 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer rateChanged:(float)rate;<br/>
-19.14 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer loadedTimeProgress:(float)progress;<br/>
-19.15 - (void)startLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.16 - (void)cancelLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.17 - (void)loadCompletion:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.18 - (BOOL)canTriggerRotationOfVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.20 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willRotateView:(BOOL)isFull;<br/>
-19.21 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didEndRotation:(BOOL)isFull;<br/>
-19.22 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willFitOnScreen:(BOOL)isFitOnScreen;<br/>
-19.23 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didCompleteFitOnScreen:(BOOL)isFitOnScreen;<br/>
-19.24 - (void)horizontalDirectionWillBeginDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.25 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer horizontalDirectionDidMove:(CGFloat)progress;<br/>
-19.26 - (void)horizontalDirectionDidEndDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.27 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer reachabilityChanged:(SJNetworkStatus)status;<br/>
-19.28 - (void)tappedPlayerOnTheLockedState:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.29 - (void)lockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.30 - (void)unlockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.31 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;<br/>
-19.32 - (void)appWillResignActive:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.33 - (void)appDidBecomeActive:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.34 - (void)appWillEnterForeground:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-19.35 - (void)appDidEnterBackground:(__kindof SJBaseVideoPlayer *)videoPlayer;<br/>
-<br/>
+* [19.8 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer presentationSize:(CGSize)size;](#19.8)
+* [19.9 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer muteChanged:(BOOL)mute;](#19.9)
+* [19.11 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer volumeChanged:(float)volume;](#19.11)
+* [19.12 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer brightnessChanged:(float)brightness;](#19.12)
+* [19.13 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer rateChanged:(float)rate;](#19.13)
+* [19.14 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer loadedTimeProgress:(float)progress;](#19.14)
+* [19.15 - (void)startLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.15)
+* [19.16 - (void)cancelLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.16)
+* [19.17 - (void)loadCompletion:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.17)
+* [19.18 - (BOOL)canTriggerRotationOfVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.18)
+* [19.20 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willRotateView:(BOOL)isFull;](#19.20)
+* [19.21 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didEndRotation:(BOOL)isFull;](#19.21)
+* [19.22 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willFitOnScreen:(BOOL)isFitOnScreen;](#19.22)
+* [19.23 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didCompleteFitOnScreen:(BOOL)isFitOnScreen;](#19.23)
+* [19.24 - (void)horizontalDirectionWillBeginDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.24)
+* [19.25 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer horizontalDirectionDidMove:(CGFloat)progress;](#19.25)
+* [19.26 - (void)horizontalDirectionDidEndDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.26)
+* [19.27 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer reachabilityChanged:(SJNetworkStatus)status;](#19.27)
+* [19.28 - (void)tappedPlayerOnTheLockedState:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.28)
+* [19.29 - (void)lockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.29)
+* [19.30 - (void)unlockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.30)
+* [19.31 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;](#19.31)
+* [19.32 - (void)appWillResignActive:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.32)
+* [19.33 - (void)appDidBecomeActive:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.33)
+* [19.34 - (void)appWillEnterForeground:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.34)
+* [19.35 - (void)appDidEnterBackground:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.35)
 
 ___
 
