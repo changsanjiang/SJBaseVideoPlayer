@@ -201,37 +201,44 @@ ___
 # <h2 id="1">1. 可在以下视图层次中播放</h2>
 为应对各个视图场景, 我将这些场景封装进了 SJPlayModel 中, 使用它初始化对应场景即可. 
 
-* [1.1 在普通 View 上播放 ](#1.1)
+<h3 id="1.1">1.1 在普通 View 上播放</h3>
+
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel new];
 ```
 
-* [1.2 在 TableViewCell 上播放](#1.2)
+<h3 id="1.2">1.2 在 TableViewCell 上播放</h3>
+
 ```Objective-C
 SJPlayModel *playModel =[SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
 ```
 
-* [1.3 在 TableViewHeaderView 上播放](#1.3)
+<h3 id="1.3">1.3 在 TableViewHeaderView 上播放</h3>
+
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:view.coverImageView.tag atIndexPath:indexPath tableView:self.tableView];
 ```
 
-* [1.4 在 CollectionViewCell 上播放](#1.4)
+<h3 id="1.4">1.4 在 CollectionViewCell 上播放</h3>
+
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
 ```
 
-* [1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放](#1.5)
+<h3 id="1.5">1.5 CollectionView 嵌套在 TableViewHeaderView 中, 在 CollectionViewCell 上播放</h3>
+
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
 ```
 
-* [1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放](#1.6)
+<h3 id="1.6">1.6 CollectionView 嵌套在 TableViewCell 中, 在 CollectionViewCell 上播放</h3>
+
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath tableView:self.tableView];
 ```
 
-* [1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放](#1.7)
+<h3 id="1.7">1.7 CollectionView 嵌套在 CollectionViewCell 中, 在 CollectionViewCell 上播放</h3>
+
 ```Objective-C
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
 ```
