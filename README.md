@@ -796,7 +796,7 @@ ___
 <p>
 此部分的内容由 "id &lt;SJRotationManagerProtocol&gt; rotationManager" 提供支持.
 
-对于旋转, 我们开发者肯定需要绝对的控制, 例如: 设置自动旋转所支持方向. 能够主动+自动旋转, 而且还需要能在适当的时候禁止自动旋转. 旋转前后的回调等等... 放心这些功能都有, 我挨个给大家介绍一下:
+对于旋转, 我们开发者肯定需要绝对的控制, 例如: 设置自动旋转所支持方向. 能够主动+自动旋转, 而且还需要能在适当的时候禁止自动旋转. 旋转前后的回调等等... 放心这些功能都有, 我挨个给大家介绍.
 
 另外旋转有两种方式:
 
@@ -815,6 +815,7 @@ ___
 <h3 id ="6.2">6.2 设置自动旋转支持的方向</h3>
 
 ```Objective-C
+/// 设置自动旋转支持的方向
 _player.supportedOrientation = SJAutoRotateSupportedOrientation_LandscapeLeft | SJAutoRotateSupportedOrientation_LandscapeRight;
 
 
@@ -936,6 +937,44 @@ _observer.rotationDidEndExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr
 
 <h3 id ="6.10">6.10 自己动手撸一个 SJRotationManager, 替换作者原始实现</h3>
 
+正如使用 [6.9 使 ViewController 一起旋转](#6.9) 中使用 SJVCRotationManager 替换 SJRotationManager 一样, 当你想替换原始实现时, 可以实现 SJRotationManagerProtocol 中定义的方法.
+
+___
+
+<h2 id="7">7. 直接全屏而不旋转</h2>
+
 <p>
-正如使用 [6.9 使 ViewController 一起旋转](#6.9) 中使用 SJVCRotationManager 替换 SJRotationManager 一样, 当你想替换原始实现时, 可以实现 SJRotationManagerProtocol 协议中定义的方法.
+直接全屏, 或者说充满屏幕, 但不旋转.
 </p>
+
+<h3 id="7.1">7.1 全屏和恢复</h3>
+
+```Objective-C
+_player.fitOnScreen = YES;
+
+[_player setFitOnScreen:NO animated:NO];
+
+[_player setFitOnScreen:YES animated:YES completionHandler:^(__kindof SJBaseVideoPlayer * _Nonnull player) {
+    /// ...
+}];
+```
+
+<h3 id="7.2">7.2 开始和结束的回调</h3>
+
+```Objective-C
+@property (nonatomic, copy, nullable) void(^fitOnScreenWillBeginExeBlock)(__kindof SJBaseVideoPlayer *player);
+@property (nonatomic, copy, nullable) void(^fitOnScreenDidEndExeBlock)(__kindof SJBaseVideoPlayer *player);;
+```
+
+<h3 id="7.3">7.3 是否是全屏</h3>
+
+```Objective-C
+/// YES 为充满屏幕 
+_player.isFitOnScreen
+```
+
+<h3 id="7.4">7.4 自己动手撸一个 SJFitOnScreenManager, 替换作者原始实现</h3>
+
+该部分管理类的协议定义在 SJFitOnScreenManager 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
+
+
