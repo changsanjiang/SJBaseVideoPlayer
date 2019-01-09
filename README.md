@@ -975,6 +975,195 @@ _player.isFitOnScreen
 
 <h3 id="7.4">7.4 自己动手撸一个 SJFitOnScreenManager, 替换作者原始实现</h3>
 
-该部分管理类的协议定义在 SJFitOnScreenManager 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
+该部分管理类的协议定义在 SJFitOnScreenManagerProtocol 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
 
+___
+
+<h2 id="8">8. 镜像翻转</h2>
+
+<p>
+此部分内容由 id&lt;SJFlipTransitionManager&gt; flipTransitionManager 提供支持
+
+目前镜像翻转只写了 水平翻转, 未来可能会加入更多的翻转类型.
+</p>
+
+```Objective-C
+typedef enum : NSUInteger {
+    SJViewFlipTransition_Identity,
+    SJViewFlipTransition_Horizontally, // 水平翻转
+} SJViewFlipTransition;
+```
+
+<h3 id="8.1">8.1 翻转和恢复</h3>
+
+```Objective-C
+/// 当前的翻转类型
+_player.flipTransition
+
+/// 翻转相关方法
+[_player setFlipTransition:SJViewFlipTransition_Horizontally];
+[_player setFlipTransition:SJViewFlipTransition_Horizontally animated:YES];
+[_player setFlipTransition:SJViewFlipTransition_Identity animated:YES completionHandler:^(__kindof SJBaseVideoPlayer * _Nonnull player) {
+    /// ...
+}];
+```
+
+<h3 id="8.2">8.2 开始和结束的回调</h3>
+
+```Objective-C
+@property (nonatomic, copy, nullable) void(^flipTransitionDidStartExeBlock)(__kindof SJBaseVideoPlayer *player);
+@property (nonatomic, copy, nullable) void(^flipTransitionDidStopExeBlock)(__kindof SJBaseVideoPlayer *player);
+```
+
+<h3 id="8.3">8.3  自己动手撸一个 SJFlipTransitionManager, 替换作者原始实现</h3>
+
+<p>
+该部分管理类的协议定义在 SJFlipTransitionManagerProtocol 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
+</p>
+
+___
+
+<h2 id="9">9. 网络状态</h2>
+
+<p>
+此部分内容由 id&lt;SJReachability&gt; reachability 提供支持
+
+默认的 reachability 是个单例, 在App生命周期中, 仅创建一次. 因此每个播放器对象持有的 reachability 都是相同的. 
+</p>
+
+<h3 id="9.1">9.1 当前的网络状态</h3>
+
+```Objective-C
+@property (nonatomic, readonly) SJNetworkStatus networkStatus;
+```
+
+<h3 id="9.1">9.2 网络状态改变的回调</h3>
+
+```Objective-C
+@property (nonatomic, copy, nullable) void(^networkStatusDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player);
+```
+
+<h3 id="9.1">9.3 自己动手撸一个 SJReachability, 替换作者原始实现</h3>
+
+<p>
+该部分管理类的协议定义在 SJNetworkStatus 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
+</p>
+
+___
+
+<h2 id="10">10. 手势</h2>
+<p>
+此部分内容由 id&lt;SJPlayerGestureControl&gt; gestureControl 提供支持
+
+播放器默认存在四种手势, 每个手势触发后的回调均定义在 SJPlayerGestureControl 协议中, 当想改变某个手势的处理时, 可以直接修改对应手势触发的 block 即可.
+
+具体请看以下部分.
+</p>
+
+<h3 id="10.1">10.1 单击手势</h3>
+
+<p>
+当用户单击播放器时, 播放器会调用 [显示或隐藏控制层的操作](#4)
+ 
+以下为默认实现: 
+</p>
+
+```Objective-C
+__weak typeof(self) _self = self;
+_gestureControl.singleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, CGPoint location) {
+    __strong typeof(_self) self = _self;
+    if ( !self ) return ;
+    /// 让控制层显示或隐藏
+    [self.controlLayerAppearManager switchAppearState];
+};
+```
+
+<h3 id="10.1">10.2 双击手势</h3>
+
+<p>
+双击会触发暂停或播放的操作
+</p>
+
+```Objective-C
+__weak typeof(self) _self = self;
+_gestureControl.doubleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, CGPoint location) {
+    __strong typeof(_self) self = _self;
+    if ( !self ) return ;
+    if ( [self playStatus_isPlaying] )
+        [self pause];
+    else
+        [self play];
+};
+```
+
+<h3 id="10.1">10.3 移动手势</h3>
+
+- 垂直滑动时, 默认情况下如果在屏幕左边, 则会触发调整亮度的操作, 并显示亮度提示视图. 如果在屏幕右边, 则会触发调整声音的操作, 并显示系统音量提示视图
+- 水平滑动时, 会触发控制层相应的代理方法
+
+```Objective-C
+__weak typeof(self) _self = self;
+_gestureControl.panHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, SJPanGestureTriggeredPosition position, SJPanGestureMovingDirection direction, SJPanGestureRecognizerState state, CGPoint translate) {
+    __strong typeof(_self) self = _self;
+    if ( !self ) return ;
+    /// ....
+};
+```
+
+<h3 id="10.1">10.4 捏合手势</h3>
+
+<p>
+当用户做放大或收缩触发该手势时, 会设置播放器显示模式`Aspect`或`AspectFill`.
+</p>
+
+```Objective-C
+__weak typeof(self) _self = self;
+_gestureControl.pinchHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, CGFloat scale) {
+    __strong typeof(_self) self = _self;
+    if ( !self ) return ;
+    self.playbackController.videoGravity = scale > 1 ?AVLayerVideoGravityResizeAspectFill:AVLayerVideoGravityResizeAspect;
+};
+```
+
+<h3 id="10.1">10.5 禁止某些手势</h3>
+
+<p>
+当需要禁止某个手势时, 可以像如下设置:
+</p>
+
+```Objective-C
+/// 此处为禁止单击和双击手势
+_player.disabledGestures = SJPlayerGestureType_SingleTap | SJPlayerGestureType_DoubleTap;  
+
+typedef enum : NSUInteger {
+    SJPlayerGestureType_SingleTap,
+    SJPlayerGestureType_DoubleTap,
+    SJPlayerGestureType_Pan,
+    SJPlayerGestureType_Pinch,
+} SJPlayerGestureType;
+```
+
+<h3 id="10.1">10.6 自定义某个手势的处理</h3>
+
+```Objective-C
+/// 例如 替换单击手势的处理
+__weak typeof(self) _self = self;
+_player.gestureControl.singleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, CGPoint location) {
+    __strong typeof(_self) self = _self;
+    if ( !self ) return ;
+    /// .....你的处理
+};
+```
+
+<h3 id="10.1">10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现</h3>
+
+<p>
+该部分管理类的协议定义在 SJPlayerGestureControlProtocol 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
+</p>
+
+___
+
+#### [11. 占位图](#11)
+* [11.1 设置本地占位图](#11.1)
+* [11.2 设置网络占位图](#11.2)
 
