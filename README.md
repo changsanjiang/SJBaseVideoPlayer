@@ -191,10 +191,6 @@ totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;<br/>
 * [19.29 - (void)lockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.29)
 * [19.30 - (void)unlockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.30)
 * [19.31 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;](#19.31)
-* [19.32 - (void)appWillResignActive:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.32)
-* [19.33 - (void)appDidBecomeActive:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.33)
-* [19.34 - (void)appWillEnterForeground:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.34)
-* [19.35 - (void)appDidEnterBackground:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.35)
 
 ___
 
@@ -1055,18 +1051,16 @@ ___
 <p>
 此部分内容由 id&lt;SJPlayerGestureControl&gt; gestureControl 提供支持
 
-播放器默认存在四种手势, 每个手势触发后的回调均定义在 SJPlayerGestureControl 协议中, 当想改变某个手势的处理时, 可以直接修改对应手势触发的 block 即可.
+播放器默认存在四种手势, 每个手势触发的回调均定义在 SJPlayerGestureControl 中, 当想改变某个手势的处理时, 可以直接修改对应手势触发的 block 即可.
 
 具体请看以下部分.
 </p>
 
 <h3 id="10.1">10.1 单击手势</h3>
 
-<p>
 当用户单击播放器时, 播放器会调用 [显示或隐藏控制层的操作](#4)
- 
+
 以下为默认实现: 
-</p>
 
 ```Objective-C
 __weak typeof(self) _self = self;
@@ -1078,7 +1072,7 @@ _gestureControl.singleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull contro
 };
 ```
 
-<h3 id="10.1">10.2 双击手势</h3>
+<h3 id="10.2">10.2 双击手势</h3>
 
 <p>
 双击会触发暂停或播放的操作
@@ -1096,7 +1090,7 @@ _gestureControl.doubleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull contro
 };
 ```
 
-<h3 id="10.1">10.3 移动手势</h3>
+<h3 id="10.3">10.3 移动手势</h3>
 
 - 垂直滑动时, 默认情况下如果在屏幕左边, 则会触发调整亮度的操作, 并显示亮度提示视图. 如果在屏幕右边, 则会触发调整声音的操作, 并显示系统音量提示视图
 - 水平滑动时, 会触发控制层相应的代理方法
@@ -1110,7 +1104,7 @@ _gestureControl.panHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, SJP
 };
 ```
 
-<h3 id="10.1">10.4 捏合手势</h3>
+<h3 id="10.4">10.4 捏合手势</h3>
 
 <p>
 当用户做放大或收缩触发该手势时, 会设置播放器显示模式`Aspect`或`AspectFill`.
@@ -1125,7 +1119,7 @@ _gestureControl.pinchHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, C
 };
 ```
 
-<h3 id="10.1">10.5 禁止某些手势</h3>
+<h3 id="10.5">10.5 禁止某些手势</h3>
 
 <p>
 当需要禁止某个手势时, 可以像如下设置:
@@ -1143,7 +1137,7 @@ typedef enum : NSUInteger {
 } SJPlayerGestureType;
 ```
 
-<h3 id="10.1">10.6 自定义某个手势的处理</h3>
+<h3 id="10.6">10.6 自定义某个手势的处理</h3>
 
 ```Objective-C
 /// 例如 替换单击手势的处理
@@ -1155,7 +1149,7 @@ _player.gestureControl.singleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull
 };
 ```
 
-<h3 id="10.1">10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现</h3>
+<h3 id="10.7">10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现</h3>
 
 <p>
 该部分管理类的协议定义在 SJPlayerGestureControlProtocol 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
@@ -1163,7 +1157,535 @@ _player.gestureControl.singleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull
 
 ___
 
-#### [11. 占位图](#11)
-* [11.1 设置本地占位图](#11.1)
-* [11.2 设置网络占位图](#11.2)
+<h2 id="11">11. 占位图</h2>
 
+<p>
+资源在初始化时, 由于暂时没有画面可以呈现, 会出现短暂的黑屏. 在此期间, 建议大家设置一下占位图.
+</p>
+
+<h3 id="11.1">11.1 设置本地占位图</h3>
+
+```Objective-C
+_player.placeholderImageView.image = [UIImage imageNamed:@"..."];
+```
+
+<h3 id="11.2">11.2 设置网络占位图</h3>
+
+```Objective-C
+[_player.placeholderImageView sd_setImageWithURL:URL placeholderImage:img];
+```
+
+___
+
+<h2 id="12">12. 显示提示文本</h2>
+
+<p>
+目前提示文本支持 NSString 以及 NSAttributedString. 
+</p>
+
+<h3 id="12.1">12.1 显示文本及持续时间 - (NSString or NSAttributedString)</h3>
+
+```Objective-C
+/// duration 如果为 -1, 则会一直显示 
+- (void)showTitle:(NSString *)title duration:(NSTimeInterval)duration;
+
+- (void)showTitle:(NSString *)title duration:(NSTimeInterval)duration hiddenExeBlock:(void(^__nullable)(__kindof SJBaseVideoPlayer *player))hiddenExeBlock;
+
+- (void)showAttributedString:(NSAttributedString *)attributedString duration:(NSTimeInterval)duration;
+
+- (void)showAttributedString:(NSAttributedString *)attributedString duration:(NSTimeInterval)duration hiddenExeBlock:(void(^__nullable)(__kindof SJBaseVideoPlayer *player))hiddenExeBlock;
+
+/// 隐藏
+- (void)hiddenTitle;
+```
+
+<h3 id="12.1">12.2 配置提示文本</h3>
+
+```Objective-C
+
+/// Update
+_player.prompt.update(^(SJPromptConfig * _Nonnull config) {
+    config.font = [UIFont systemFontOfSize:12];
+});
+
+/// 所有属性如下: 
+@interface SJPromptConfig : NSObject
+
+/// default is UIEdgeInsetsMake( 8, 8, 8, 8 ).
+@property (nonatomic, assign) UIEdgeInsets insets;
+
+/// default is 8.
+@property (nonatomic, assign) CGFloat cornerRadius;
+
+/// default is black.
+@property (nonatomic, strong) UIColor *backgroundColor;
+
+/// default is systemFont( 14 ).
+@property (nonatomic, assign) UIFont *font;
+
+/// default is white.
+@property (nonatomic, strong) UIColor *fontColor;
+
+/// default is ( superview.width * 0.6 ).
+@property (nonatomic, assign) CGFloat maxWidth;
+
+- (void)reset;
+
+@end
+```
+
+___
+
+<h2 id="13">13. 一些固定代码</h2>
+
+<p>
+接入播放器的 ViewController 中, 会写一些固定的代码, 我将这些固定代码(例如 进入下个页面时, 需要当前页面的播放器暂停), 都封装在了以下方法中. 
+
+在适当的时候直接调用即可, 以下为内部实现:
+</p>
+
+<h3 id="13.1">13.1 - (void)vc_viewDidAppear; </h3>
+
+<p>
+当 ViewController 的 viewDidAppear 调用时, 恢复播放
+
+实现如下:
+</p>
+
+```Objective-C
+- (void)vc_viewDidAppear {
+    if ( !self.isPlayOnScrollView || (self.isPlayOnScrollView && self.isScrollAppeared) ) {
+    /// 恢复播放
+        [self play];
+    }
+    
+    /// 标识vc已显示 
+    /// vc_isDisappeared 是自动旋转触发的条件之一, 如果控制器 disappear 了, 就不会触发旋转 
+    self.vc_isDisappeared = NO;
+}
+```
+
+<h3 id="13.2">13.2 - (void)vc_viewWillDisappear;</h3>
+
+<p>
+当 ViewController 的 viewWillDisappear 调用时, 设置标识为YES
+
+实现如下:
+</p>
+
+```Objective-C
+- (void)vc_viewWillDisappear {
+    /// 标识vc已显示 
+    /// vc_isDisappeared 是自动旋转触发的条件之一, 如果控制器 disappear 了, 就不会触发旋转 
+    self.vc_isDisappeared = YES;
+}
+```
+
+<h3 id="13.3">13.3 - (void)vc_viewDidDisappear;</h3>
+
+<p>
+当 ViewController 的 viewDidDisappear 调用时, 暂停播放
+
+实现如下:
+</p>
+
+```Objective-C
+- (void)vc_viewDidDisappear {
+    [self pause];
+}
+```
+
+<h3 id="13.4">13.4 - (BOOL)vc_prefersStatusBarHidden;</h3>
+
+<p>
+状态栏是否可以隐藏
+
+实现如下: 
+</p>
+
+```Objective-C
+- (BOOL)vc_prefersStatusBarHidden {
+    if ( _tmpShowStatusBar ) return NO;         // 临时显示
+    if ( _tmpHiddenStatusBar ) return YES;      // 临时隐藏
+    if ( self.lockedScreen ) return YES;        // 锁屏时, 不显示
+    if ( self.rotationManager.transitioning ) { // 旋转时, 不显示
+        if ( !self.disabledControlLayerAppearManager && self.controlLayerIsAppeared ) return NO;
+        return YES;
+    }
+    // 全屏播放时, 使状态栏根据控制层显示或隐藏
+    if ( self.isFullScreen ) return !self.controlLayerIsAppeared;
+    return NO;
+}
+```
+
+<h3 id="13.5">13.5 - (UIStatusBarStyle)vc_preferredStatusBarStyle;</h3>
+
+<p>
+状态栏显示白色还是黑色
+
+实现如下:
+</p>
+
+```Objective-C
+- (UIStatusBarStyle)vc_preferredStatusBarStyle {
+    // 全屏播放时, 使状态栏变成白色
+    if ( self.isFullScreen || self.fitOnScreen ) return UIStatusBarStyleLightContent;
+    return UIStatusBarStyleDefault;
+}
+```
+
+<h3 id="13.6">13.6 - 临时显示状态栏</h3>
+
+<p>
+有时候, 可能会希望临时显示状态栏, 例如全屏转回小屏时, 旋转之前, 需要将状态栏显示.
+</p>
+
+```Objective-C
+[_player needShowStatusBar]; 
+```
+
+<h3 id="13.7">13.7 - 临时隐藏状态栏</h3>
+
+<p>
+有时候, 可能会希望临时隐藏状态栏, 例如某个播放器控制层不需要显示状态栏.
+</p>
+
+```Objective-C
+[_player needHiddenStatusBar]; 
+```
+
+___
+
+<h2 id="14">14. 截屏</h2>
+
+<h3 id="14.1">14.1 当前时间截图</h3>
+
+```Objective-C
+UIImage *img = [_player screenshot];
+```
+
+<h3 id="14.1">14.2 指定时间截图</h3>
+
+```Objective-C
+- (void)screenshotWithTime:(NSTimeInterval)secs
+                completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block;
+
+/// 可以通过 _player.playbackController.presentationSize 来获取当前视频宽高
+- (void)screenshotWithTime:(NSTimeInterval)secs
+                      size:(CGSize)size
+                completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block;
+```
+
+<h3 id="14.1">14.3 生成预览视图, 大约20张</h3>
+
+```Objective-C
+/// 可以通过 _player.playbackController.presentationSize 来获取当前视频宽高
+/// itemSize 应该尽可能的小一点, 这样处理的效率会更快
+- (void)generatedPreviewImagesWithMaxItemSize:(CGSize)itemSize
+                                   completion:(void(^)(__kindof SJBaseVideoPlayer *player, NSArray<id<SJVideoPlayerPreviewInfo>> *__nullable images, NSError *__nullable error))block;
+```
+
+<h2 id="15">15. 导出视频或GIF</h2>
+
+<h3 id="15.1">15.1 导出视频</h3>
+
+```Objective-C
+/**
+ export session.
+ 
+ @param beginTime           开始的位置, 单位是秒
+ @param endTime             结束的位置, 单位是秒
+ @param presetName 	       default is `AVAssetExportPresetMediumQuality`.
+ @param progressBlock       progressBlock
+ @param completion 	       completion
+ @param failure 	          failure
+ */
+- (void)exportWithBeginTime:(NSTimeInterval)beginTime
+                    endTime:(NSTimeInterval)endTime
+                 presetName:(nullable NSString *)presetName
+                   progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
+                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSURL *fileURL, UIImage *thumbnailImage))completion
+                    failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure;
+```
+
+<h3 id="15.2">15.2 导出GIF</h3>
+
+```Objective-C
+/**
+生成GIF
+
+@param beginTime 开始的位置, 单位是秒
+@param duration  时长
+@param progressBlock 进度回调
+@param completion 完成的回调
+@param failure 失败的回调
+*/
+- (void)generateGIFWithBeginTime:(NSTimeInterval)beginTime
+                        duration:(NSTimeInterval)duration
+                        progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
+                      completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage *imageGIF, UIImage *thumbnailImage, NSURL *filePath))completion
+                         failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure;
+```
+
+<h3 id="15.3">15.3 取消操作</h3>
+
+```Objective-C
+/// 取消导出操作
+/// 播放器 dealloc 时, 会调用一次 
+- (void)cancelExportOperation;
+
+/// 取消GIF操作
+/// 播放器 dealloc 时, 会调用一次 
+- (void)cancelGenerateGIFOperation;
+```
+
+<h2 id="16">16. 滚动相关</h2>
+
+<p>
+此部分的内容由 SJPlayModelPropertiesObserver 提供支持.
+</p>
+
+
+<h3 id="16.1">16.1 是否在 UICollectionView 或者 UITableView 中播放</h3>
+
+```Objective-C
+/// 是否是在 UICollectionView 或者 UITableView 中播放
+_player.isPlayOnScrollView
+```
+
+<h3 id="16.2">16.2 是否滚动显示</h3>
+
+```Objective-C
+/// 是否滚动显示
+_player.isScrollAppeared
+```
+
+<h3 id="16.3">16.3 播放器视图将要滚动显示和消失的回调</h3>
+
+```Objective-C
+@property (nonatomic, copy, nullable) void(^playerViewWillAppearExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
+@property (nonatomic, copy, nullable) void(^playerViewWillDisappearExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
+```
+
+<h2 id="17">17. 自动播放 - 在 UICollectionView 或者 UITableView 中</h2>
+
+<p>
+目前支持在 UICollectionViewCell 和 UITableViewCell 中自动播放.
+
+使用之前, 请导入头文件 `#import "UIScrollView+ListViewAutoplaySJAdd.h"`
+</p>
+
+<h3 id="17.1">17.1 开启</h3>
+
+```Objective-C
+/// 配置列表自动播放
+[_tableView sj_enableAutoplayWithConfig:[SJPlayerAutoplayConfig configWithPlayerSuperviewTag:101 autoplayDelegate:self]];
+
+
+/// Delegate method
+- (void)sj_playerNeedPlayNewAssetAtIndexPath:(NSIndexPath *)indexPath {
+
+}
+```
+
+<h3 id="17.2">17.2 配置</h3>
+
+```Objective-C
+typedef NS_ENUM(NSUInteger, SJAutoplayScrollAnimationType) {
+    SJAutoplayScrollAnimationTypeNone,
+    SJAutoplayScrollAnimationTypeTop,
+    SJAutoplayScrollAnimationTypeMiddle,
+};
+
+@interface SJPlayerAutoplayConfig : NSObject
++ (instancetype)configWithPlayerSuperviewTag:(NSInteger)playerSuperviewTag
+                            autoplayDelegate:(id<SJPlayerAutoplayDelegate>)autoplayDelegate;
+
+/// 滚动的动画类型
+/// default is .Middle;
+@property (nonatomic) SJAutoplayScrollAnimationType animationType;
+
+@property (nonatomic, readonly) NSInteger playerSuperviewTag;
+@property (nonatomic, weak, nullable, readonly) id<SJPlayerAutoplayDelegate> autoplayDelegate;
+@end
+
+@protocol SJPlayerAutoplayDelegate <NSObject>
+- (void)sj_playerNeedPlayNewAssetAtIndexPath:(NSIndexPath *)indexPath;
+@end
+```
+
+<h3 id="17.3">17.3 关闭</h3>
+
+```Objective-C
+[_tableView sj_disenableAutoplay];
+```
+
+<h3 id="17.4">17.4 主动调用播放下一个资源</h3>
+
+```Objective-C
+[_tableView sj_needPlayNextAsset];
+```
+
+___
+
+<h2 id="18">18. 控制层数据源, 每个方法介绍</h2>
+
+<h3 id="18.1">18.1 - (UIView *)controlView;</h3>
+
+<p>
+controlView 为控制层的根视图, 它将会被添加到播放器中
+</p>
+
+<h3 id="18.2">18.2 - (BOOL)controlLayerDisappearCondition;</h3>
+
+[控制层的显示和隐藏管理类](#4) 触发自动隐藏时, 播放器会回调这个方法.
+
+如果返回 YES, 则播放器将会调用 [19.2 - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.2).
+
+<h3 id="18.3">18.3 - (BOOL)triggerGesturesCondition:(CGPoint)location;</h3>
+
+此方法将作为手势触发的一个条件, 如果返回NO, 将不会触发任何手势.
+
+当某个手势将要触发时, 该方法将会被调用. 
+
+<h3 id="18.4">18.4 - (void)installedControlViewToVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+当播放器将[controlView](#18.1)添加到播放器视图中后, 会回调这个方法.
+
+<h2 id="19">19. 控制层代理, 每个方法介绍</h2>
+
+<h3 id="19.1">19.1 - (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+控制层需要显示的时候, 会回调这个方法. 你应该在这里做一些显示的工作.
+
+当调用 `[_player controlLayerNeedAppear]` 时, 此时会立即回调这个方法
+
+<h3 id="19.1">19.2 - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+当控制层需要隐藏的时候, 会回调这个方法. 你应该在这里做一些隐藏的工作.
+
+关于控制层的隐藏: 默认情况下(videoPlayer.enableControlLayerDisplayController==YES)
+- 当调用[videoPlayer controlLayerNeedDisappear]时, 此时会立即回调这个方法
+- 当控制层显示时, 默认会在3秒后, 自动调用这个方法, 隐藏控制层
+
+
+<h3 id="19.1">19.3 - (void)videoPlayerWillAppearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+滚动 scrollView 时, 播放器即将出现时会回调这个方法.
+
+<h3 id="19.1">19.4 - (void)videoPlayerWillDisappearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+滚动scrollView时, 播放器即将消失时会回调这个方法.
+
+<h3 id="19.1">19.5 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer prepareToPlay:(SJVideoPlayerURLAsset *)asset;</h3>
+
+当播放器播放一个新的资源时, 会回调这个方法
+
+<h3 id="19.1">19.6 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer statusDidChanged:(SJVideoPlayerPlayStatus)status;</h3>
+
+当播放状态改变时, 会回调这个方法
+
+<h3 id="19.1">19.7 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer
+currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeStrtotalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;</h3>
+
+播放时间改变的回调
+
+<h3 id="19.1">19.8 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer presentationSize:(CGSize)size;</h3>
+
+播放器获取到视频宽高后, 会回调这个方法
+
+<h3 id="19.1">19.9 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer muteChanged:(BOOL)mute;</h3>
+
+设置静音时, 会回调这个方法
+
+<h3 id="19.1">19.11 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer volumeChanged:(float)volume;</h3>
+
+设置系统音量时, 会回调这个方法
+
+<h3 id="19.1">19.12 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer brightnessChanged:(float)brightness;</h3>
+
+设置系统亮度时, 会回调这个方法
+
+<h3 id="19.1">19.13 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer rateChanged:(float)rate;</h3>
+
+设置速率时, 会回调这个方法
+
+<h3 id="19.1">19.14 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer loadedTimeProgress:(float)progress;</h3>
+
+缓冲时间改变的回调.
+
+注: 由于命名问题, 此方法未来可能会过期
+
+<h3 id="19.1">19.15 - (void)startLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+开始缓冲. 
+
+注: 由于命名问题, 此方法未来可能会过期
+
+<h3 id="19.1">19.16 - (void)cancelLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+取消缓冲.
+
+注: 由于命名问题, 此方法未来可能会过期
+
+<h3 id="19.1">19.17 - (void)loadCompletion:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+完成缓冲.
+
+注: 由于命名问题, 此方法未来可能会过期
+
+<h3 id="19.1">19.18 - (BOOL)canTriggerRotationOfVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+播放器是否可以出发自动旋转.
+
+<h3 id="19.1">19.20 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willRotateView:(BOOL)isFull;</h3>
+
+ 开始旋转的回调
+
+<h3 id="19.1">19.21 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didEndRotation:(BOOL)isFull;</h3>
+
+结束旋转的回调
+
+<h3 id="19.1">19.22 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willFitOnScreen:(BOOL)isFitOnScreen;</h3>
+
+将要充满屏幕的回调
+
+<h3 id="19.1">19.23 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didCompleteFitOnScreen:(BOOL)isFitOnScreen;</h3>
+
+完成后的回调
+
+<h3 id="19.1">19.24 - (void)horizontalDirectionWillBeginDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+水平方向的手势将要开始拖拽
+
+<h3 id="19.1">19.25 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer horizontalDirectionDidMove:(CGFloat)progress;</h3>
+
+水平方向的手势拖动中, progress 为当前的拖拽进度
+
+注: 由于命名问题, 此方法未来可能会过期
+
+<h3 id="19.1">19.26 - (void)horizontalDirectionDidEndDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+水平方向的手势拖动结束.
+
+<h3 id="19.1">19.27 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer reachabilityChanged:(SJNetworkStatus)status;</h3>
+
+网络状态变更的回调.
+
+<h3 id="19.1">19.28 - (void)tappedPlayerOnTheLockedState:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+这是一个只有在播放器锁屏状态下, 才会回调的方法
+
+当播放器锁屏后, 用户每次点击都会回调这个方法
+
+<h3 id="19.1">19.29 - (void)lockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+锁屏后的回调
+
+<h3 id="19.1">19.30 - (void)unlockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
+
+解锁后的回调
+
+<h3 id="19.1">19.31 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;</h3>
+
+切换分辨率的回调
