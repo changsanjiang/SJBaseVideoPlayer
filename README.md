@@ -1241,6 +1241,13 @@ ___
 <p>
 接入播放器的 ViewController 中, 会写一些固定的代码, 我将这些固定代码(例如 进入下个页面时, 需要当前页面的播放器暂停), 都封装在了以下方法中. 
 
+```Objective-C
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [_player vc_viewDidAppear];
+}
+```
+
 在适当的时候直接调用即可, 以下为内部实现:
 </p>
 
