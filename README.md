@@ -203,7 +203,7 @@ ___
 SJBaseVideoPlayer 播放的视频资源是通过 SJVideoPlayerURLAsset 进行初始化的.  SJVideoPlayerURLAsset 由两部分组成: 
 
 - 视图层次 (SJPlayModel)
-- 资源地址 (可以是本地资源/远程URL/AVAsset)
+- 资源地址 (可以是本地资源/URL/AVAsset)
 
 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放. 如下示例:
 </p>
@@ -316,7 +316,7 @@ ___
 SJBaseVideoPlayer 播放的视频资源是通过 SJVideoPlayerURLAsset 进行初始化的.  SJVideoPlayerURLAsset 由两部分组成: 
 
 - 视图层次 (第一部分中的SJPlayModel)
-- 资源地址 (可以是本地资源/远程URL/AVAsset)
+- 资源地址 (可以是本地资源/URL/AVAsset)
 
 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放. 如下示例:
 </p>
@@ -786,20 +786,156 @@ _player.disableVolumeSetting = YES;
 </p>
 
 ```Objective-C
-_player.deviceVolumeAndBrightnessManager = Yout deviceVolumeAndBrightnessManager;
+_player.deviceVolumeAndBrightnessManager = Your deviceVolumeAndBrightnessManager;
 ```
 
 ___
 
-/// 明天继续....
-#### [6. 旋转](#6)
-* [6.1 自动旋转](#6.1)
-* [6.2 设置自动旋转支持的方向](#6.2)
-* [6.3 禁止自动旋转](#6.3)
-* [6.4 主动调用旋转](#6.4)
-* [6.5 是否全屏](#6.5)
-* [6.6 是否正在旋转](#6.6)
-* [6.7 当前旋转的方向 ](#6.7)
-* [6.8 旋转开始和结束的回调](#6.8)
-* [6.9 使 ViewController 一起旋转](#6.9)
-* [6.10 自己动手撸一个 SJRotationManager, 替换作者原始实现](#6.1)
+<h2 id="6">6. 旋转</h2>
+
+<p>
+此部分的内容由 "id &lt;SJRotationManagerProtocol&gt; rotationManager" 提供支持.
+
+对于旋转, 我们开发者肯定需要绝对的控制, 例如: 设置自动旋转所支持方向. 能够主动+自动旋转, 而且还需要能在适当的时候禁止自动旋转. 旋转前后的回调等等... 放心这些功能都有, 我挨个给大家介绍一下:
+
+另外旋转有两种方式:
+
+- 仅旋转播放器视图 (默认情况下)
+- 使 ViewController 也一起旋转
+
+具体请看下面介绍.
+</p>
+
+<h3 id ="6.1">6.1 自动旋转</h3>
+
+<p>
+先说说何为自动旋转. 其实就是当设备方向变更时, 播放器根据设备方向进行自动旋转.
+</p>
+
+<h3 id ="6.2">6.2 设置自动旋转支持的方向</h3>
+
+```Objective-C
+_player.supportedOrientation = SJAutoRotateSupportedOrientation_LandscapeLeft | SJAutoRotateSupportedOrientation_LandscapeRight;
+
+
+/**
+ 自动旋转支持的方向
+ 
+ - SJAutoRotateSupportedOrientation_Portrait:       竖屏
+ - SJAutoRotateSupportedOrientation_LandscapeLeft:  支持全屏, Home键在右侧
+ - SJAutoRotateSupportedOrientation_LandscapeRight: 支持全屏, Home键在左侧
+ - SJAutoRotateSupportedOrientation_All:            全部方向
+ */
+typedef NS_ENUM(NSUInteger, SJAutoRotateSupportedOrientation) {
+    SJAutoRotateSupportedOrientation_Portrait = 1 << 0,
+    SJAutoRotateSupportedOrientation_LandscapeLeft = 1 << 1,  
+    SJAutoRotateSupportedOrientation_LandscapeRight = 1 << 2, 
+    SJAutoRotateSupportedOrientation_All = SJAutoRotateSupportedOrientation_Portrait | SJAutoRotateSupportedOrientation_LandscapeLeft | SJAutoRotateSupportedOrientation_LandscapeRight,
+};
+```
+
+<h3 id ="6.3">6.3 禁止自动旋转</h3>
+
+<p>
+这里有两点需要注意: 
+
+- 合适的时候要记得恢复自动旋转. 
+- 禁止自动旋转后, 主动调用旋转, 还是可以旋转的.
+</p>
+
+```Objective-C
+_player.disableAutoRotation = YES;
+```
+
+<h3 id ="6.4">6.4 主动调用旋转</h3>
+
+<p>
+主动旋转. 当我们想主动旋转时, 大概分为以下三点:
+
+-   播放器旋转到用户当前的设备方向或恢复小屏.
+-   主动旋转到指定方向.
+-   主动旋转完成后的回调.
+
+请看以下方法, 分别对应以上三点:
+</p>
+
+```Objective-C
+- (void)rotate;
+- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated;
+- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completion:(void (^ _Nullable)(__kindof SJBaseVideoPlayer *player))block;
+```
+
+<h3 id ="6.5">6.5 是否全屏</h3>
+
+```Objective-C
+/// 如果为YES, 表示全屏
+_player.isFullScreen
+```
+
+<h3 id ="6.6">6.6 是否正在旋转</h3>
+
+```Objective-C
+/// 如果为YES, 表示正在旋转中
+_player.isTransitioning
+```
+
+<h3 id ="6.7">6.7 当前旋转的方向</h3>
+
+```Objective-C
+_player.orientation
+```
+
+<h3 id ="6.8">6.8 旋转开始和结束的回调</h3>
+
+```Objective-C
+_observer = [self.rotationManager getObserver];
+_observer.rotationDidStartExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
+    /// ...
+};
+    
+_observer.rotationDidEndExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
+    /// ...
+};
+```
+
+<h3 id ="6.9">6.9 使 ViewController 一起旋转</h3>
+
+<p>
+默认情况下, _player.rotationManager 使用的是 SJRotationManager 的实例. 它只会旋转播放器视图. 
+
+当我们需要 ViewController 也一起旋转时, 需要切换 旋转管理类为 SJVCRotationManager. 如下: 
+</p>
+
+```Objective-C
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    _player.rotationManager = [[SJVCRotationManager alloc] initWithViewController:vc];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    SJVCRotationManager *mgr = _player.rotationManager;
+    [mgr vc_viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+}
+
+- (BOOL)shouldAutorotate {
+    SJVCRotationManager *mgr = _player.rotationManager;
+    return [mgr vc_shouldAutorotate];
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    SJVCRotationManager *mgr = _player.rotationManager;
+    return [mgr vc_supportedInterfaceOrientations];
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    SJVCRotationManager *mgr = _player.rotationManager;
+    return [mgr vc_preferredInterfaceOrientationForPresentation];
+}
+```
+
+<h3 id ="6.10">6.10 自己动手撸一个 SJRotationManager, 替换作者原始实现</h3>
+
+<p>
+正如使用 [6.9 使 ViewController 一起旋转](#6.9) 中使用 SJVCRotationManager 替换 SJRotationManager 一样, 当你想替换原始实现时, 可以实现 SJRotationManagerProtocol 协议中定义的方法.
+</p>
