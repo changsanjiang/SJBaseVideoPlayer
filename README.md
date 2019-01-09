@@ -200,7 +200,21 @@ ___
 
 <h2 id="1">1. 视图层次</h2>
 <p>
-我将以下视图层次封装进了 SJPlayModel 中, 使用它初始化对应层次即可.
+SJBaseVideoPlayer 播放的视频资源是通过 SJVideoPlayerURLAsset 进行初始化的.  SJVideoPlayerURLAsset 由两部分组成: 
+
+- 视图层次 (SJPlayModel)
+- 资源地址 (可以是本地资源/远程URL/AVAsset)
+
+默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放. 如下示例:
+</p>
+
+```Objective-C
+SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
+_player.URLAsset = asset;
+```
+
+<p>
+我们先来看 SJPlayModel, 我将以下视图层次封装到了 SJPlayModel 中, 使用它初始化对应层次即可.
 </p>
 
 <h3 id="1.1">1.1 在普通 View 上播放</h3>
@@ -301,8 +315,8 @@ ___
 <p>
 SJBaseVideoPlayer 播放的视频资源是通过 SJVideoPlayerURLAsset 进行初始化的.  SJVideoPlayerURLAsset 由两部分组成: 
 
-- 资源地址 (可以是本地资源/远程URL/AVAsset)
 - 视图层次 (第一部分中的SJPlayModel)
+- 资源地址 (可以是本地资源/远程URL/AVAsset)
 
 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放. 如下示例:
 </p>
