@@ -136,7 +136,6 @@ NS_ASSUME_NONNULL_BEGIN
     
     /// view controller
     BOOL _vc_isDisappeared;
-    BOOL _asset_isPlayed;   // 当前的资源被播放过
     
     /// playback controller
     id<SJMediaPlaybackController> _playbackController;
@@ -347,14 +346,6 @@ static NSString *_kGestureState = @"state";
             [self.controlLayerDelegate videoPlayer:self statusDidChanged:playStatus];
         }
     });
-    
-    if ( playStatus == SJVideoPlayerPlayStatusPrepare ||
-         playStatus == SJVideoPlayerPlayStatusUnknown ) {
-        _asset_isPlayed = NO;
-    }
-    else if ( playStatus == SJVideoPlayerPlayStatusPlaying ) {
-        _asset_isPlayed = YES;
-    }
 }
 
 
@@ -1247,11 +1238,6 @@ static NSString *_kGestureState = @"state";
 @implementation SJBaseVideoPlayer (UIViewController)
 /// You should call it when view did appear
 - (void)vc_viewDidAppear {
-    if ( !self.isPlayOnScrollView || (self.isPlayOnScrollView && self.isScrollAppeared) ) {
-        if ( _autoPlayWhenPlayStatusIsReadyToPlay || _asset_isPlayed ) {
-            [self play];
-        }
-    }
     self.vc_isDisappeared = NO;
 }
 /// You should call it when view will disappear
