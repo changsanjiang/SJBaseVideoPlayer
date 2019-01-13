@@ -82,13 +82,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly, nullable) NSError *error;
 
 /**
- This imageView will show up during the loading of the video(player.status is unknown or prepare).
- - When initializing the loaded video, it may be a short black screen. It is recommended to set the placeholderImage.
- - 初始化加载视频时, 可能会短暂黑屏, 建议设置一下占位图.
- */
-@property (nonatomic, strong, readonly) UIImageView *placeholderImageView;
-
-/**
  default is `AVLayerVideoGravityResizeAspect`.
  
  readwrite.
@@ -100,6 +93,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable __kindof UIViewController *)atViewController;
 
+@end
+
+
+@interface SJBaseVideoPlayer (Placeholder)
+/// 初始化资源时, 可能会短暂黑屏, 建议设置一下占位图
+@property (nonatomic, strong, readonly) UIImageView *placeholderImageView;
+
+/// 播放器准备好显示时, 是否隐藏占位图
+/// - 默认为YES
+@property (nonatomic) BOOL hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
 @end
 
 
@@ -141,7 +144,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) void(^playDidToEndExeBlock)(__kindof SJBaseVideoPlayer *player);
 
 - (NSString *)timeStringWithSeconds:(NSInteger)secs; // format: 00:00:00
-
 @end
 
 

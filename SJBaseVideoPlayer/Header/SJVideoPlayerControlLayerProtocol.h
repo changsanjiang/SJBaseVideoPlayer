@@ -12,70 +12,55 @@
 #import "SJNetworkStatus.h"
 #import "SJVideoPlayerState.h"
 #import "SJMediaPlaybackProtocol.h"
+#import "SJPlayerGestureControlProtocol.h"
 
-@protocol SJPlayStatusControlDelegate, SJLoadingControlDelegate, SJNetworkStatusControlDelegate, SJLockScreenStateControlDelegate, SJAppActivityControlDelegate, SJVolumeBrightnessRateControlDelegate, SJGestureControlDelegate, SJRotationControlDelegate, SJDeprecatedControlDelegate, SJFitOnScreenControlDelegate, SJSwitchVideoDefinitionControlDelegate;
+@protocol SJPlayStatusControlDelegate, SJBufferControlDelegate, SJNetworkStatusControlDelegate, SJLockScreenStateControlDelegate, SJAppActivityControlDelegate, SJVolumeBrightnessRateControlDelegate, SJGestureControlDelegate, SJRotationControlDelegate, SJFitOnScreenControlDelegate, SJSwitchVideoDefinitionControlDelegate;
 @class SJBaseVideoPlayer, SJVideoPlayerURLAsset;
 
 
 
 @protocol SJVideoPlayerControlLayerDataSource <NSObject>
 @required
-/// Please return to the root view of the control layer, which will be added to the player view.
+/// Please return to the control view of the control layer, which will be added to the player view.
 /// 请返回控制层的根视图
 /// 这个视图将会添加的播放器中
 - (UIView *)controlView;
 
 @optional
-/// This method is called before the control layer needs to be hidden, and `controlLayerNeedDisappear:` will not be called if NO is returned.
-/// 此方法针对`自动隐藏`的控制. 如果返回YES, 将会触发隐藏控制层的相关方法(见下delegate的`controlLayerNeedDisappear:`)
-///
-/// 关于`自动隐藏`:
-/// * 当控制层显示时, 播放器会在一段时间(默认3秒)后尝试隐藏控制层, 见delegate中的`controlLayerNeedAppear:`和`controlLayerNeedDisappear:`
-- (BOOL)controlLayerDisappearCondition;
-
-/// This method is called before the gesture is triggered. If NO is returned, will not trigger gestures.
-/// 此方法将作为手势触发的一个条件, 如果返回NO, 将不会触发任何手势.
-- (BOOL)triggerGesturesCondition:(CGPoint)location;
-
-/// Call it When installed control view to player view.
+/// This method will be called When installed control view of control layer to the video player.
 /// 当安装好控制层后, 会回调这个方法
 - (void)installedControlViewToVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;
 @end
 
 
-
-
 @protocol SJVideoPlayerControlLayerDelegate <
     SJPlayStatusControlDelegate,
-    SJLoadingControlDelegate,
+    SJBufferControlDelegate,
     SJRotationControlDelegate,
     SJGestureControlDelegate,
     SJNetworkStatusControlDelegate,
     SJVolumeBrightnessRateControlDelegate,
     SJLockScreenStateControlDelegate,
     SJAppActivityControlDelegate,
-    SJDeprecatedControlDelegate,
     SJFitOnScreenControlDelegate,
     SJSwitchVideoDefinitionControlDelegate
 >
 @required
-/// This method will be called when the control layer needs to be appear. You should do some appear work here.
-/// 控制层需要显示的时候, 会回调这个方法. 你应该在这里做一些显示的工作
-///
-/// 关于控制层的显示: 默认情况下(videoPlayer.enableControlLayerDisplayController==YES)
-/// * 当调用[videoPlayer controlLayerNeedAppear]时, 此时会立即回调这个方法
-/// * 每当播放一个新的资源时, 1秒后播放器会自动回调这个方法
+/// This method will be called when the control layer needs to be appear.
+/// You should do some appear work here.
+/// 控制层需要显示. 你应该在这里做一些显示的工作
 - (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;
 
-/// This method will be called when the control layer needs to be disappear. You should do some disappear work here.
-/// 当控制层需要隐藏的时候, 会回调这个方法. 你应该在这个做一些隐藏的工作
-///
-/// 关于控制层的隐藏: 默认情况下(videoPlayer.enableControlLayerDisplayController==YES)
-/// * 当调用[videoPlayer controlLayerNeedDisappear]时, 此时会立即回调这个方法
-/// * 当控制层显示时, 默认会在3秒后, 自动调用这个方法, 隐藏控制层
+/// This method will be called when the control layer needs to be disappear.
+/// You should do some disappear work here.
+/// 控制层需要隐藏. 你应该在这个做一些隐藏的工作
 - (void)controlLayerNeedDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;
 
 @optional
+/// Asks the delegate if the control layer can automatically disappear.
+/// 控制层是否可以自动隐藏
+- (BOOL)controlLayerOfVideoPlayerCanAutomaticallyDisappear:(__kindof SJBaseVideoPlayer *)videoPlayer;
+
 /// Call it when `tableView` or` collectionView` is about to appear. Because scrollview may be scrolled.
 /// 当滚动scrollView时, 播放器即将出现时会回调这个方法
 - (void)videoPlayerWillAppearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;
@@ -83,6 +68,10 @@
 /// Call it when `tableView` or` collectionView` is about to disappear. Because scrollview may be scrolled.
 /// 当滚动scrollView时, 播放器即将消失时会回调这个方法
 - (void)videoPlayerWillDisappearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;
+
+// deprecated methods
+
+- (BOOL)controlLayerDisappearCondition __deprecated_msg("use `controlLayerOfVideoPlayerCanAutomaticallyDisappear:`");
 @end
 
 
@@ -93,16 +82,21 @@
 /// 当播放器准备播放一个新的资源时, 会回调这个方法
 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer prepareToPlay:(SJVideoPlayerURLAsset *)asset;
 
+/// 播放状态改变的回调
 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer statusDidChanged:(SJVideoPlayerPlayStatus)status;
-/// Deprecated
-- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer stateChanged:(SJVideoPlayerPlayState)state __deprecated_msg("已弃用, 请使用`videoPlayer:statusDidChanged:`;");
 
+/// 时间改变的回调
 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer
         currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeStr
           totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;
 
+/// 获取到视频宽高的回调
 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer presentationSize:(CGSize)size;
 
+
+// deprecated methods
+
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer stateChanged:(SJVideoPlayerPlayState)state __deprecated_msg("已弃用, 请使用`videoPlayer:statusDidChanged:`;");
 @end
 
 
@@ -117,23 +111,18 @@
 
 
 
-@protocol SJLoadingControlDelegate <NSObject>
+@protocol SJBufferControlDelegate <NSObject>
 @optional
-/// When buffer progress changed, this method will be called.
-/// 当缓冲进度更新的实时回调
-- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer loadedTimeProgress:(float)progress;
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer bufferTimeDidChange:(NSTimeInterval)bufferTime;
 
-/// When player start the buffer, this method will be called.
-/// 开始缓冲时调用
-- (void)startLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus;
 
-/// When the buffer is cancelled, this method will be called.
-/// 取消缓冲时调用
-- (void)cancelLoading:(__kindof SJBaseVideoPlayer *)videoPlayer;
+// deprecated methods
 
-/// When the buffer can continue to play, this method will be called.
-/// 当缓冲可以继续播放的时候调用
-- (void)loadCompletion:(__kindof SJBaseVideoPlayer *)videoPlayer;
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer loadedTimeProgress:(float)progress __deprecated_msg("use `videoPlayer:bufferTimeDidChange:`");
+- (void)startLoading:(__kindof SJBaseVideoPlayer *)videoPlayer __deprecated_msg("use `videoPlayer:bufferStatusDidChange:`");
+- (void)cancelLoading:(__kindof SJBaseVideoPlayer *)videoPlayer __deprecated_msg("use `videoPlayer:bufferStatusDidChange:`");
+- (void)loadCompletion:(__kindof SJBaseVideoPlayer *)videoPlayer __deprecated_msg("use `videoPlayer:bufferStatusDidChange:`");
 @end
 
 
@@ -169,22 +158,19 @@
 
 @protocol SJGestureControlDelegate <NSObject>
 @optional
-/// horizontal gesture
-/// When horizontal direction is going to start dragging, this method will be called
-/// 水平手势
-/// 水平方向将要开始拖拽
-- (void)horizontalDirectionWillBeginDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;
+/// Asks the delegate if gesture should trigger in the video player.
+/// 是否可以触发某个手势
+- (BOOL)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer gestureRecognizerShouldTrigger:(SJPlayerGestureType)type location:(CGPoint)location;
 
-/// horizontal gesture
-/// progress represents the current drag progress
-/// 水平手势
-/// 水平方向拖动中, progress 为当前的拖拽进度
-/// progress 表示当前拖拽的进度, 不是播放的进度
-- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer horizontalDirectionDidMove:(CGFloat)progress;
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer panGestureTriggeredInTheHorizontalDirection:(SJPanGestureRecognizerState)state progressTime:(NSTimeInterval)progressTime;
 
-/// 水平手势
-/// 水平方向拖动结束.
-- (void)horizontalDirectionDidEndDragging:(__kindof SJBaseVideoPlayer *)videoPlayer;
+// deprecated methods
+
+- (BOOL)triggerGesturesCondition:(CGPoint)location __deprecated_msg("use `videoPlayer:gestureRecognizerShouldTrigger:location:`");
+- (void)horizontalDirectionWillBeginDragging:(__kindof SJBaseVideoPlayer *)videoPlayer __deprecated_msg("use `videoPlayer:panGestureTriggeredInTheHorizontalDirection:progressTime:`");
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer horizontalDirectionDidMove:(CGFloat)progress __deprecated_msg("use `videoPlayer:panGestureTriggeredInTheHorizontalDirection:progressTime:`");
+- (void)horizontalDirectionDidEndDragging:(__kindof SJBaseVideoPlayer *)videoPlayer __deprecated_msg("use `videoPlayer:panGestureTriggeredInTheHorizontalDirection:progressTime:`");
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer horizontalDirectionDidDrag:(CGFloat)translation __deprecated_msg("use `videoPlayer:horizontalDirectionDidMove:`;");
 @end
 
 
@@ -231,12 +217,4 @@
 - (void)appWillEnterForeground:(__kindof SJBaseVideoPlayer *)videoPlayer;
 - (void)appDidEnterBackground:(__kindof SJBaseVideoPlayer *)videoPlayer;
 @end
-
-
-/// 一些已弃用的方法
-@protocol SJDeprecatedControlDelegate <NSObject>
-@optional
-- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer horizontalDirectionDidDrag:(CGFloat)translation __deprecated_msg("use `videoPlayer:horizontalDirectionDidMove:`;");
-@end
-
 #endif /* SJVideoPlayerControlLayerProtocol_h */

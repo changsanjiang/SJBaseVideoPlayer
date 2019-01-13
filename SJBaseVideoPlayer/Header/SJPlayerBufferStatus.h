@@ -11,8 +11,8 @@
 
 typedef NS_ENUM(NSUInteger, SJPlayerBufferStatus) {
     SJPlayerBufferStatusUnknown,
-    SJPlayerBufferStatusEmpty,
-    SJPlayerBufferStatusFull,
+    SJPlayerBufferStatusUnplayable,
+    SJPlayerBufferStatusPlayable,
 };
 
 #endif /* SJPlayerBufferStatus_h */

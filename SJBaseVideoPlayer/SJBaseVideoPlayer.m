@@ -110,7 +110,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL isTriggeringForPopGesture;
 
 @property (nonatomic) NSTimeInterval pan_totalTime;
-@property (nonatomic) CGFloat pan_shift;
+@property (nonatomic) NSTimeInterval pan_shift;
 @end
 
 @implementation SJBaseVideoPlayer {
@@ -118,6 +118,12 @@ NS_ASSUME_NONNULL_BEGIN
     SJVideoPlayerPresentView *_presentView;
     UIView *_controlContentView;
     SJVideoPlayerRegistrar *_registrar;
+    
+    /// 当前资源是否播放过
+    BOOL _assetIsPlayed;
+    
+    /// Placeholder
+    BOOL _hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
     
     /// Status Bar
     BOOL _tmpShowStatusBar; // 临时显示状态栏
@@ -132,7 +138,6 @@ NS_ASSUME_NONNULL_BEGIN
     /// gestures
     UITapGestureRecognizer *_lockStateTapGesture;
     SJPlayerGestureControl *_gestureControl;
-    CGFloat _pan_shift;
     
     /// view controller
     BOOL _vc_isDisappeared;
@@ -197,7 +202,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 + (NSString *)version {
-    return @"1.8.1";
+    return @"2.0.0";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -214,6 +219,7 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if ( !self ) return nil;
     self.rate = 1;
+    self.hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay = YES;
     self.autoPlayWhenPlayStatusIsReadyToPlay = YES; // 是否自动播放, 默认yes
     self.pauseWhenAppDidEnterBackground = YES; // App进入后台是否暂停播放, 默认yes
     self.disabledControlLayerAppearManager = NO; // 是否启用控制层管理器
@@ -224,7 +230,7 @@ NS_ASSUME_NONNULL_BEGIN
     [self gestureControl];
     [self addInterceptTapGR];
     [self _configAVAudioSession];
-    [self _considerShowOrHiddenPlaceholder];
+    [self _showOrHiddenPlaceholderImageViewIfNeeded];
     return self;
 }
 
@@ -279,6 +285,7 @@ static NSString *_kGestureState = @"state";
 #endif
     if ( _URLAsset && self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
     [_presentView removeFromSuperview];
+    [_view removeFromSuperview];
 }
 
 - (void)setPlayStatus:(SJVideoPlayerPlayStatus)playStatus {
@@ -337,7 +344,7 @@ static NSString *_kGestureState = @"state";
     }
 #pragma clang diagnostic pop
     
-    [self _considerShowOrHiddenPlaceholder];
+    [self _showOrHiddenPlaceholderImageViewIfNeeded];
     __weak typeof(self) _self = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         __strong typeof(_self) self = _self;
@@ -346,6 +353,10 @@ static NSString *_kGestureState = @"state";
             [self.controlLayerDelegate videoPlayer:self statusDidChanged:playStatus];
         }
     });
+    
+    if ( SJVideoPlayerPlayStatusPlaying == _playStatus ) {
+        _assetIsPlayed = YES;
+    }
 }
 
 
@@ -368,32 +379,19 @@ static NSString *_kGestureState = @"state";
     }
 }
 
-- (void)_considerShowOrHiddenPlaceholder {
+- (void)_showOrHiddenPlaceholderImageViewIfNeeded {
     if ( [self playStatus_isUnknown] || [self playStatus_isPrepare] ) {
-        if ( !self.URLAsset.otherMedia ) {
-            if ( [NSThread.currentThread isMainThread] ) [self.presentView showPlaceholder];
-            else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.presentView showPlaceholder];
-                });
-            }
+        if ( !self.URLAsset.otherMedia && _presentView.placeholderImageViewIsHidden ) {
+            [self.presentView showPlaceholder];
         }
     }
-    else if ( [self playStatus_isPlaying] ) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [UIView animateWithDuration:0.4 animations:^{
-                [self.presentView hiddenPlaceholder];
-            }];
-        });
+    else if ( self.playbackController.isReadyForDisplay &&
+              _hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay &&
+             !_presentView.placeholderImageViewIsHidden ) {
+        [UIView animateWithDuration:0.4 animations:^{
+            [self.presentView hiddenPlaceholder];
+        }];
     }
-}
-
-///
-/// Thanks @chjsun
-/// https://github.com/changsanjiang/SJVideoPlayer/issues/42
-///
-- (UIImageView *)placeholderImageView {
-    return self.presentView.placeholderImageView;
 }
 
 - (void)setVideoGravity:(AVLayerVideoGravity _Nullable)videoGravity {
@@ -525,6 +523,25 @@ static NSString *_kGestureState = @"state";
     if ( [self.controlLayerDelegate respondsToSelector:@selector(tappedPlayerOnTheLockedState:)] ) {
         [self.controlLayerDelegate tappedPlayerOnTheLockedState:self];
     }
+}
+@end
+
+
+@implementation SJBaseVideoPlayer (Placeholder)
+///
+/// Thanks @chjsun
+/// https://github.com/changsanjiang/SJVideoPlayer/issues/42
+///
+- (UIImageView *)placeholderImageView {
+    return self.presentView.placeholderImageView;
+}
+
+- (void)setHiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay:(BOOL)hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay {
+    _hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay = hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
+}
+
+- (BOOL)hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay {
+    return _hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
 }
 @end
 
@@ -689,6 +706,12 @@ static NSString *_kGestureState = @"state";
     [self.playbackController switchVideoDefinitionByURL:URL];
 }
 
+/// delegate methods
+
+- (void)playbackControllerIsReadyForDisplay:(id<SJMediaPlaybackController>)controller {
+    [self _showOrHiddenPlaceholderImageViewIfNeeded];
+}
+
 - (void)playbackController:(id<SJMediaPlaybackController>)controller prepareToPlayStatusDidChange:(SJMediaPlaybackPrepareStatus)prepareStatus {
     switch ( prepareStatus ) {
         case SJMediaPlaybackPrepareStatusUnknown: break;
@@ -725,28 +748,73 @@ static NSString *_kGestureState = @"state";
 
 - (void)playbackController:(id<SJMediaPlaybackController>)controller bufferLoadedTimeDidChange:(NSTimeInterval)bufferLoadedTime {
     if ( controller.duration == 0 ) return;
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:loadedTimeProgress:)] ) {
+    
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:bufferTimeDidChange:)] ) {
+        [self.controlLayerDelegate videoPlayer:self bufferTimeDidChange:bufferLoadedTime];
+    }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    else if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:loadedTimeProgress:)] ) {
         [self.controlLayerDelegate videoPlayer:self loadedTimeProgress:controller.bufferLoadedTime / controller.duration];
     }
+#pragma clang diagnostic pop
+
 }
 
 - (void)playbackController:(id<SJMediaPlaybackController>)controller bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus {
+#ifdef SJ_MAC
+    switch ( bufferStatus ) {
+        case SJPlayerBufferStatusUnknown:
+            printf("\nSJPlayerBufferStatusUnknown \n");
+            break;
+        case SJPlayerBufferStatusUnplayable:
+            printf("\nSJPlayerBufferStatusUnplayable \n");
+            break;
+        case SJPlayerBufferStatusPlayable:
+            printf("\nSJPlayerBufferStatusPlayable \n");
+            break;
+    }
+#endif
+    
     switch ( bufferStatus ) {
         case SJPlayerBufferStatusUnknown: break;
-        case SJPlayerBufferStatusEmpty: {
-            [self pause:SJVideoPlayerPausedReasonBuffering];
-            if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
-                [self.controlLayerDelegate startLoading:self];
+        case SJPlayerBufferStatusUnplayable: {
+            if ( ![self playStatus_isPrepare] || _assetIsPlayed ) {
+               if ( [self playStatus_isPaused] )
+                   [self pause:SJVideoPlayerPausedReasonBuffering];
             }
         }
             break;
-        case SJPlayerBufferStatusFull: {
-            if ( [self playStatus_isPaused_ReasonBuffering] ) [self play];
-            if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
-                [self.controlLayerDelegate loadCompletion:self];
+        case SJPlayerBufferStatusPlayable: {
+            if ( _assetIsPlayed && [self playStatus_isPaused_ReasonBuffering] ) {
+                [self play];
             }
         }
             break;
+    }
+
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:bufferStatusDidChange:)] ) {
+        [self.controlLayerDelegate videoPlayer:self bufferStatusDidChange:bufferStatus];
+    }
+    else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        switch ( bufferStatus ) {
+            case SJPlayerBufferStatusUnknown: break;
+            case SJPlayerBufferStatusUnplayable: {
+                if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
+                    [self.controlLayerDelegate startLoading:self];
+                }
+            }
+                break;
+            case SJPlayerBufferStatusPlayable: {
+                if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
+                    [self.controlLayerDelegate loadCompletion:self];
+                }
+            }
+                break;
+        }
+#pragma clang diagnostic pop
     }
 }
 
@@ -790,9 +858,6 @@ static NSString *_kGestureState = @"state";
         self.playModelObserver = [[SJPlayModelPropertiesObserver alloc] initWithPlayModel:URLAsset.playModel];
         self.playModelObserver.delegate = (id)self;
     
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(startLoading:)] ) {
-            [self.controlLayerDelegate startLoading:self];
-        }
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:prepareToPlay:)] ) {
             [self.controlLayerDelegate videoPlayer:self prepareToPlay:URLAsset];
         }
@@ -829,10 +894,6 @@ static NSString *_kGestureState = @"state";
         });
     }
     
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(loadCompletion:)] ) {
-        [self.controlLayerDelegate loadCompletion:self];
-    }
-    
     self.playStatus = SJVideoPlayerPlayStatusReadyToPlay;
     
     if ( self.operationOfInitializing ) {
@@ -854,10 +915,6 @@ static NSString *_kGestureState = @"state";
 
 // 2.2
 - (void)_playerPrepareFailed {
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(cancelLoading:)] ) {
-        [self.controlLayerDelegate cancelLoading:self];
-    }
-    
     self.error = _playbackController.error;
     self.inactivityReason = SJVideoPlayerInactivityReasonPlayFailed;
     self.playStatus = SJVideoPlayerPlayStatusInactivity;
@@ -1035,13 +1092,6 @@ static NSString *_kGestureState = @"state";
     [self.playbackController stop];
     self.playModelObserver = nil;
     self.URLAsset = nil;
-    
-    if ( self.playStatus_isPaused_ReasonBuffering ) {
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(cancelLoading:)] ){
-            [self.controlLayerDelegate cancelLoading:self];
-        }
-    }
-    
     self.playStatus = SJVideoPlayerPlayStatusUnknown;
 }
 
@@ -1401,11 +1451,17 @@ static NSString *_kGestureState = @"state";
             }
         }
         
-        if ( type != SJPlayerGestureType_Pinch ) {
-            if ( self.controlLayerDataSource && ![self.controlLayerDataSource triggerGesturesCondition:location] )
+        if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:gestureRecognizerShouldTrigger:location:)] ) {
+            if ( ![self.controlLayerDelegate videoPlayer:self gestureRecognizerShouldTrigger:type location:location] )
                 return NO;
         }
-        
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        else if ( [self.controlLayerDelegate respondsToSelector:@selector(triggerGesturesCondition:)] ) {
+            if ( ![self.controlLayerDelegate triggerGesturesCondition:location] )
+                return NO;
+        }
+#pragma clang diagnostic pop
         return YES;
     };
     
@@ -1435,9 +1491,12 @@ static NSString *_kGestureState = @"state";
                     case SJPanGestureMovingDirection_H: {
                         self.pan_shift = self.currentTime;
                         self.pan_totalTime = self.totalTime;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                         if ( [self.controlLayerDelegate respondsToSelector:@selector(horizontalDirectionWillBeginDragging:)] ) {
                             [self.controlLayerDelegate horizontalDirectionWillBeginDragging:self];
                         }
+#pragma clang diagnostic pop
                     }
                         break;
                         /// 垂直
@@ -1478,17 +1537,19 @@ static NSString *_kGestureState = @"state";
                         CGFloat add = offset / 667 * self.pan_totalTime;
                         CGFloat shift = self.pan_shift;
                         shift += add;
+                        if ( shift > self.pan_totalTime ) shift = self.pan_totalTime;
+                        else if ( shift < 0 ) shift = 0;
                         self.pan_shift = shift;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:horizontalDirectionDidMove:)] ) {
                             CGFloat progress = shift / self.pan_totalTime;
                             [self.controlLayerDelegate videoPlayer:self horizontalDirectionDidMove:progress];
                         }
                         else if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:horizontalDirectionDidDrag:)] ) {
-                            #pragma clang diagnostic push
-                            #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                                [self.controlLayerDelegate videoPlayer:self horizontalDirectionDidDrag:add];
-                            #pragma clang diagnostic pop
+                            [self.controlLayerDelegate videoPlayer:self horizontalDirectionDidDrag:add];
                         }
+#pragma clang diagnostic pop
                     }
                         break;
                         /// 垂直
@@ -1516,9 +1577,12 @@ static NSString *_kGestureState = @"state";
             case SJPanGestureRecognizerStateEnded: {
                 switch ( direction ) {
                     case SJPanGestureMovingDirection_H: {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                         if ( [self.controlLayerDelegate respondsToSelector:@selector(horizontalDirectionDidEndDragging:)] ) {
                             [self.controlLayerDelegate horizontalDirectionDidEndDragging:self];
                         }
+#pragma clang diagnostic pop
                     }
                         break;
                     case SJPanGestureMovingDirection_V: { }
@@ -1526,6 +1590,12 @@ static NSString *_kGestureState = @"state";
                 }
             }
                 break;
+        }
+        
+        if ( direction == SJPanGestureMovingDirection_H ) {
+            if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:panGestureTriggeredInTheHorizontalDirection:progressTime:)] ) {
+                [self.controlLayerDelegate videoPlayer:self panGestureTriggeredInTheHorizontalDirection:state progressTime:self.pan_shift];
+            }
         }
     };
     
@@ -1577,14 +1647,23 @@ static NSString *_kGestureState = @"state";
         return;
     
     __weak typeof(self) _self = self;
-    _controlLayerAppearManager.canDisappearAutomatically = ^BOOL(id<SJControlLayerAppearManager>  _Nonnull mgr) {
+    _controlLayerAppearManager.canAutomaticallyDisappear = ^BOOL(id<SJControlLayerAppearManager>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return NO;
-        if ( [self.controlLayerDataSource respondsToSelector:@selector(controlLayerDisappearCondition)] ) {
-            if ( self.controlLayerDataSource.controlLayerDisappearCondition )
-                return YES;
+
+        if ( [self.controlLayerDelegate respondsToSelector:@selector(controlLayerOfVideoPlayerCanAutomaticallyDisappear:)] ) {
+            if ( ![self.controlLayerDelegate controlLayerOfVideoPlayerCanAutomaticallyDisappear:self] ) {
+                return NO;
+            }
         }
-        return NO;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        else if ( [self.controlLayerDataSource respondsToSelector:@selector(controlLayerDisappearCondition)] ) {
+            if ( !self.controlLayerDelegate.controlLayerDisappearCondition )
+                return NO;
+        }
+#pragma clang diagnostic pop
+        return YES;
     };
     
     _controlLayerAppearManagerObserver = [_controlLayerAppearManager getObserver];
@@ -1800,6 +1879,7 @@ static NSString *_kGestureState = @"state";
             if ( ![self.controlLayerDelegate canTriggerRotationOfVideoPlayer:self] )
                 return NO;
         }
+        if ( self.atViewController.presentedViewController ) return NO;
         return YES;
     };
     
@@ -1807,6 +1887,7 @@ static NSString *_kGestureState = @"state";
     _rotationManagerObserver.rotationDidStartExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
+        self.atViewController.navigationController.view.userInteractionEnabled = NO;
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:willRotateView:)] ) {
             [self.controlLayerDelegate videoPlayer:self willRotateView:mgr.isFullscreen];
         }
@@ -1832,6 +1913,7 @@ static NSString *_kGestureState = @"state";
     _rotationManagerObserver.rotationDidEndExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
+        self.atViewController.navigationController.view.userInteractionEnabled = YES;
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:didEndRotation:)] ) {
             [self.controlLayerDelegate videoPlayer:self didEndRotation:mgr.isFullscreen];
         }

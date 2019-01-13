@@ -45,6 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSTimeInterval bufferLoadedTime;
 @property (nonatomic, readonly) SJPlayerBufferStatus bufferStatus;
 @property (nonatomic, readonly) CGSize presentationSize;
+@property (nonatomic, readonly) BOOL isReadyForDisplay;
 
 @property (nonatomic) float volume;
 @property (nonatomic) float rate;
@@ -117,6 +118,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)playbackController:(id<SJMediaPlaybackController>)controller presentationSizeDidChange:(CGSize)presentationSize;
 
 - (void)playbackController:(id<SJMediaPlaybackController>)controller switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;
+
+- (void)playbackControllerIsReadyForDisplay:(id<SJMediaPlaybackController>)controller;
 
 @optional
 - (void)pausedForAppDidEnterBackgroundOfPlaybackController:(id<SJMediaPlaybackController>)controller;

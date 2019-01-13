@@ -203,5 +203,24 @@ NS_ASSUME_NONNULL_BEGIN
     }
     [gesture setValue:@(UIGestureRecognizerStateCancelled) forKey:@"state"];
 }
+
+- (UIGestureRecognizerState)stateOfGesture:(SJPlayerGestureType)type {
+    UIGestureRecognizer *gesture = nil;
+    switch ( type ) {
+        case SJPlayerGestureType_SingleTap:
+            gesture = _singleTap;
+            break;
+        case SJPlayerGestureType_DoubleTap:
+            gesture = _doubleTap;
+            break;
+        case SJPlayerGestureType_Pan:
+            gesture = _pan;
+            break;
+        case SJPlayerGestureType_Pinch:
+            gesture = _pinch;
+            break;
+    }
+    return gesture.state;
+}
 @end
 NS_ASSUME_NONNULL_END

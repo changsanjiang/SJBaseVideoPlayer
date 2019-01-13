@@ -57,6 +57,7 @@ typedef enum : NSUInteger {
 
 @property (nonatomic) SJPlayerDisabledGestures disabledGestures;
 - (void)cancelGesture:(SJPlayerGestureType)type;
+- (UIGestureRecognizerState)stateOfGesture:(SJPlayerGestureType)type;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 @end

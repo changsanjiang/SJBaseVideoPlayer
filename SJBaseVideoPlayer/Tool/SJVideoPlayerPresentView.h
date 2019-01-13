@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SJVideoPlayerPresentView : UIView
 @property (nonatomic, strong, readonly) UIImageView *placeholderImageView;
 
+@property (nonatomic, readonly) BOOL placeholderImageViewIsHidden;
 - (void)showPlaceholder;
 - (void)hiddenPlaceholder;
 @end

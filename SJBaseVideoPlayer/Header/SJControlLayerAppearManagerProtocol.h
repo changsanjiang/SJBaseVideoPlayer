@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)keepAppearState;
 - (void)keepDisappearState;
 
-@property (nonatomic, copy, nullable) BOOL(^canDisappearAutomatically)(id<SJControlLayerAppearManager> mgr);
+@property (nonatomic, copy, nullable) BOOL(^canAutomaticallyDisappear)(id<SJControlLayerAppearManager> mgr);
 @end
 
 @protocol SJControlLayerAppearManagerObserver

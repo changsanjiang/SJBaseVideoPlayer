@@ -7,25 +7,28 @@
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
+@protocol SJAVPlayerLayerPresenter, SJAVPlayerLayerPresenterObserver;
 
 NS_ASSUME_NONNULL_BEGIN
-@protocol SJAVPlayerLayerPresenter <NSObject>
-@property (nonatomic, strong, null_resettable) AVLayerVideoGravity videoGravity; // deafult value is `AVLayerVideoGravityResizeAspect`;
-@property (nonatomic, copy, nullable) void(^isReadyForDisplayExeBlock)(id<SJAVPlayerLayerPresenter> presenter);
-@property (nonatomic, readonly, getter=isReadyForDisplay) BOOL readyForDisplay;
+@interface SJAVMediaPresentView : UIView
+@property (nonatomic, strong, null_resettable) AVLayerVideoGravity videoGravity;
+@property (nonatomic, strong, readonly) id<SJAVPlayerLayerPresenter> mainPresenter;
+@property (nonatomic, strong, readonly) id<SJAVPlayerLayerPresenter> subPresenter;
+
+- (void)exchangePresenter;
+- (void)reset;
+- (void)resetMainPresenter;
+- (void)resetSubPresenter;
 @end
 
-@interface SJAVMediaPresentView : UIView
-- (id<SJAVPlayerLayerPresenter>)createPresenterForPlayer:(AVPlayer *)player videoGravity:(AVLayerVideoGravity)videoGravity;
 
-@property (nonatomic, strong, readonly) NSArray<id<SJAVPlayerLayerPresenter>> *presenters;
-- (void)addPresenter:(id<SJAVPlayerLayerPresenter>)presenter;
-- (void)insertPresenter:(id<SJAVPlayerLayerPresenter>)presenter atIndex:(NSInteger)idx;
-- (void)insertPresenter:(id<SJAVPlayerLayerPresenter>)presenter belowPresenter:(id<SJAVPlayerLayerPresenter>)belowPresenter;
-- (void)insertPresenter:(id<SJAVPlayerLayerPresenter>)presenter abovePresenter:(id<SJAVPlayerLayerPresenter>)abovePresenter;
-- (void)removePresenter:(id<SJAVPlayerLayerPresenter>)presenter;
-- (void)removeAllPresenter;
-- (void)removeLastPresenter;
-- (void)removeAllPresenterAndAddNewPresenter:(id<SJAVPlayerLayerPresenter>)presenter;
+@protocol SJAVPlayerLayerPresenter
+@property (nonatomic, strong, nullable) AVPlayer *player;
+@property (nonatomic, readonly, getter=isReadyForDisplay) BOOL readyForDisplay;
+- (id<SJAVPlayerLayerPresenterObserver>)getObserver;
+@end
+
+@protocol SJAVPlayerLayerPresenterObserver
+@property (nonatomic, copy, nullable) void(^isReadyForDisplayExeBlock)(id<SJAVPlayerLayerPresenter> presenter);
 @end
 NS_ASSUME_NONNULL_END

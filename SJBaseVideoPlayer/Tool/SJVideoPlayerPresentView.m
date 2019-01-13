@@ -29,6 +29,10 @@ NS_ASSUME_NONNULL_BEGIN
 }
 #endif
 
+- (BOOL)placeholderImageViewIsHidden {
+    return _isHidden;
+}
+
 - (void)showPlaceholder {
     if ( !_isHidden ) return; _isHidden = NO;
     self.placeholderImageView.alpha = 1;

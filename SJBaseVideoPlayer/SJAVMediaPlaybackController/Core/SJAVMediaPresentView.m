@@ -13,13 +13,42 @@
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
-@interface _SJAVPlayerLayerPresentView: UIView<SJAVPlayerLayerPresenter>
-@property (nonatomic, strong, readonly) AVPlayerLayer *avLayer;
-@property (nonatomic, strong, nullable) AVPlayer *player;
+@interface SJAVPlayerLayerPresenter: UIView<SJAVPlayerLayerPresenter>
+@property (nonatomic, strong, null_resettable) AVLayerVideoGravity videoGravity;
 @end
 
-@implementation _SJAVPlayerLayerPresentView
+@interface SJAVPlayerLayerPresenterObserver : NSObject<SJAVPlayerLayerPresenterObserver>
+- (instancetype)initWithPresenter:(SJAVPlayerLayerPresenter *)presenter;
+@property (nonatomic, weak, readonly, nullable) SJAVPlayerLayerPresenter *presenter;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+@end
+
+@implementation SJAVPlayerLayerPresenterObserver
 @synthesize isReadyForDisplayExeBlock = _isReadyForDisplayExeBlock;
+
+static NSString *kReadyForDisplay = @"readyForDisplay";
+- (instancetype)initWithPresenter:(SJAVPlayerLayerPresenter *)presenter {
+    self = [super init];
+    if ( !self ) return nil;
+    _presenter = presenter;
+    [presenter.layer sj_addObserver:self forKeyPath:@"readyForDisplay" context:&kReadyForDisplay];
+    return self;
+}
+
+- (void)observeValueForKeyPath:(nullable NSString *)keyPath ofObject:(nullable id)object change:(nullable NSDictionary<NSKeyValueChangeKey,id> *)change context:(nullable void *)context {
+    if ( context == &kReadyForDisplay ) {
+        AVPlayerLayer *layer = object;
+        if ( layer.isReadyForDisplay && _isReadyForDisplayExeBlock )
+            _isReadyForDisplayExeBlock(_presenter);
+    }
+}
+@end
+
+@implementation SJAVPlayerLayerPresenter
+@synthesize readyForDisplay = _readyForDisplay;
+@synthesize player = _player;
 
 #ifdef SJ_MAC
 - (void)dealloc {
@@ -35,21 +64,6 @@ NS_ASSUME_NONNULL_BEGIN
     return (AVPlayerLayer *)self.layer;
 }
 
-static NSString *kReadyForDisplay = @"readyForDisplay";
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if ( !self ) return nil;
-    [self.layer sj_addObserver:self forKeyPath:@"readyForDisplay" context:&kReadyForDisplay];
-    return self;
-}
-
-- (void)observeValueForKeyPath:(nullable NSString *)keyPath ofObject:(nullable id)object change:(nullable NSDictionary<NSKeyValueChangeKey,id> *)change context:(nullable void *)context {
-    if ( context == &kReadyForDisplay ) {
-        if ( self.avLayer.isReadyForDisplay && _isReadyForDisplayExeBlock )
-            _isReadyForDisplayExeBlock(self);
-    }
-}
-
 - (void)setPlayer:(nullable AVPlayer *)player {
     if ( player == self.avLayer.player ) return;
     self.avLayer.player = player;
@@ -63,17 +77,31 @@ static NSString *kReadyForDisplay = @"readyForDisplay";
     return [self avLayer].isReadyForDisplay;
 }
 
+- (id<SJAVPlayerLayerPresenterObserver>)getObserver {
+    return [[SJAVPlayerLayerPresenterObserver alloc] initWithPresenter:self];
+}
+
+- (UIView *)view {
+    return self;
+}
+
 @synthesize videoGravity = _videoGravity;
 - (void)setVideoGravity:(AVLayerVideoGravity _Nullable)videoGravity {
     _videoGravity = videoGravity;
     self.avLayer.videoGravity = self.videoGravity;
 }
+
 - (AVLayerVideoGravity)videoGravity {
     if ( !_videoGravity ) return AVLayerVideoGravityResizeAspect;
     return _videoGravity;
 }
 @end
 
+
+
+@interface SJAVMediaPresentView ()
+
+@end
 
 @implementation SJAVMediaPresentView
 #ifdef SJ_MAC
@@ -82,51 +110,65 @@ static NSString *kReadyForDisplay = @"readyForDisplay";
 }
 #endif
 
-- (id<SJAVPlayerLayerPresenter>)createPresenterForPlayer:(AVPlayer *)player videoGravity:(AVLayerVideoGravity)videoGravity {
-    _SJAVPlayerLayerPresentView *view = [[_SJAVPlayerLayerPresentView alloc] initWithFrame:self.bounds];
-    view.player = player;
-    view.videoGravity = videoGravity;
-    return view;
+@synthesize mainPresenter = _mainPresenter;
+- (id<SJAVPlayerLayerPresenter>)mainPresenter {
+    if ( !_mainPresenter ) {
+        SJAVPlayerLayerPresenter *main = [[SJAVPlayerLayerPresenter alloc] initWithFrame:self.bounds];
+        main.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        main.backgroundColor = [UIColor blackColor];
+        [self addSubview:main];
+        main.videoGravity = self.videoGravity;
+        _mainPresenter = main;
+    }
+    return _mainPresenter;
 }
-- (NSArray<_SJAVPlayerLayerPresentView *> *)presenters {
-    return self.subviews;
+
+@synthesize subPresenter = _subPresenter;
+- (id<SJAVPlayerLayerPresenter>)subPresenter {
+    if ( !_subPresenter ) {
+        SJAVPlayerLayerPresenter *sub = [[SJAVPlayerLayerPresenter alloc] initWithFrame:self.bounds];
+        sub.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        sub.backgroundColor = [UIColor blackColor];
+        [self insertSubview:sub belowSubview:(id)self.mainPresenter];
+        sub.videoGravity = self.videoGravity;
+        _subPresenter = sub;
+    }
+    return _subPresenter;
 }
-- (void)addPresenter:(id<SJAVPlayerLayerPresenter>)presenter {
-    [self insertPresenter:presenter atIndex:0];
+
+@synthesize videoGravity = _videoGravity;
+- (void)setVideoGravity:(AVLayerVideoGravity _Nullable)videoGravity {
+    _videoGravity = videoGravity;
+    [(SJAVPlayerLayerPresenter *)_mainPresenter setVideoGravity:videoGravity];
+    [(SJAVPlayerLayerPresenter *)_subPresenter setVideoGravity:videoGravity];
 }
-- (void)insertPresenter:(_SJAVPlayerLayerPresentView *)presenter atIndex:(NSInteger)idx {
-    if ( idx >= self.presenters.count ) idx = self.presenters.count;
-    if ( idx < 0 ) idx = 0;
-    presenter.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    presenter.frame = self.bounds;
-    [self insertSubview:presenter atIndex:idx];
+
+- (AVLayerVideoGravity)videoGravity {
+    if ( !_videoGravity ) return AVLayerVideoGravityResizeAspect;
+    return _videoGravity;
 }
-- (void)insertPresenter:(id<SJAVPlayerLayerPresenter>)presenter belowPresenter:(id<SJAVPlayerLayerPresenter>)belowPresenter {
-    NSInteger idx = [self.presenters indexOfObject:belowPresenter];
-    if ( idx == NSNotFound ) return;
-    [self insertPresenter:presenter atIndex:idx];
+
+- (void)exchangePresenter {
+    SJAVPlayerLayerPresenter *main = (id)_mainPresenter;
+    SJAVPlayerLayerPresenter *sub = (id)_subPresenter;
+    
+    _mainPresenter = sub;
+    _subPresenter = main;
+    
+    [self exchangeSubviewAtIndex:0 withSubviewAtIndex:1];
 }
-- (void)insertPresenter:(id<SJAVPlayerLayerPresenter>)presenter abovePresenter:(id<SJAVPlayerLayerPresenter>)abovePresenter {
-    NSInteger idx = [self.presenters indexOfObject:abovePresenter];
-    if ( idx == NSNotFound ) return;
-    [self insertPresenter:presenter atIndex:idx + 1];
+
+- (void)reset {
+    [self resetMainPresenter];
+    [self resetSubPresenter];
 }
-- (void)removePresenter:(_SJAVPlayerLayerPresentView *)presenter {
-    [presenter removeFromSuperview];
+
+- (void)resetMainPresenter {
+    _mainPresenter.player = nil;
 }
-- (void)removeAllPresenter {
-    if ( self.presenters.count == 0 ) return;
-    [self.presenters enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(_SJAVPlayerLayerPresentView *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj removeFromSuperview];
-    }];
-}
-- (void)removeLastPresenter {
-    [self.subviews.lastObject removeFromSuperview];
-}
-- (void)removeAllPresenterAndAddNewPresenter:(id<SJAVPlayerLayerPresenter>)presenter {
-    if ( !presenter ) return;
-    [self removeAllPresenter];
-    [self addPresenter:presenter];
+
+- (void)resetSubPresenter {
+    _subPresenter.player = nil;
 }
 @end
 NS_ASSUME_NONNULL_END
