@@ -169,8 +169,6 @@ ___
 
 * [SJPlayStatusControlDelegate](#SJPlayStatusControlDelegate)
 
-</br>
-
 * [19.6 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer prepareToPlay:(SJVideoPlayerURLAsset *)asset;](#19.6)
 * [19.7 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer statusDidChanged:(SJVideoPlayerPlayStatus)status;](#19.7)
 * [19.8 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayercurrentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeStr totalTime:(NSTimeInterval)totalTime totalTimeStr:(NSString *)totalTimeStr;](#19.8)
@@ -180,8 +178,6 @@ ___
 </br>
 
 * [SJVolumeBrightnessRateControlDelegate](#SJVolumeBrightnessRateControlDelegate)
-
-</br>
 
 * [19.10 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer muteChanged:(BOOL)mute;](#19.10)
 * [19.11 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer volumeChanged:(float)volume;](#19.11)
@@ -193,18 +189,13 @@ ___
 
 * [SJBufferControlDelegate](#SJBufferControlDelegate)
 
-</br>
-
 * [19.14 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer bufferTimeDidChange:(NSTimeInterval)bufferTime;](#19.14 )
-
 * [19.15 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus;](#19.15)
 
 
 </br>
 
 * [SJRotationControlDelegate](#SJRotationControlDelegate)
-
-</br>
 
 * [19.16 - (BOOL)canTriggerRotationOfVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.16)
 * [19.17 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willRotateView:(BOOL)isFull;](#19.17)
@@ -215,8 +206,6 @@ ___
 
 * [SJFitOnScreenControlDelegate](#SJFitOnScreenControlDelegate)
 
-</br>
-
 * [19.22 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willFitOnScreen:(BOOL)isFitOnScreen;](#19.22)
 * [19.23 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didCompleteFitOnScreen:(BOOL)isFitOnScreen;](#19.23)
 
@@ -224,8 +213,6 @@ ___
 </br>
 
 * [SJGestureControlDelegate](#SJGestureControlDelegate)
-
-</br>
 
 * [19.24 - (BOOL)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer gestureRecognizerShouldTrigger:(SJPlayerGestureType)type location:(CGPoint)location;](#19.24)
 * [19.25 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer panGestureTriggeredInTheHorizontalDirection:(SJPanGestureRecognizerState)state progressTime:(NSTimeInterval)progressTime;](#19.25)
@@ -235,16 +222,12 @@ ___
 
 * [SJNetworkStatusControlDelegate](#SJNetworkStatusControlDelegate)
 
-</br>
-
 * [19.26 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer reachabilityChanged:(SJNetworkStatus)status;](#19.26)
 
 
 </br>
 
 * [SJLockScreenStateControlDelegate](#SJLockScreenStateControlDelegate)
-
-</br>
 
 * [19.27 - (void)tappedPlayerOnTheLockedState:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.27)
 * [19.28 - (void)lockedVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;](#19.28)
@@ -254,8 +237,6 @@ ___
 </br>
 
 * [SJSwitchVideoDefinitionControlDelegate](#SJSwitchVideoDefinitionControlDelegate)
-
-</br>
 
 * [19.30 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;](#19.30)
 
@@ -1652,11 +1633,11 @@ ___
 滚动 scrollView 时, 播放器即将出现时会回调这个方法.
 
 
-
 <h3 id="19.5">19.5 - (void)videoPlayerWillDisappearInScrollView:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
 
 滚动scrollView时, 播放器即将消失时会回调这个方法.
 
+</br>
 
 <h3 id="SJPlayStatusControlDelegate"> SJPlayStatusControlDelegate</h3>
 
@@ -1688,8 +1669,6 @@ currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeSt
 
 <h3 id="SJVolumeBrightnessRateControlDelegate"> SJVolumeBrightnessRateControlDelegate</h3>
 
-</br>
-
 <h3 id="19.10">19.10 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer muteChanged:(BOOL)mute;</h3>
 
 设置静音时, 会回调这个方法
@@ -1711,8 +1690,6 @@ currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeSt
 
 <h3 id="SJBufferControlDelegate"> SJBufferControlDelegate</h3>
 
-</br>
-
 <h3 id="19.14">19.14 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer bufferTimeDidChange:(NSTimeInterval)bufferTime;</h3>
 
 缓冲时间改变的回调.
@@ -1726,8 +1703,6 @@ currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeSt
 </br>
 
 <h3 id="SJRotationControlDelegate"> SJRotationControlDelegate</h3>
-
-</br>
 
 <h3 id="19.16">19.16 - (BOOL)canTriggerRotationOfVideoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
 
@@ -1746,9 +1721,6 @@ currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeSt
 
 <h3 id="SJFitOnScreenControlDelegate">SJFitOnScreenControlDelegate</h3>
 
-</br>
-
-
 <h3 id="19.19">19.19 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer willFitOnScreen:(BOOL)isFitOnScreen;</h3>
 
 将要充满屏幕的回调
@@ -1761,8 +1733,6 @@ currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeSt
 </br>
 
 <h3 id="SJGestureControlDelegate">SJGestureControlDelegate</h3>
-
-</br>
 
 <h3 id="19.24">19.24 - (BOOL)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer gestureRecognizerShouldTrigger:(SJPlayerGestureType)type location:(CGPoint)location;</h3>
 
@@ -1778,16 +1748,12 @@ currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeSt
 
 <h3 id="SJNetworkStatusControlDelegate">SJNetworkStatusControlDelegate</h3>
 
-</br>
-
 
 <h3 id="19.26">19.26 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer reachabilityChanged:(SJNetworkStatus)status;</h3>
 
 网络状态变更的回调.
 
 <h3 id="SJLockScreenStateControlDelegate">SJLockScreenStateControlDelegate</h3>
-
-</br>
 
 <h3 id="19.27">19.27 - (void)tappedPlayerOnTheLockedState:(__kindof SJBaseVideoPlayer *)videoPlayer;</h3>
 
@@ -1807,8 +1773,6 @@ currentTime:(NSTimeInterval)currentTime currentTimeStr:(NSString *)currentTimeSt
 </br>
 
 <h3 id="SJSwitchVideoDefinitionControlDelegate">SJSwitchVideoDefinitionControlDelegate</h3>
-
-</br>
 
 <h3 id="19.30">19.30 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status;</h3>
 
