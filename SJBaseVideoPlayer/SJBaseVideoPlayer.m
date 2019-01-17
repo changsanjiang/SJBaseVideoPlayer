@@ -817,6 +817,7 @@ static NSString *_kGestureState = @"state";
     }
     
     _URLAsset = URLAsset;
+    _assetIsPlayed = NO;
     
     // 维护当前播放的indexPath
     UIScrollView *scrollView = sj_getScrollView(URLAsset.playModel);
