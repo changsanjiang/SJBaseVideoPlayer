@@ -53,6 +53,10 @@ NS_ASSUME_NONNULL_BEGIN
     _timer.exeBlock = ^(SJTimerControl * _Nonnull control) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
+        if ( self.isDisabled ) {
+            [control clear];
+            return;
+        }
         if ( self.canAutomaticallyDisappear ) {
             if ( !self.canAutomaticallyDisappear(self) )
                 return;
