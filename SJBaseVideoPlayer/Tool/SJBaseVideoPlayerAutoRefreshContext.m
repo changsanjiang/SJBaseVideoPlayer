@@ -20,11 +20,13 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if ( !self ) return nil;
     _asset = asset;
+    _delay = delay;
     [self resume];
     return self;
 }
 - (void)pause {
     self.isPaused = YES;
+    self.isWaiting = NO;
 }
 - (void)resume {
     if ( self.isWaiting ) return;
