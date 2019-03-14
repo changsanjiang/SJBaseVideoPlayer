@@ -2203,7 +2203,6 @@ static NSString *_kGestureState = @"state";
     _rotationManagerObserver.rotationDidStartExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
-        self.atViewController.navigationController.view.userInteractionEnabled = NO;
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:willRotateView:)] ) {
             [self.controlLayerDelegate videoPlayer:self willRotateView:mgr.isFullscreen];
         }
@@ -2229,7 +2228,6 @@ static NSString *_kGestureState = @"state";
     _rotationManagerObserver.rotationDidEndExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
-        self.atViewController.navigationController.view.userInteractionEnabled = YES;
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:didEndRotation:)] ) {
             [self.controlLayerDelegate videoPlayer:self didEndRotation:mgr.isFullscreen];
         }
