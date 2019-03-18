@@ -1,1 +1,0 @@
-../../../../../SJBaseVideoPlayer/Header/SJFlipTransitionManagerProtocol.h
