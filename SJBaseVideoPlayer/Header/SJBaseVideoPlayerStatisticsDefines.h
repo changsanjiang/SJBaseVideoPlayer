@@ -7,12 +7,13 @@
 
 #ifndef SJBaseVideoPlayerStatisticsProtocol_h
 #define SJBaseVideoPlayerStatisticsProtocol_h
-#import "SJVideoPlayerState.h"
-@protocol SJBaseVideoPlayerStatisticsPlayer, SJBaseVideoPlayerStatistics;
+#import "SJVideoPlayerPlayStatusDefines.h"
+#import "SJBaseVideoPlayerDefines.h"
+@protocol SJBaseVideoPlayerStatistics;
 @class SJVideoPlayerURLAsset;
 
 NS_ASSUME_NONNULL_BEGIN
-typedef void(^SJBaseVideoPlayerEventHandler)(id<SJBaseVideoPlayerStatistics> s, id<SJBaseVideoPlayerStatisticsPlayer> player);
+typedef void(^SJBaseVideoPlayerEventHandler)(id<SJBaseVideoPlayerStatistics> s, id<SJBaseVideoPlayer> player);
 
 @protocol SJBaseVideoPlayerStatistics <NSObject>
 /// 获取某个资源`已播放的时长`
@@ -23,12 +24,7 @@ typedef void(^SJBaseVideoPlayerEventHandler)(id<SJBaseVideoPlayerStatistics> s, 
 @property (nonatomic, copy, nullable) SJBaseVideoPlayerEventHandler playStatusDidChangeHandler;
 
 /// - 开发者无需关心此方法, 将由播放器自动调用.
-- (void)observePlayer:(__weak id<SJBaseVideoPlayerStatisticsPlayer>)player;
-@end
-
-@protocol SJBaseVideoPlayerStatisticsPlayer <NSObject>
-@property (nonatomic, strong, nullable) SJVideoPlayerURLAsset *URLAsset;
-@property (nonatomic, readonly) SJVideoPlayerPlayStatus playStatus;
+- (void)observePlayer:(__weak id<SJBaseVideoPlayer>)player;
 @end
 NS_ASSUME_NONNULL_END
 

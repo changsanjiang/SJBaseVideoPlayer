@@ -1,5 +1,5 @@
 //
-//  SJFitOnScreenManagerProtocol.h
+//  SJFitOnScreenManagerDefines.h
 //  SJBaseVideoPlayer
 //
 //  Created by BlueDancer on 2018/12/31.

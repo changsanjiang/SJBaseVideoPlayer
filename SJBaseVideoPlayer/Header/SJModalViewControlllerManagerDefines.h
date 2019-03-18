@@ -1,5 +1,5 @@
 //
-//  SJModalViewControlllerManagerProtocol.h
+//  SJModalViewControlllerManagerDefines.h
 //  SJVideoPlayerProject
 //
 //  Created by BlueDancer on 2019/1/28.

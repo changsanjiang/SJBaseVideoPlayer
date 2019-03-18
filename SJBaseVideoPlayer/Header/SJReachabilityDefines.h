@@ -1,5 +1,5 @@
 //
-//  SJNetworkStatus.h
+//  SJReachabilityDefines
 //  Project
 //
 //  Created by 畅三江 on 2018/6/1.

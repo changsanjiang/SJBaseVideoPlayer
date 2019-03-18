@@ -1,13 +1,13 @@
 //
-//  SJVideoPlayerState.h
+//  SJVideoPlayerPlayStatusDefines.h
 //  SJVideoPlayerProject
 //
 //  Created by BlueDancer on 2017/11/29.
 //  Copyright © 2017年 SanJiang. All rights reserved.
 //
 
-#ifndef SJVideoPlayerState_h
-#define SJVideoPlayerState_h
+#ifndef SJVideoPlayerPlayStatusDefines_h
+#define SJVideoPlayerPlayStatusDefines_h
 @class SJBaseVideoPlayer;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -74,4 +74,4 @@ typedef NS_ENUM(NSUInteger, SJVideoPlayerPlayState) {
 } __deprecated_msg("已弃用, 请使用`SJVideoPlayerPlayStatus`");
 
 NS_ASSUME_NONNULL_END
-#endif /* SJVideoPlayerState_h */
+#endif /* SJVideoPlayerPlayStatusDefines_h */

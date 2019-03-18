@@ -1,5 +1,5 @@
 //
-//  SJPlayerGestureControlProtocol.h
+//  SJPlayerGestureControlDefines.h
 //  Pods
 //
 //  Created by 畅三江 on 2019/1/3.

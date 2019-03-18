@@ -1,5 +1,5 @@
 //
-//  SJRotationManagerProtocol.h
+//  SJRotationManagerDefines.h
 //  Pods
 //
 //  Created by 畅三江 on 2018/9/19.

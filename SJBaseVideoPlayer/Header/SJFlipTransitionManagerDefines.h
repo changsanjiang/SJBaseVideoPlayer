@@ -1,5 +1,5 @@
 //
-//  SJFlipTransitionManagerProtocol.h
+//  SJFlipTransitionManagerDefines.h
 //  Pods
 //
 //  Created by BlueDancer on 2018/12/31.

@@ -1,5 +1,5 @@
 //
-//  SJControlLayerAppearManagerProtocol.h
+//  SJControlLayerAppearManagerDefines.h
 //  SJBaseVideoPlayer
 //
 //  Created by BlueDancer on 2018/12/31.
