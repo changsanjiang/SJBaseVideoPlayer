@@ -1921,7 +1921,7 @@ static NSString *_kGestureState = @"state";
 }
 
 - (void)setDisabledGestures:(SJPlayerDisabledGestures)disabledGestures {
-    _gestureControl.disabledGestures = disabledGestures;
+    self.gestureControl.disabledGestures = disabledGestures;
 }
 
 - (SJPlayerDisabledGestures)disabledGestures {
