@@ -841,11 +841,8 @@ static NSString *_kGestureState = @"state";
     return [[SJPlayStatusObserver alloc] initWithPlayer:self];
 }
 
-- (void)setError:(NSError * _Nullable)error {
-    _error = error;
-}
 - (NSError *_Nullable)error {
-    return _error;
+    return self.playbackController.error;
 }
 
 // 1.
@@ -1405,7 +1402,6 @@ static NSString *_kGestureState = @"state";
 
 // 2.2
 - (void)_playerPrepareFailed {
-    self.error = _playbackController.error;
     self.inactivityReason = SJVideoPlayerInactivityReasonPlayFailed;
     self.playStatus = SJVideoPlayerPlayStatusInactivity;
 }
