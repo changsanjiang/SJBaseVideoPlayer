@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SJBaseVideoPlayer'
-  s.version      = '2.3.1'
+  s.version      = '2.3.2'
   s.summary      = 'video player.'
   s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
   s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
