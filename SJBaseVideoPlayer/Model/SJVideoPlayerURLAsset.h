@@ -11,7 +11,6 @@
 #import "SJMediaPlaybackProtocol.h"
 
 @protocol SJVideoPlayerURLAssetObserver;
-@class AVAsset;
 
 NS_ASSUME_NONNULL_BEGIN
 

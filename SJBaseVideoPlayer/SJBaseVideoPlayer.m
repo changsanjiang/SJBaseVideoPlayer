@@ -829,8 +829,8 @@ static NSString *_kGestureState = @"state";
     if ( _playbackController.videoGravity != self.videoGravity ) _playbackController.videoGravity = self.videoGravity;
 }
 
-- (void)switchVideoDefinitionByURL:(NSURL *)URL {
-    [self.playbackController switchVideoDefinitionByURL:URL];
+- (void)switchVideoDefinition:(SJVideoPlayerURLAsset *)URLAsset {
+    [self.playbackController switchVideoDefinition:URLAsset];
 }
 
 - (SJMediaPlaybackType)playbackType {
@@ -856,19 +856,9 @@ static NSString *_kGestureState = @"state";
     _replayed = NO;
     
     // update
-    [self _updateCurrentPlayingIndexPathIfNeeded:URLAsset.playModel];
-    [self _updatePlayModelObserver:URLAsset.playModel];
-    _mpc_assetObserver = [URLAsset getObserver];
-    __weak typeof(self) _self = self;
-    _mpc_assetObserver.playModelDidChangeExeBlock = ^(SJVideoPlayerURLAsset * _Nonnull asset) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        [self _updateCurrentPlayingIndexPathIfNeeded:URLAsset.playModel];
-        [self _updatePlayModelObserver:URLAsset.playModel];
-    };
-    
-    // update
     _URLAsset = URLAsset;
+    
+    [self _updateAssetObservers];
     
     self.playbackController.media = URLAsset;
     
@@ -887,6 +877,19 @@ static NSString *_kGestureState = @"state";
 }
 - (nullable SJVideoPlayerURLAsset *)URLAsset {
     return _URLAsset;
+}
+
+- (void)_updateAssetObservers {
+    [self _updateCurrentPlayingIndexPathIfNeeded:_URLAsset.playModel];
+    [self _updatePlayModelObserver:_URLAsset.playModel];
+    _mpc_assetObserver = [_URLAsset getObserver];
+    __weak typeof(self) _self = self;
+    _mpc_assetObserver.playModelDidChangeExeBlock = ^(SJVideoPlayerURLAsset * _Nonnull asset) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        [self _updateCurrentPlayingIndexPathIfNeeded:asset.playModel];
+        [self _updatePlayModelObserver:asset.playModel];
+    };
 }
 
 - (void)refresh {
@@ -1012,7 +1015,7 @@ static NSString *_kGestureState = @"state";
         return;
     }
     
-    if ( [self playStatus_isPrepare] ) {
+    if ( [self playStatus_isPrepare] && self.playbackController.prepareStatus != SJMediaPlaybackPrepareStatusReadyToPlay ) {
         // 记录操作, 待资源初始化完成后调用
         self.operationOfInitializing = ^(SJBaseVideoPlayer * _Nonnull player) {
             if ( player.autoPlayWhenPlayStatusIsReadyToPlay ) [player play];
@@ -1252,9 +1255,16 @@ static NSString *_kGestureState = @"state";
     }
 }
 
-- (void)playbackController:(id<SJMediaPlaybackController>)controller switchVideoDefinitionByURL:(NSURL *)URL statusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status {
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:switchVideoDefinitionByURL:statusDidChange:)] ) {
-        [self.controlLayerDelegate videoPlayer:self switchVideoDefinitionByURL:URL statusDidChange:status];
+- (void)playbackController:(id<SJMediaPlaybackController>)controller switchingDefinitionStatusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status media:(id<SJMediaModelProtocol>)media {
+
+    if ( status == SJMediaPlaybackSwitchDefinitionStatusFinished ) {
+        _URLAsset = (id)media;
+        [self _updateAssetObservers];
+        if ( ![self playStatus_isPaused_ReasonPause] ) [self play];
+    }
+    
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:switchingDefinitionStatusDidChange:media:)] ) {
+        [self.controlLayerDelegate videoPlayer:self switchingDefinitionStatusDidChange:status media:media];
     }
 }
 
@@ -2894,6 +2904,9 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
 
 - (nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull, CGSize))presentationSize __deprecated_msg("use `presentationSizeDidChangeExeBlock`") {
     return objc_getAssociatedObject(self, _cmd);
+}
+- (void)switchVideoDefinitionByURL:(NSURL *)URL {
+    [self switchVideoDefinition:[[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:_URLAsset.playModel]];
 }
 @end
 NS_ASSUME_NONNULL_END
