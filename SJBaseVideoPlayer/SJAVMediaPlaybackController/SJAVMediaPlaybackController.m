@@ -60,6 +60,7 @@ inline static bool isFloatZero(float value) {
 #ifdef DEBUG
     NSLog(@"%d - %s", (int)__LINE__, __func__);
 #endif
+    if ( !_media.otherMedia ) [_playAsset.player pause];
     [_playerView removeFromSuperview];
     [self _cancelOperations];
 }
@@ -163,7 +164,7 @@ inline static bool isFloatZero(float value) {
 }
 
 - (void)_resetMediaForSwitchDefinitionSuccess:(id<SJMediaModelProtocol>)new_meida {
-    [_playAsset.player replaceCurrentItemWithPlayerItem:nil];
+    [_playAsset.player pause];
     sj_removeAssetForMedia(_media);
     _media = new_meida;
     _playAsset = sj_assetForMedia(new_meida);
@@ -401,10 +402,9 @@ inline static bool isFloatZero(float value) {
         _isPreparing = NO;
         _prepareStatus = (SJMediaPlaybackPrepareStatus)playerItemStatus;
         _error = _playAsset.playerItem.error;
-        
-        __weak SJAVMediaPlayAsset *_Nullable asset = self.playAsset;
         [self _setupMainPresenterIfNeeded];
         
+        __weak SJAVMediaPlayAsset *_Nullable asset = self.playAsset;
         __weak typeof(self) _self = self;
         if ( _prepareStatus == SJMediaPlaybackPrepareStatusReadyToPlay &&
              !_media.otherMedia ) {
@@ -450,7 +450,6 @@ inline static bool isFloatZero(float value) {
     
     if ( !_media.otherMedia ) {
         [_mainPresenter removeAllPresenters];
-        [_playAsset.player replaceCurrentItemWithPlayerItem:nil];
     }
 
     [self _cancelOperations];

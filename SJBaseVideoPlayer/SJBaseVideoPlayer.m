@@ -1674,6 +1674,9 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         __strong typeof(_self) self = _self;
         if ( !self ) return NO;
         
+        if ( self.isTransitioning )
+            return NO;
+        
         if ( self.isLockedScreen )
             return NO;
         

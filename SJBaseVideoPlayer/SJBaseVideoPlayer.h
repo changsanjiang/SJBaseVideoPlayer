@@ -668,5 +668,4 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) void(^presentationSize)(__kindof SJBaseVideoPlayer *videoPlayer, CGSize size) __deprecated_msg("use `presentationSizeDidChangeExeBlock`");
 - (void)switchVideoDefinitionByURL:(NSURL *)URL; // 切换清晰度, 推荐使用 `switchVideoDefinition:`
 @end
-
 NS_ASSUME_NONNULL_END

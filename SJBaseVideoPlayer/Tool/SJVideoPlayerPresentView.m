@@ -35,11 +35,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)showPlaceholder:(BOOL)animated {
     if ( !_isHidden ) return; _isHidden = NO;
-    if ( !_placeholderImageView.superview ) {
-        _placeholderImageView.frame = self.bounds;
-        [self insertSubview:_placeholderImageView atIndex:0];
-    }
-    
     if ( animated ) {
         [UIView animateWithDuration:0.4 animations:^{
             self->_placeholderImageView.alpha = 1;
@@ -55,13 +50,10 @@ NS_ASSUME_NONNULL_BEGIN
     if ( animated ) {
         [UIView animateWithDuration:0.4 animations:^{
             self->_placeholderImageView.alpha = 0.001;
-        } completion:^(BOOL finished) {
-            if ( self->_isHidden ) [self->_placeholderImageView removeFromSuperview];
         }];
     }
     else {
-        _placeholderImageView.alpha = 0.001;
-        [_placeholderImageView removeFromSuperview];
+        _placeholderImageView.alpha = 0.001; 
     }
 }
 
