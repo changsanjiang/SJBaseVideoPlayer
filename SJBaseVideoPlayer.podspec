@@ -12,6 +12,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.dependency 'Masonry'
   s.dependency 'SJUIKit/ObserverHelper', '>= 0.0.0.23'
+  s.dependency 'SJUIKit/Queues', '>= 0.0.0.23'
   s.dependency 'Reachability'
 
   s.source_files = 'SJBaseVideoPlayer/*.{h,m}'
