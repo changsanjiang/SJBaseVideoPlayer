@@ -166,10 +166,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// - 默认是0, 即不自动刷新
 /// - 单位是秒
 @property (nonatomic) NSTimeInterval delayToAutoRefreshWhenPlayFailed;
-/// 当缓冲为`Unplayable`时, 多少秒后自动尝试播放
-/// - 默认是0, 将会在缓冲状态为`Playable`时播放.
-/// - 单位是秒
-@property (nonatomic) NSInteger refreshToPlayAfterBufferTime;
 /// 使播放
 - (void)play;
 /// 切换`清晰度` (v1.6.5 新增)

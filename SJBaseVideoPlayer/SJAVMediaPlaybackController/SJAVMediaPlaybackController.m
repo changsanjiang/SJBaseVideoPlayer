@@ -159,6 +159,7 @@ inline static bool isFloatZero(float value) {
     _isPlaying = NO;
     _definitionLoader = nil;
     _media = media;
+    [self cancelPendingSeeks];
 }
 
 - (void)_resetMediaForSwitchDefinitionSuccess:(id<SJMediaModelProtocol>)new_meida {
@@ -313,11 +314,6 @@ inline static bool isFloatZero(float value) {
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus {
     [self _updateBufferStatusIfNeeded];
 }
-- (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer bufferWatingTimeDidChange:(NSTimeInterval)bufferWatingTime {
-    if ( [self.delegate respondsToSelector:@selector(playbackController:bufferWatingTimeDidChange:)] ) {
-        [self.delegate playbackController:self bufferWatingTimeDidChange:bufferWatingTime];
-    }
-}
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer presentationSizeDidChange:(CGSize)presentationSize {
     [self _updatePresentationSizeIfNeeded];
 }
@@ -393,10 +389,12 @@ inline static bool isFloatZero(float value) {
 }
 
 - (void)_updatePrepareStatusIfNeeded {
+    if ( _playAssetObserver.playerItemStatus == AVPlayerStatusUnknown )
+        return;
     AVPlayerItemStatus playerItemStatus = _playAssetObserver.playerItemStatus;
     if ( _prepareStatus == (NSInteger)playerItemStatus )
         return;
-    
+
     _prepareStatus = (SJMediaPlaybackPrepareStatus)playerItemStatus;
     _error = _playAsset.playerItem.error;
     
@@ -565,10 +563,6 @@ inline static bool isFloatZero(float value) {
         if ( !self ) return ;
         if ( failure ) failure(self, error);
     }];
-}
-
-- (NSTimeInterval)bufferWatingTime {
-    return _playAsset.bufferWatingTime;
 }
 
 - (void)updateBufferStatus {

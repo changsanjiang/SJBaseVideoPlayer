@@ -25,7 +25,6 @@ NSNotificationName const SJAVMediaPlaybackTimeDidChangeNotification = @"SJAVMedi
 NSNotificationName const SJAVMediaPlaybackDurationDidChangeNotificationn = @"SJAVMediaPlaybackDurationDidChangeNotificationn";
 NSNotificationName const SJAVMediaBufferLoadedTimeRangesDidChangeNotification = @"SJAVMediaBufferLoadedTimeRangesDidChangeNotification";
 NSNotificationName const SJAVMediaBufferStatusDidChangeNotification = @"SJAVMediaBufferStatusDidChangeNotification";
-NSNotificationName const SJAVMediaBufferWatingTimeDidChangeNotification = @"SJAVMediaBufferWatingTimeDidChangeNotification";
 NSNotificationName const SJAVMediaPresentationSizeDidChangeNotification = @"SJAVMediaPresentationSizeDidChangeNotification";
 NSNotificationName const SJAVMediaPlayerItemStatusDidChangeNotification = @"SJAVMediaPlayerItemStatusDidChangeNotification";
 NSNotificationName const SJAVMediaPlaybackTypeLoadedNotification = @"SJAVMediaPlaybackTypeLoadedNotification";
@@ -38,7 +37,6 @@ NSNotificationName const SJAVMediaPlaybackTypeLoadedNotification = @"SJAVMediaPl
 @property (nonatomic) CMTime duration;
 @property (nonatomic) CMTime currentTime;
 @property (nonatomic) SJPlayerBufferStatus bufferStatus;
-@property (nonatomic) NSTimeInterval bufferWatingTime;
 @property (nonatomic) CMTimeRange bufferLoadedTime;
 @property (nonatomic) CGSize presentationSize;
 @property (nonatomic) AVPlayerItemStatus playerItemStatus;
@@ -295,41 +293,6 @@ static NSString *kRate = @"rate";
         [NSNotificationCenter.defaultCenter postNotificationName:SJAVMediaPlaybackTypeLoadedNotification object:self];
     }
 }
-
-#pragma mark -
-- (void)setBufferStatus:(SJPlayerBufferStatus)bufferStatus {
-    if ( bufferStatus == _bufferStatus ) return;
-    _bufferStatus = bufferStatus;
-    switch ( bufferStatus ) {
-        case SJPlayerBufferStatusUnknown: break;
-        case SJPlayerBufferStatusUnplayable: {
-            [_watingTimer invalidate];
-            __weak typeof(self) _self = self;
-            _watingTimer = [NSTimer assetAdd_timerWithTimeInterval:1 block:^(NSTimer *timer) {
-                __strong typeof(_self) self = _self;
-                if ( !self ) {
-                    [timer invalidate];
-                    return ;
-                }
-                self.bufferWatingTime += timer.timeInterval;
-            } repeats:YES];
-            [_watingTimer assetAdd_fire];
-            [NSRunLoop.mainRunLoop addTimer:_watingTimer forMode:NSRunLoopCommonModes];
-        }
-            break;
-        case SJPlayerBufferStatusPlayable: {
-            [_watingTimer invalidate];
-            self.bufferWatingTime = 0;
-        }
-            break;
-    }
-}
-
-- (void)setBufferWatingTime:(NSTimeInterval)bufferWatingTime {
-    if ( bufferWatingTime == _bufferWatingTime ) return;
-    _bufferWatingTime = bufferWatingTime;
-    [NSNotificationCenter.defaultCenter postNotificationName:SJAVMediaBufferWatingTimeDidChangeNotification object:self];
-}
 @end
 
 
@@ -388,12 +351,6 @@ static NSString *kRate = @"rate";
         }
     }];
     
-    [self sj_observeWithNotification:SJAVMediaBufferWatingTimeDidChangeNotification target:playerAsset usingBlock:^(SJAVMediaPlayAssetPropertiesObserver *_Nonnull self, NSNotification * _Nonnull note) {
-        if ( [self.delegate respondsToSelector:@selector(observer:bufferWatingTimeDidChange:)] ) {
-            [self.delegate observer:self bufferWatingTimeDidChange:self.bufferWatingTime];
-        }
-    }];
-    
     [self sj_observeWithNotification:SJAVMediaPlaybackTypeLoadedNotification target:playerAsset usingBlock:^(SJAVMediaPlayAssetPropertiesObserver *_Nonnull self, NSNotification * _Nonnull note) {
         if ( [self.delegate respondsToSelector:@selector(observer:playbackTypeLoaded:)] ) {
             [self.delegate observer:self playbackTypeLoaded:self.playbackType];
@@ -433,10 +390,6 @@ static NSString *kRate = @"rate";
 
 - (CGSize)presentationSize {
     return _playerAsset.presentationSize;
-}
-
-- (NSTimeInterval)bufferWatingTime {
-    return _playerAsset.bufferWatingTime;
 }
 
 - (SJMediaPlaybackType)playbackType {

@@ -20,7 +20,6 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackTimeDidChangeNotification
 UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackDurationDidChangeNotificationn;
 UIKIT_EXTERN NSNotificationName const SJAVMediaBufferStatusDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaBufferLoadedTimeRangesDidChangeNotification;
-UIKIT_EXTERN NSNotificationName const SJAVMediaBufferWatingTimeDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaPresentationSizeDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaPlayerItemStatusDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackTypeLoadedNotification;
@@ -38,7 +37,6 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackTypeLoadedNotification;
 @property (nonatomic, readonly) CMTime duration;
 @property (nonatomic, readonly) CMTime currentTime;
 @property (nonatomic, readonly) SJPlayerBufferStatus bufferStatus;
-@property (nonatomic, readonly) NSTimeInterval bufferWatingTime;
 @property (nonatomic, readonly) CMTimeRange bufferLoadedTime;
 @property (nonatomic, readonly) CGSize presentationSize;
 @property (nonatomic, readonly) AVPlayerItemStatus playerItemStatus;
@@ -55,7 +53,6 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackTypeLoadedNotification;
 @property (nonatomic, readonly) AVPlayerItemStatus playerItemStatus;
 @property (nonatomic, readonly) SJPlayerBufferStatus bufferStatus;
 @property (nonatomic, readonly) NSTimeInterval bufferLoadedTime; // 已缓冲到的时间
-@property (nonatomic, readonly) NSTimeInterval bufferWatingTime; // 如果状态为`Unplayable`, 则每等待`1`秒, 此属性的值将`+1`, 当缓冲状态为`Playable`后, 将会被置为 0
 @property (nonatomic, readonly) NSTimeInterval currentTime;
 @property (nonatomic, readonly) CGSize presentationSize;
 @property (nonatomic, readonly) NSTimeInterval duration;
@@ -71,7 +68,6 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackTypeLoadedNotification;
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer currentTimeDidChange:(NSTimeInterval)currentTime;
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer bufferLoadedTimeDidChange:(NSTimeInterval)bufferLoadedTime;
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus;
-- (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer bufferWatingTimeDidChange:(NSTimeInterval)bufferWatingTime;
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer presentationSizeDidChange:(CGSize)presentationSize;
 - (void)observer:(SJAVMediaPlayAssetPropertiesObserver *)observer playerItemStatusDidChange:(AVPlayerItemStatus)playerItemStatus;
 - (void)playDidToEndForObserver:(SJAVMediaPlayAssetPropertiesObserver *)observer;

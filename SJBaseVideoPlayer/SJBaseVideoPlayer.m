@@ -272,7 +272,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     NSTimeInterval _delayToAutoRefreshWhenPlayFailed;
     SJBaseVideoPlayerAutoRefreshController *_Nullable _autoRefresh;
     BOOL _replayed;
-    NSInteger _refreshToPlayAfterBufferTime;
     void(^_Nullable _presentationSizeDidChangeExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
     BOOL _pauseWhenAppDidEnterBackground;
     
@@ -330,7 +329,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 + (NSString *)version {
-    return @"2.3.5";
+    return @"2.3.6";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -391,6 +390,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 #ifdef SJ_MAC
     NSLog(@"SJVideoPlayerLog: %d - %s", (int)__LINE__, __func__);
 #endif
+    if ( _autoRefresh ) [_autoRefresh cancel];
     if ( _URLAsset && self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
     [_presentView removeFromSuperview];
     [_view removeFromSuperview];
@@ -862,6 +862,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 
 - (void)setDelayToAutoRefreshWhenPlayFailed:(NSTimeInterval)delayToAutoRefreshWhenPlayFailed {
     _delayToAutoRefreshWhenPlayFailed = delayToAutoRefreshWhenPlayFailed;
+    [_autoRefresh cancel];
     if ( delayToAutoRefreshWhenPlayFailed > 0 ) {
         _autoRefresh = [[SJBaseVideoPlayerAutoRefreshController alloc] initWithPlayer:(id)self];
     }
@@ -871,13 +872,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 - (NSTimeInterval)delayToAutoRefreshWhenPlayFailed {
     return _delayToAutoRefreshWhenPlayFailed;
-}
-
-- (void)setRefreshToPlayAfterBufferTime:(NSInteger)refreshToPlayAfterBufferTime {
-    _refreshToPlayAfterBufferTime = refreshToPlayAfterBufferTime;
-}
-- (NSInteger)refreshToPlayAfterBufferTime {
-    return _refreshToPlayAfterBufferTime;
 }
 
 - (void)setAssetDeallocExeBlock:(nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull))assetDeallocExeBlock {
@@ -1185,16 +1179,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 
 - (void)playbackController:(id<SJMediaPlaybackController>)controller bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus {
     [self _updateBufferStatus];
-}
-
-- (void)playbackController:(id<SJMediaPlaybackController>)controller bufferWatingTimeDidChange:(NSTimeInterval)bufferWatingTime {
-    if ( _refreshToPlayAfterBufferTime == 0 ) return;
-    BOOL flag = (((NSInteger)bufferWatingTime) % _refreshToPlayAfterBufferTime == 0)
-                && (self.networkStatus != SJNetworkStatus_NotReachable)
-                && ![self playStatus_isPaused_ReasonPause];
-    if ( flag ) {
-        [self refresh];
-    }
 }
 
 - (void)playbackController:(id<SJMediaPlaybackController>)controller presentationSizeDidChange:(CGSize)presentationSize {
@@ -2685,7 +2669,7 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         _view.hidden = NO;
     }
     
-    if ( _resumePlaybackWhenScrollAppeared && ![self playStatus_isInactivity] ) {
+    if ( _resumePlaybackWhenScrollAppeared && [self playStatus_isPaused_ReasonPause] ) {
         [self play];
     }
     
