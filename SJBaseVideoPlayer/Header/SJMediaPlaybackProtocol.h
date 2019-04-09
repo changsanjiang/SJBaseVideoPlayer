@@ -72,6 +72,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable UIImage *)screenshot;
 - (void)switchVideoDefinition:(id<SJMediaModelProtocol>)media;
 
+@property (nonatomic, readonly) SJVideoPlayerPlayStatus playStatus;
+@property (nonatomic, readonly) SJVideoPlayerPausedReason pausedReason;
+@property (nonatomic, readonly) SJVideoPlayerInactivityReason inactivityReason;
+
 @optional
 - (void)cancelPendingSeeks;
 @end
@@ -129,6 +133,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)playbackControllerIsReadyForDisplay:(id<SJMediaPlaybackController>)controller;
 - (void)playbackController:(id<SJMediaPlaybackController>)controller playbackTypeLoaded:(SJMediaPlaybackType)playbackType;
+
+- (void)playbackController:(id<SJMediaPlaybackController>)controller playbackStatusDidChange:(SJVideoPlayerPlayStatus)playbackStatus;
 
 @optional
 - (void)pausedForAppDidEnterBackgroundOfPlaybackController:(id<SJMediaPlaybackController>)controller;

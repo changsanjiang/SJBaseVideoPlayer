@@ -1087,7 +1087,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         if ( !self ) return ;
         [self.playbackController updateBufferStatus];
         if ( finished ) {
-            if ( [self playStatus_isPaused_ReasonSeeking] ) [self play];
+//            if ( [self playStatus_isPaused_ReasonSeeking] ) [self play];
             if ( self.playTimeDidChangeExeBlok ) self.playTimeDidChangeExeBlok(self);
         }
         if ( completionHandler ) completionHandler(finished);
