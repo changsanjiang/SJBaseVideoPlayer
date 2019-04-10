@@ -11,7 +11,7 @@
 #import <UIKit/UIKit.h>
 #import "SJReachabilityDefines.h"
 #import "SJVideoPlayerPlayStatusDefines.h"
-#import "SJMediaPlaybackProtocol.h"
+#import "SJMediaPlaybackControllerDefines.h"
 #import "SJPlayerGestureControlDefines.h"
 
 @protocol SJPlayStatusControlDelegate,

@@ -20,7 +20,6 @@
 #import "SJVideoPlayerRegistrar.h"
 #import "SJVideoPlayerPresentView.h"
 #import "SJPlayModelPropertiesObserver.h"
-#import "SJAVMediaPlayAsset+SJAVMediaPlaybackControllerAdd.h"
 #import "SJBaseVideoPlayer+PlayStatus.h"
 #import "SJTimerControl.h"
 #import "UIScrollView+ListViewAutoplaySJAdd.h"
@@ -36,6 +35,7 @@
 #import "SJBaseVideoPlayerAutoRefreshController.h"
 #import "SJVCRotationManager.h"
 #import "SJPlayerView.h"
+#import "SJPlayStatusObserver.h"
 
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
@@ -51,32 +51,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 static NSInteger _SJBaseVideoPlayerViewTag = 10000;
-
-@interface SJPlayStatusObserver : NSObject<SJPlayStatusObserver>
-- (instancetype)initWithPlayer:(__kindof SJBaseVideoPlayer *)player;
-@property (nonatomic, copy, nullable) void(^playStatusDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player);
-@end
-
-@implementation SJPlayStatusObserver
-static NSString *_kPlayStatus = @"playStatus";
-- (instancetype)initWithPlayer:(__kindof SJBaseVideoPlayer *)player {
-    self = [super init];
-    if ( !self ) return nil;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [player sj_addObserver:self forKeyPath:_kPlayStatus context:&_kPlayStatus];
-    });
-    return self;
-}
-
-- (void)observeValueForKeyPath:(nullable NSString *)keyPath ofObject:(nullable SJBaseVideoPlayer *)object change:(nullable NSDictionary<NSKeyValueChangeKey,id> *)change context:(nullable void *)context {
-    if ( context == &_kPlayStatus ) {
-        if ( _playStatusDidChangeExeBlock ) _playStatusDidChangeExeBlock(object);
-    }
-}
-@end
-
-
-#pragma mark -
 
 @interface SJBaseVideoPlayer ()
 @property (nonatomic) SJVideoPlayerPlayState state __deprecated_msg("已弃用, 请使用`playStatus`");
@@ -370,8 +344,8 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)_configAVAudioSession {
-    if ( AVAudioSession.sharedInstance.category != AVAudioSessionCategoryPlayback ||
-        AVAudioSession.sharedInstance.category != AVAudioSessionCategoryPlayAndRecord ) {
+    if ( AVAudioSession.sharedInstance.category != AVAudioSessionCategoryPlayback &&
+         AVAudioSession.sharedInstance.category != AVAudioSessionCategoryPlayAndRecord ) {
         NSError *error = nil;
         // 使播放器在静音状态下也能放出声音
         [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error];
@@ -380,7 +354,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)dealloc {
-#ifdef SJ_MAC
+#ifdef DEBUG
     NSLog(@"SJVideoPlayerLog: %d - %s", (int)__LINE__, __func__);
 #endif
     if ( _autoRefresh ) [_autoRefresh cancel];
@@ -397,62 +371,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     if ( _playStatusDidChangeExeBlock )
         _playStatusDidChangeExeBlock(self);
     
-#ifdef DEBUG
-    printf("%s\n", [self getPlayStatusStr:playStatus].UTF8String);
-#endif
-    
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    switch ( playStatus ) {
-        case SJVideoPlayerPlayStatusUnknown:
-            self.state = SJVideoPlayerPlayState_Unknown;
-            break;
-        case SJVideoPlayerPlayStatusPrepare:
-        case SJVideoPlayerPlayStatusReadyToPlay:
-            self.state = SJVideoPlayerPlayState_Prepare;
-            break;
-        case SJVideoPlayerPlayStatusPlaying:
-            self.state = SJVideoPlayerPlayState_Playing;
-            break;
-        case SJVideoPlayerPlayStatusPaused: {
-            switch ( self.pausedReason ) {
-                case SJVideoPlayerPausedReasonUnknown:
-                    break;
-                case SJVideoPlayerPausedReasonBuffering:
-                    self.state = SJVideoPlayerPlayState_Buffing;
-                    break;
-                case SJVideoPlayerPausedReasonPause:
-                    self.state = SJVideoPlayerPlayState_Paused;
-                    break;
-                case SJVideoPlayerPausedReasonSeeking:
-                    self.state = SJVideoPlayerPlayState_Buffing;
-                    break;
-            }
-        }
-            break;
-        case SJVideoPlayerPlayStatusInactivity:
-            switch ( self.inactivityReason ) {
-                case SJVideoPlayerPausedReasonUnknown:
-                    break;
-                case SJVideoPlayerInactivityReasonPlayEnd:
-                    self.state = SJVideoPlayerPlayState_PlayEnd;
-                    break;
-                case SJVideoPlayerInactivityReasonPlayFailed:
-                    self.state = SJVideoPlayerPlayState_PlayFailed;
-                    break;
-                case SJVideoPlayerInactivityReasonNotReachableAndPlaybackStalled:
-                    self.state = SJVideoPlayerPlayState_PlayFailed;
-                    break;
-            }
-            break;
-    }
-#pragma clang diagnostic pop
-    
     [self _showOrHiddenPlaceholderImageViewIfNeeded];
-
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:statusDidChanged:)] ) {
-        [self.controlLayerDelegate videoPlayer:self statusDidChanged:playStatus];
-    }
 
     if ( SJVideoPlayerPlayStatusPlaying == _playStatus ) {
         _mpc_assetIsPlayed = YES;
@@ -471,6 +390,28 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
             }
         }
     }
+    
+    if ( [self playStatus_isPaused_ReasonPause] ) {
+        if ( self.pausedToKeepAppearState ) {
+            [self.controlLayerAppearManager keepAppearState];
+        }
+    }
+    
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:statusDidChanged:)] ) {
+        [self.controlLayerDelegate videoPlayer:self statusDidChanged:playStatus];
+    }
+    else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:stateChanged:)] ) {
+            [self.controlLayerDelegate videoPlayer:self stateChanged:self.state];
+        }
+#pragma clang diagnostic pop
+    }
+
+#ifdef SJMAC
+    printf("%s\n", [self getPlayStatusStr:playStatus].UTF8String);
+#endif
 }
 
 - (void)setControlLayerDataSource:(nullable id<SJVideoPlayerControlLayerDataSource>)controlLayerDataSource {
@@ -607,18 +548,40 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     return _registrar;
 }
 
-- (void)setState:(SJVideoPlayerPlayState)state {
-    if ( state == _state ) return;
-    _state = state;
-    
-    if ( state == SJVideoPlayerPlayState_Paused &&
-         self.pausedToKeepAppearState &&
-         self.registrar.state == SJVideoPlayerAppState_Forground )
-        [self.controlLayerAppearManager keepAppearState];
-    
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:stateChanged:)] ) {
-        [self.controlLayerDelegate videoPlayer:self stateChanged:state];
+- (SJVideoPlayerPlayState)state {
+    switch ( self.playStatus ) {
+        case SJVideoPlayerPlayStatusUnknown:
+            return SJVideoPlayerPlayState_Unknown;
+        case SJVideoPlayerPlayStatusPrepare:
+        case SJVideoPlayerPlayStatusReadyToPlay:
+            return SJVideoPlayerPlayState_Prepare;
+        case SJVideoPlayerPlayStatusPlaying:
+            return SJVideoPlayerPlayState_Playing;
+        case SJVideoPlayerPlayStatusPaused: {
+            switch ( self.pausedReason ) {
+                case SJVideoPlayerPausedReasonUnknown: break;
+                case SJVideoPlayerPausedReasonBuffering:
+                    return SJVideoPlayerPlayState_Buffing;
+                case SJVideoPlayerPausedReasonPause:
+                    return SJVideoPlayerPlayState_Paused;
+                case SJVideoPlayerPausedReasonSeeking:
+                    return SJVideoPlayerPlayState_Buffing;
+            }
+        }
+            break;
+        case SJVideoPlayerPlayStatusInactivity:
+            switch ( self.inactivityReason ) {
+                case SJVideoPlayerPausedReasonUnknown: break;
+                case SJVideoPlayerInactivityReasonPlayEnd:
+                    return SJVideoPlayerPlayState_PlayEnd;
+                case SJVideoPlayerInactivityReasonPlayFailed:
+                    return SJVideoPlayerPlayState_PlayFailed;
+                case SJVideoPlayerInactivityReasonNotReachableAndPlaybackStalled:
+                    return SJVideoPlayerPlayState_PlayFailed;
+            }
+            break;
     }
+    return SJVideoPlayerPlayState_Unknown;
 }
 
 - (UITapGestureRecognizer *)lockStateTapGesture {
@@ -778,7 +741,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (id<SJPlayStatusObserver>)getPlayStatusObserver {
-    return [[SJPlayStatusObserver alloc] initWithPlayer:self];
+    return [[SJPlayStatusObserver alloc] initWithPlayer:(id)self];
 }
 
 - (NSError *_Nullable)error {
@@ -811,8 +774,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         [self.playbackController prepareToPlay];
     }
     else {
-#warning next ... 是否需要加入清理资源
-        self.playModelObserver = nil;
+        [self stop];
     }
 }
 - (nullable SJVideoPlayerURLAsset *)URLAsset {
@@ -984,9 +946,9 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     }
     
     _operationOfInitializing = nil;
-    [self.playbackController stop];
-    self.playModelObserver = nil;
-    self.URLAsset = nil;
+    [_playbackController stop];
+    _playModelObserver = nil;
+    _URLAsset = nil;
 }
 
 - (void)stopAndFadeOut {
@@ -1179,7 +1141,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     [self _showOrHiddenPlaceholderImageViewIfNeeded];
 }
 
-#warning next ....
 - (void)playbackController:(id<SJMediaPlaybackController>)controller switchingDefinitionStatusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status media:(id<SJMediaModelProtocol>)media {
 
     if ( status == SJMediaPlaybackSwitchDefinitionStatusFinished ) {
@@ -1232,32 +1193,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
             break;
     }
 #endif
-    
-//    switch ( bufferStatus ) {
-//        case SJPlayerBufferStatusUnknown:
-//        case SJPlayerBufferStatusUnplayable: {
-//            // 有网
-//            if ( self.reachability.networkStatus != SJNetworkStatus_NotReachable ) {
-//                if ( (![self playStatus_isPrepare] && ![self playStatus_isReadyToPlay]) || _mpc_assetIsPlayed ) {
-//                    if ( ![self playStatus_isPaused] )
-//                        [self pause:SJVideoPlayerPausedReasonBuffering];
-//                }
-//            }
-//            // 无网
-//            else if ( ![self.URLAsset.mediaURL isFileURL] ) {
-//                self.inactivityReason = SJVideoPlayerInactivityReasonNotReachableAndPlaybackStalled;
-//                self.playStatus = SJVideoPlayerPlayStatusInactivity;
-//            }
-//        }
-//            break;
-//        case SJPlayerBufferStatusPlayable: {
-//            if ( [self playStatus_isPaused_ReasonBuffering] ||
-//                 [self playStatus_isInactivity_ReasonNotReachableAndPlaybackStalled] ) {
-//                [self play];
-//            }
-//        }
-//            break;
-//    }
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:bufferStatusDidChange:)] ) {
         [self.controlLayerDelegate videoPlayer:self bufferStatusDidChange:bufferStatus];
@@ -1312,10 +1247,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _reachabilityObserver.networkStatusDidChangeExeBlock = ^(id<SJReachability> r, SJNetworkStatus status) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        
-#warning next ..
-//        [self _updateBufferStatus];
-        
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:reachabilityChanged:)] ) {
             [self.controlLayerDelegate videoPlayer:self reachabilityChanged:status];
         }

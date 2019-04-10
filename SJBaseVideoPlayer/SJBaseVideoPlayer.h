@@ -36,7 +36,7 @@
 #import "SJVideoPlayerControlLayerProtocol.h"
 #import "SJControlLayerAppearManagerDefines.h"
 #import "SJFlipTransitionManagerDefines.h"
-#import "SJMediaPlaybackProtocol.h"
+#import "SJMediaPlaybackControllerDefines.h"
 #import "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h"
 #import "SJPlayerGestureControlDefines.h"
 #import "SJDeviceVolumeAndBrightnessManagerDefines.h"

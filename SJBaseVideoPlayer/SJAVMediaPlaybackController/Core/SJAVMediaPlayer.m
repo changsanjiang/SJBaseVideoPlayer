@@ -14,15 +14,6 @@
 #import "SJReachability.h"
 
 NS_ASSUME_NONNULL_BEGIN
-NSNotificationName const SJAVMediaPlaybackStatusDidChangeNotification = @"SJAVMediaPlaybackStatusDidChangeNotification";
-NSNotificationName const SJAVMediaBufferStatusDidChangeNotification = @"SJAVMediaBufferStatusDidChangeNotification";
-NSNotificationName const SJAVMediaPlayableDurationDidChangeNotification = @"SJAVMediaPlayableDurationDidChangeNotification";
-NSNotificationName const SJAVMediaPlayDidToEndTimeNotification = @"SJAVMediaPlayDidToEndTimeNotification";
-NSNotificationName const SJAVMediaLoadedPresentationSizeNotification = @"SJAVMediaLoadedPresentationSizeNotification";
-NSNotificationName const SJAVMediaLoadedPlaybackTypeNotification = @"SJAVMediaLoadedPlaybackTypeNotification";
-NSNotificationName const SJAVMediaLoadedDurationNotification = @"SJAVMediaLoadedDurationNotification";
-NSNotificationName const SJAVMediaItemStatusDidChangeNotification = @"SJAVMediaItemStatusDidChangeNotification";
-
 typedef struct SJAVMediaPlaybackInfo {
     BOOL isPrerolling;      ///< buffer为空的状态
     BOOL isPlayed;          ///< 是否播放过
@@ -430,9 +421,8 @@ inline static bool isFloatZero(float value) {
 
 - (void)setSj_playbackRate:(float)sj_playbackRate {
     _sj_playbackRate = sj_playbackRate;
-    if ( !isFloatZero(self.rate) ) {
+    if ( _sj_playbackInfo->isPlaying )
         self.rate = sj_playbackRate;
-    }
 }
 
 - (void)setSj_playbackVolume:(float)sj_playbackVolume {
@@ -465,6 +455,10 @@ inline static bool isFloatZero(float value) {
         [self _didEndSeeking];
     }
     [super play];
+    
+    if ( floor(self.rate + 0.5) != floor(self.sj_playbackRate + 0.5) ) {
+        self.rate = self.sj_playbackRate;
+    }
 }
 - (void)replay {
     _sj_playbackInfo->isPlayedToEndTime = YES;
@@ -643,4 +637,13 @@ inline static bool isFloatZero(float value) {
     [self _postNotificationWithName:SJAVMediaItemStatusDidChangeNotification];
 }
 @end
+
+NSNotificationName const SJAVMediaPlaybackStatusDidChangeNotification = @"SJAVMediaPlaybackStatusDidChangeNotification";
+NSNotificationName const SJAVMediaBufferStatusDidChangeNotification = @"SJAVMediaBufferStatusDidChangeNotification";
+NSNotificationName const SJAVMediaPlayableDurationDidChangeNotification = @"SJAVMediaPlayableDurationDidChangeNotification";
+NSNotificationName const SJAVMediaPlayDidToEndTimeNotification = @"SJAVMediaPlayDidToEndTimeNotification";
+NSNotificationName const SJAVMediaLoadedPresentationSizeNotification = @"SJAVMediaLoadedPresentationSizeNotification";
+NSNotificationName const SJAVMediaLoadedPlaybackTypeNotification = @"SJAVMediaLoadedPlaybackTypeNotification";
+NSNotificationName const SJAVMediaLoadedDurationNotification = @"SJAVMediaLoadedDurationNotification";
+NSNotificationName const SJAVMediaItemStatusDidChangeNotification = @"SJAVMediaItemStatusDidChangeNotification";
 NS_ASSUME_NONNULL_END

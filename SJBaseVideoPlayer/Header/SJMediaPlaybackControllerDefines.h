@@ -34,7 +34,7 @@ typedef AVLayerVideoGravity SJVideoGravity;
 NS_ASSUME_NONNULL_BEGIN
 @protocol SJMediaPlaybackController<NSObject>
 @required
-@property (nonatomic) NSTimeInterval refreshTimeInterval; // default value is 1.0
+@property (nonatomic) NSTimeInterval refreshTimeInterval; // default value is 0.5
 @property (nonatomic, strong, readonly, nullable) NSError *error;
 @property (nonatomic, weak, nullable) id<SJMediaPlaybackControllerDelegate> delegate;
 
@@ -52,7 +52,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSTimeInterval currentTime;
 @property (nonatomic, readonly) NSTimeInterval duration;
 @property (nonatomic, readonly) NSTimeInterval bufferLoadedTime;
-- (void)updateBufferStatus;
 @property (nonatomic, readonly) CGSize presentationSize;
 @property (nonatomic, readonly, getter=isReadyForDisplay) BOOL readyForDisplay;
 
@@ -130,6 +129,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, readonly, nullable) id<SJMediaModelProtocol> otherMedia;
 
 @property (nonatomic) NSTimeInterval specifyStartTime;
+@end
+
+@protocol SJAVMediaModelProtocol<SJMediaModelProtocol>
+@property (nonatomic, strong, readonly, nullable) __kindof AVAsset *avAsset;
 @end
 NS_ASSUME_NONNULL_END
 
