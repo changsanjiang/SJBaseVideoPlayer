@@ -29,29 +29,28 @@ typedef NS_ENUM(NSInteger, SJMediaPlaybackSwitchDefinitionStatus) {
     SJMediaPlaybackSwitchDefinitionStatusFailed,
 };
 
-//Playback type (LIVE, VOD, FILE).
-typedef enum : NSUInteger {
-    SJMediaPlaybackTypeUnknown,
-    SJMediaPlaybackTypeLIVE,
-    SJMediaPlaybackTypeVOD,
-    SJMediaPlaybackTypeFILE
-} SJMediaPlaybackType;
-
 typedef AVLayerVideoGravity SJVideoGravity;
 
 NS_ASSUME_NONNULL_BEGIN
 @protocol SJMediaPlaybackController<NSObject>
 @required
+@property (nonatomic) NSTimeInterval refreshTimeInterval; // default value is 1.0
+@property (nonatomic, strong, readonly, nullable) NSError *error;
 @property (nonatomic, weak, nullable) id<SJMediaPlaybackControllerDelegate> delegate;
 
 @property (nonatomic, readonly) SJMediaPlaybackType playbackType;
 @property (nonatomic, strong, readonly) __kindof UIView *playerView;
 @property (nonatomic, strong, nullable) id<SJMediaModelProtocol> media;
-@property (nonatomic, strong) SJVideoGravity videoGravity; // default is AVLayerVideoGravityResizeAspect
+@property (nonatomic, strong) SJVideoGravity videoGravity; // default value is AVLayerVideoGravityResizeAspect
 
+// - status -
+@property (nonatomic, readonly) SJVideoPlayerInactivityReason inactivityReason;
+@property (nonatomic, readonly) SJVideoPlayerPausedReason pausedReason;
+@property (nonatomic, readonly) SJVideoPlayerPlayStatus playStatus;
+@property (nonatomic, readonly) SJPlayerBufferStatus bufferStatus;
+@property (nonatomic, readonly) SJMediaPlaybackPrepareStatus prepareStatus;
 @property (nonatomic, readonly) NSTimeInterval currentTime;
 @property (nonatomic, readonly) NSTimeInterval duration;
-@property (nonatomic, readonly) SJPlayerBufferStatus bufferStatus;
 @property (nonatomic, readonly) NSTimeInterval bufferLoadedTime;
 - (void)updateBufferStatus;
 @property (nonatomic, readonly) CGSize presentationSize;
@@ -61,9 +60,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) float rate;
 @property (nonatomic) BOOL mute;
 
-@property (nonatomic, readonly) SJMediaPlaybackPrepareStatus prepareStatus;
-@property (nonatomic, strong, readonly, nullable) NSError *error;
+@property (nonatomic, readonly, getter=isReplayed) BOOL replayed;
 - (void)prepareToPlay;
+- (void)replay;
 - (void)play;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 - (void)pause;
@@ -71,13 +70,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)seekToTime:(NSTimeInterval)secs completionHandler:(void (^ __nullable)(BOOL finished))completionHandler;
 - (nullable UIImage *)screenshot;
 - (void)switchVideoDefinition:(id<SJMediaModelProtocol>)media;
-
-@property (nonatomic, readonly) SJVideoPlayerPlayStatus playStatus;
-@property (nonatomic, readonly) SJVideoPlayerPausedReason pausedReason;
-@property (nonatomic, readonly) SJVideoPlayerInactivityReason inactivityReason;
-
-@optional
-- (void)cancelPendingSeeks;
 @end
 
 /// screenshot
@@ -85,9 +77,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)screenshotWithTime:(NSTimeInterval)time
                       size:(CGSize)size
                 completion:(void(^)(id<SJMediaPlaybackController> controller, UIImage * __nullable image, NSError *__nullable error))block;
-
-- (void)generatedPreviewImagesWithMaxItemSize:(CGSize)itemSize
-                                   completion:(void(^)(__kindof id<SJMediaPlaybackController> controller, NSArray<id<SJVideoPlayerPreviewInfo>> *__nullable images, NSError *__nullable error))block;
 @end
 
 
@@ -117,28 +106,18 @@ NS_ASSUME_NONNULL_BEGIN
 /// delegate
 @protocol SJMediaPlaybackControllerDelegate<NSObject>
 
-- (void)playbackController:(id<SJMediaPlaybackController>)controller prepareToPlayStatusDidChange:(SJMediaPlaybackPrepareStatus)prepareStatus;
-
+@optional
+// - new -
+- (void)playbackController:(id<SJMediaPlaybackController>)controller playbackStatusDidChange:(SJVideoPlayerPlayStatus)playbackStatus;
+- (void)playbackController:(id<SJMediaPlaybackController>)controller bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus;
 - (void)playbackController:(id<SJMediaPlaybackController>)controller durationDidChange:(NSTimeInterval)duration;
 - (void)playbackController:(id<SJMediaPlaybackController>)controller currentTimeDidChange:(NSTimeInterval)currentTime;
-
 - (void)mediaDidPlayToEndForPlaybackController:(id<SJMediaPlaybackController>)controller;
-
-- (void)playbackController:(id<SJMediaPlaybackController>)controller bufferLoadedTimeDidChange:(NSTimeInterval)bufferLoadedTime;
-- (void)playbackController:(id<SJMediaPlaybackController>)controller bufferStatusDidChange:(SJPlayerBufferStatus)bufferStatus;
-
 - (void)playbackController:(id<SJMediaPlaybackController>)controller presentationSizeDidChange:(CGSize)presentationSize;
-
-- (void)playbackController:(id<SJMediaPlaybackController>)controller switchingDefinitionStatusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status media:(id<SJMediaModelProtocol>)media;
-
-- (void)playbackControllerIsReadyForDisplay:(id<SJMediaPlaybackController>)controller;
 - (void)playbackController:(id<SJMediaPlaybackController>)controller playbackTypeLoaded:(SJMediaPlaybackType)playbackType;
-
-- (void)playbackController:(id<SJMediaPlaybackController>)controller playbackStatusDidChange:(SJVideoPlayerPlayStatus)playbackStatus;
-
-@optional
-- (void)pausedForAppDidEnterBackgroundOfPlaybackController:(id<SJMediaPlaybackController>)controller;
-
+- (void)playbackController:(id<SJMediaPlaybackController>)controller bufferLoadedTimeDidChange:(NSTimeInterval)bufferLoadedTime;
+- (void)playbackControllerIsReadyForDisplay:(id<SJMediaPlaybackController>)controller;
+- (void)playbackController:(id<SJMediaPlaybackController>)controller switchingDefinitionStatusDidChange:(SJMediaPlaybackSwitchDefinitionStatus)status media:(id<SJMediaModelProtocol>)media;
 @end
 
 

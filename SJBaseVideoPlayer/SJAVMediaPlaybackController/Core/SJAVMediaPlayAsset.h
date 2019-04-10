@@ -10,6 +10,7 @@
 #import "SJAVMediaPlayAssetProtocol.h"
 #import "SJPlayerBufferStatus.h"
 #import "SJMediaPlaybackProtocol.h"
+#import "SJAVMediaPlaybackDefines.h"
 
 @protocol SJAVMediaPlayAssetPropertiesObserverDelegate;
 @class SJAVMediaPlayAssetPropertiesObserver;
@@ -18,7 +19,6 @@ NS_ASSUME_NONNULL_BEGIN
 UIKIT_EXTERN NSNotificationName const SJAVMediaDidPlayToEndTimeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackTimeDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackDurationDidChangeNotificationn;
-UIKIT_EXTERN NSNotificationName const SJAVMediaBufferStatusDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaBufferLoadedTimeRangesDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaPresentationSizeDidChangeNotification;
 UIKIT_EXTERN NSNotificationName const SJAVMediaPlayerItemStatusDidChangeNotification;

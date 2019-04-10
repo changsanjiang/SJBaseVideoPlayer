@@ -12,6 +12,7 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 
+#warning next  = delete -
 @protocol SJVideoPlayerPreviewInfo <NSObject>
 
 @property (nonatomic, strong, readonly) UIImage *image;

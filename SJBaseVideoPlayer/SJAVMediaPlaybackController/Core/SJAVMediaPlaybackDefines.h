@@ -12,9 +12,14 @@
 #import "SJPlayerBufferStatus.h"
 
 NS_ASSUME_NONNULL_BEGIN
-UIKIT_EXTERN NSNotificationName const SJAVMediaPlayerPlaybackStatusDidChangeNotification;
-UIKIT_EXTERN NSNotificationName const SJAVMediaPlayerBufferStatusDidChangeNotification;
-UIKIT_EXTERN NSNotificationName const SJAVMediaPlayerPlayDidToEndTimeNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaPlaybackStatusDidChangeNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaBufferStatusDidChangeNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaPlayableDurationDidChangeNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaPlayDidToEndTimeNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaLoadedPresentationSizeNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaLoadedPlaybackTypeNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaLoadedDurationNotification;
+UIKIT_EXTERN NSNotificationName const SJAVMediaItemStatusDidChangeNotification;
 
 @protocol SJAVMediaPlayerProtocol <NSObject>
 - (instancetype)initWithURL:(NSURL *)URL;
@@ -23,22 +28,33 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaPlayerPlayDidToEndTimeNotificatio
 
 @property (nonatomic) float sj_playbackRate;
 @property (nonatomic) float sj_playbackVolume;
-@property (nonatomic, getter=isSJMuted) BOOL sj_muted;
+@property (nonatomic, getter=sj_isMuted) BOOL sj_muted;
+@property (nonatomic, getter=sj_isReplayed, readonly) BOOL sj_replayed;
 
 // - status -
 @property (nonatomic, readonly) SJVideoPlayerInactivityReason sj_inactivityReason;
 @property (nonatomic, readonly) SJVideoPlayerPausedReason sj_pausedReason;
 @property (nonatomic, readonly) SJVideoPlayerPlayStatus sj_playbackStatus;
 @property (nonatomic, readonly) SJPlayerBufferStatus sj_bufferStatus;
+- (BOOL)sj_getIsPlaying;
+- (SJMediaPlaybackType)sj_getPlaybackType;
 - (NSTimeInterval)sj_getDuration;
 - (NSTimeInterval)sj_getCurrentPlaybackTime;
+- (NSTimeInterval)sj_getPlayableDuration;
+- (AVPlayerItemStatus)sj_getAVPlayerItemStatus;
+- (CGSize)sj_getPresentationSize;
 - (NSError *_Nullable)sj_getError;
+- (AVPlayer *)sj_getAVPlayer;
+- (AVAsset *)sj_getAVAsset;
 
 - (void)seekToTime:(CMTime)time completionHandler:(void (^)(BOOL))completionHandler;
 - (void)seekToTime:(CMTime)time toleranceBefore:(CMTime)toleranceBefore toleranceAfter:(CMTime)toleranceAfter completionHandler:(void (^)(BOOL))completionHandler;
 
 - (void)play;
+- (void)replay;
 - (void)pause;
+
+- (void)report; ///< post 当前播放状态
 @end
 NS_ASSUME_NONNULL_END
 #endif /* SJAVMediaPlaybackDefines_h */

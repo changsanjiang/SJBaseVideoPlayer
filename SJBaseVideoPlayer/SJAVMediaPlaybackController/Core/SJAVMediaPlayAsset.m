@@ -24,7 +24,6 @@ NSNotificationName const SJAVMediaDidPlayToEndTimeNotification = @"SJAVMediaDidP
 NSNotificationName const SJAVMediaPlaybackTimeDidChangeNotification = @"SJAVMediaPlaybackTimeDidChangeNotification";
 NSNotificationName const SJAVMediaPlaybackDurationDidChangeNotificationn = @"SJAVMediaPlaybackDurationDidChangeNotificationn";
 NSNotificationName const SJAVMediaBufferLoadedTimeRangesDidChangeNotification = @"SJAVMediaBufferLoadedTimeRangesDidChangeNotification";
-NSNotificationName const SJAVMediaBufferStatusDidChangeNotification = @"SJAVMediaBufferStatusDidChangeNotification";
 NSNotificationName const SJAVMediaPresentationSizeDidChangeNotification = @"SJAVMediaPresentationSizeDidChangeNotification";
 NSNotificationName const SJAVMediaPlayerItemStatusDidChangeNotification = @"SJAVMediaPlayerItemStatusDidChangeNotification";
 NSNotificationName const SJAVMediaPlaybackTypeLoadedNotification = @"SJAVMediaPlaybackTypeLoadedNotification";
