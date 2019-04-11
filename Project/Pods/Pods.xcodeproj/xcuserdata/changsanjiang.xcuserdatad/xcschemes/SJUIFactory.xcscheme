@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9506A10DA16E07493B599C2D6DE8F454"
+               BlueprintIdentifier = "DAB9BF98AC998DF6A38F7FAD957CFB5D"
+               BuildableName = "libSJUIFactory.a"
                BlueprintName = "SJUIFactory"
-               ReferencedContainer = "container:Pods.xcodeproj"
-               BuildableName = "libSJUIFactory.a">
+               ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
