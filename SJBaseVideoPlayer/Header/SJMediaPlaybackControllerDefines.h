@@ -10,7 +10,6 @@
 #define SJMediaPlaybackProtocol_h
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
-#import "SJVideoPlayerPreviewInfo.h"
 #import "SJPlayerBufferStatus.h"
 #import "SJVideoPlayerPlayStatusDefines.h"
 

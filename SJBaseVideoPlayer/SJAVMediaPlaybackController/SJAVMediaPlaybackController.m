@@ -12,6 +12,11 @@
 #else
 #import "NSObject+SJObserverHelper.h"
 #endif
+#if __has_include(<SJUIKit/SJRunLoopTaskQueue.h>)
+#import <SJUIKit/SJRunLoopTaskQueue.h>
+#else
+#import "SJRunLoopTaskQueue.h"
+#endif
 #import "SJAVMediaMainPresenter.h"
 #import "SJAVMediaPlayer.h"
 #import "SJAVMediaPlayerLoader.h"
@@ -43,7 +48,6 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if ( !self ) return nil;
     _rate =
-    _mute =
     _volume = 1;
     _refreshTimeInterval = 0.5;
     _mainPresenter = [SJAVMediaMainPresenter mainPresenter];
@@ -142,12 +146,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)_resetMainPresenterIfNeeded {
     if ( self.registrar.state == SJVideoPlayerAppState_Background )
         return;
-    
-    AVPlayer *player = self.player.sj_getAVPlayer;
-    if ( self.mainPresenter.player != self.player.sj_getAVPlayer ) {
-        SJAVMediaSubPresenter *presenter = [[SJAVMediaSubPresenter alloc] initWithAVPlayer:player];
-        [self.mainPresenter takeOverSubPresenter:presenter];
-    }
+
+    SJRunLoopTaskQueue.main.enqueue(^{
+        AVPlayer *player = self.player.sj_getAVPlayer;
+        if ( self.mainPresenter.player != self.player.sj_getAVPlayer ) {
+            SJAVMediaSubPresenter *presenter = [[SJAVMediaSubPresenter alloc] initWithAVPlayer:player];
+            [self.mainPresenter takeOverSubPresenter:presenter];
+        }
+    });
 }
 
 - (void)_applicationEnterBackgrond {
@@ -258,10 +264,14 @@ NS_ASSUME_NONNULL_BEGIN
     [_player replay];
 }
 - (void)play {
-    [_player play];
+    SJRunLoopTaskQueue.main.enqueue(^{
+        [self.player play];
+    });
 }
 - (void)pause {
-    [_player pause];
+    SJRunLoopTaskQueue.main.enqueue(^{
+        [self.player pause];
+    });
 }
 - (void)stop {
     id<SJAVMediaPlayerProtocol> _Nullable player = _player;
@@ -351,7 +361,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)_reset:(id<SJMediaModelProtocol>)meida player:(id<SJAVMediaPlayerProtocol>)player presenter:(id<SJAVMediaPresenter>)presenter {
     self.media = meida;
     self.player = player;
-    [_mainPresenter takeOverSubPresenter:presenter];
+    SJRunLoopTaskQueue.main.enqueue(^{
+        [self.mainPresenter takeOverSubPresenter:presenter];
+    });
     [self play];
 }
 

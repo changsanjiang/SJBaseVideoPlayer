@@ -29,7 +29,6 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "SJVideoPlayerPreviewInfo.h"
 #import "SJPrompt.h"
 #import "SJFitOnScreenManagerDefines.h"
 #import "SJRotationManagerDefines.h"
@@ -555,10 +554,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)screenshotWithTime:(NSTimeInterval)time
                       size:(CGSize)size
                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block;
-
-- (void)generatedPreviewImagesWithMaxItemSize:(CGSize)itemSize
-                                   completion:(void(^)(__kindof SJBaseVideoPlayer *player, NSArray<id<SJVideoPlayerPreviewInfo>> *__nullable images, NSError *__nullable error))block;
-
 @end
 
 

@@ -952,7 +952,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)stopAndFadeOut {
-#warning next ... 完善
     [self.view sj_fadeOutAndCompletion:^(UIView *view) {
         [view removeFromSuperview];
         [self stop];
@@ -1066,7 +1065,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         }
         
         if ( _autoPlayWhenPlayStatusIsReadyToPlay ) {
-            // application enter forground
+            // - application enter forground
             if ( self.registrar.state != SJVideoPlayerAppState_Background ) {
                 if ( self.isPlayOnScrollView ) {
                     if ( self.isScrollAppeared ) {
@@ -1080,7 +1079,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
                     [self play];
                 }
             }
-            // application enter background
+            // - application enter background
             else if ( !_pauseWhenAppDidEnterBackground ) {
                 [self play];
             }
@@ -1360,6 +1359,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 /// You should call it when view did appear
 - (void)vc_viewDidAppear {
     self.vc_isDisappeared = NO;
+    [self.playModelObserver refreshAppearState];
 }
 /// You should call it when view will disappear
 - (void)vc_viewWillDisappear {
@@ -2271,27 +2271,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 #endif
     }
 }
-
-- (void)generatedPreviewImagesWithMaxItemSize:(CGSize)itemSize
-                                   completion:(void(^)(__kindof SJBaseVideoPlayer *player, NSArray<id<SJVideoPlayerPreviewInfo>> *__nullable images, NSError *__nullable error))block {
-//    if ( [_playbackController respondsToSelector:@selector(generatedPreviewImagesWithMaxItemSize:completion:)] ) {
-//        itemSize = CGSizeMake(ceil(itemSize.width), ceil(itemSize.height));
-//        __weak typeof(self) _self = self;
-//        [(id<SJMediaPlaybackScreenshotController>)_playbackController generatedPreviewImagesWithMaxItemSize:itemSize completion:^(__kindof id<SJMediaPlaybackController>  _Nonnull controller, NSArray<id<SJVideoPlayerPreviewInfo>> * _Nullable images, NSError * _Nullable error) {
-//            __strong typeof(_self) self = _self;
-//            if ( !self ) return ;
-//            if ( block ) block(self, images, error);
-//        }];
-//    }
-//    else {
-//        NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-1 userInfo:@{@"errorMsg":[NSString stringWithFormat:@"SJBaseVideoPlayer<%p>.playbackController does not implement the generatedPreviewImages method", self]}];
-//        if ( block ) block(self, nil, error);
-//#ifdef DEBUG
-//        printf("%s\n", error.userInfo.description.UTF8String);
-//#endif
-//    }
-}
-
 @end
 
 
@@ -2526,8 +2505,12 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         _view.hidden = NO;
     }
     
-    if ( _resumePlaybackWhenScrollAppeared && [self playStatus_isPaused_ReasonPause] ) {
-        [self play];
+    if ( !_vc_isDisappeared ) {
+        if ( self.isPlayOnScrollView ) {
+            if ( _resumePlaybackWhenScrollAppeared ) {
+                [self play];
+            }
+        }
     }
     
     if ( superview && self.view.superview != superview ) {

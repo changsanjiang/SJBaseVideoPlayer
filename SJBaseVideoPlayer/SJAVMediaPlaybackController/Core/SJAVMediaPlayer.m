@@ -335,24 +335,28 @@ inline static bool isFloatZero(float value) {
 }
 
 - (void)_playbackTypeDidLoad {
-    AVPlayerItem *item = self.currentItem;
-    AVPlayerItemAccessLogEvent *event = item.accessLog.events.firstObject;
-    SJMediaPlaybackType playbackType = SJMediaPlaybackTypeUnknown;
-    NSString *type = event.playbackType;
-    if ( [type isEqualToString:@"LIVE"] ) {
-        playbackType = SJMediaPlaybackTypeLIVE;
-    }
-    else if ( [type isEqualToString:@"VOD"] ) {
-        playbackType = SJMediaPlaybackTypeVOD;
-    }
-    else if ( [type isEqualToString:@"FILE"] ) {
-        playbackType = SJMediaPlaybackTypeFILE;
-    }
-    
-    if ( _sj_playbackInfo->playbackType != playbackType ) {
-        _sj_playbackInfo->playbackType = playbackType;
-        [self _postNotificationWithName:SJAVMediaLoadedPlaybackTypeNotification];
-    }
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        AVPlayerItem *item = self.currentItem;
+        AVPlayerItemAccessLogEvent *event = item.accessLog.events.firstObject;
+        SJMediaPlaybackType playbackType = SJMediaPlaybackTypeUnknown;
+        NSString *type = event.playbackType;
+        if ( [type isEqualToString:@"LIVE"] ) {
+            playbackType = SJMediaPlaybackTypeLIVE;
+        }
+        else if ( [type isEqualToString:@"VOD"] ) {
+            playbackType = SJMediaPlaybackTypeVOD;
+        }
+        else if ( [type isEqualToString:@"FILE"] ) {
+            playbackType = SJMediaPlaybackTypeFILE;
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if ( self.sj_playbackInfo->playbackType != playbackType ) {
+                self.sj_playbackInfo->playbackType = playbackType;
+                [self _postNotificationWithName:SJAVMediaLoadedPlaybackTypeNotification];
+            }
+        });
+    });
 }
 
 - (void)_successfullyToPrepare:(AVPlayerItem *)item {
