@@ -299,7 +299,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 + (NSString *)version {
-    return @"2.3.6";
+    return @"2.4.1";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -860,7 +860,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     return _autoPlayWhenPlayStatusIsReadyToPlay;
 }
 
-- (void)setPauseWhenreceivedApplicationDidEnterBackgroundNotification:(BOOL)pauseWhenAppDidEnterBackground {
+- (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
     _pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
     _playbackController.pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
 }
