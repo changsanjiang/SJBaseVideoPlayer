@@ -189,6 +189,11 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 @end
 
+//typedef struct SJBaseVideoPlayerPlaybackInfo {
+//    BOOL _isPlayed; ///< 当前资源是否播放过
+//
+//} SJBaseVideoPlayerPlaybackInfo;
+
 @implementation SJBaseVideoPlayer {
     UIView *_view;
     SJVideoPlayerPresentView *_presentView;
@@ -197,7 +202,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     
     /// 当前资源是否播放过
     /// mpc => Media Playback Controller
-    BOOL _mpc_assetIsPlayed;
     id<SJVideoPlayerURLAssetObserver> _Nullable _mpc_assetObserver;
     
     /// Placeholder
@@ -235,7 +239,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     SJVideoPlayerPlayStatus _playStatus;
     void(^_Nullable _playStatusDidChangeExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
     SJVideoPlayerURLAsset *_URLAsset;
-    NSTimeInterval _playedLastTime;
     BOOL(^_Nullable _canSeekToTime)(__kindof SJBaseVideoPlayer *player);
     NSTimeInterval _delayToAutoRefreshWhenPlayFailed;
     SJBaseVideoPlayerAutoRefreshController *_Nullable _autoRefresh;
@@ -372,11 +375,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         _playStatusDidChangeExeBlock(self);
     
     [self _showOrHiddenPlaceholderImageViewIfNeeded];
-
-    if ( SJVideoPlayerPlayStatusPlaying == _playStatus ) {
-        _mpc_assetIsPlayed = YES;
-        _playedLastTime = 0;
-    }
     
     if ( [self playStatus_isInactivity_ReasonPlayEnd] ) {
         if ( self.playDidToEndExeBlock ) {
@@ -409,7 +407,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 #pragma clang diagnostic pop
     }
 
-#ifdef SJMAC
+#ifdef DEBUG
     printf("%s\n", [self getPlayStatusStr:playStatus].UTF8String);
 #endif
 }
@@ -433,15 +431,13 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)_showOrHiddenPlaceholderImageViewIfNeeded {
-    if ( [self playStatus_isUnknown] || [self playStatus_isPrepare] ) {
-        if ( !self.URLAsset.otherMedia && _presentView.placeholderImageViewIsHidden ) {
-            [self.presentView showPlaceholder:NO];
+    if ( _playbackController.isReadyForDisplay ) {
+        if ( _hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay ) {
+            [self.presentView hiddenPlaceholderAnimated:YES];
         }
     }
-    else if ( self.playbackController.isReadyForDisplay &&
-              _hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay &&
-             !_presentView.placeholderImageViewIsHidden ) {
-        [self.presentView hiddenPlaceholder:YES];
+    else {
+        [self.presentView showPlaceholderAnimated:NO];
     }
 }
 
@@ -763,8 +759,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     }
     _URLAsset = URLAsset;
     [self _updateAssetObservers];
-    _mpc_assetIsPlayed = NO;
-    
     // prepareToPlay
     self.playbackController.media = URLAsset;
     if ( URLAsset ) {
@@ -796,12 +790,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 
 - (void)refresh {
     if ( !self.URLAsset ) return;
-    if ( self.currentTime != 0 ) {
-        _playedLastTime = self.currentTime;
-    }
-
-    _URLAsset.specifyStartTime = _playedLastTime;
-    [self setURLAsset:_URLAsset];
+    [_playbackController refresh];
 }
 
 - (void)setDelayToAutoRefreshWhenPlayFailed:(NSTimeInterval)delayToAutoRefreshWhenPlayFailed {

@@ -226,7 +226,7 @@ inline static bool isFloatZero(float value) {
         AVPlayerItemStatus status = item.status;
         if ( status == AVPlayerItemStatusReadyToPlay ) {
             NSTimeInterval specifyStartTime = _sj_playbackInfo->specifyStartTime;
-            if ( !isFloatZero(specifyStartTime) ) {
+            if ( isFloatZero(specifyStartTime) ) {
                 [self _successfullyToPrepare:item];
                 return;
             }
@@ -474,6 +474,15 @@ inline static bool isFloatZero(float value) {
     _sj_playbackInfo->isPlaying = NO;
     [super pause];
 }
+- (void)report {
+    [self _postNotificationWithName:SJAVMediaPlaybackStatusDidChangeNotification];
+    [self _postNotificationWithName:SJAVMediaBufferStatusDidChangeNotification];
+    [self _postNotificationWithName:SJAVMediaPlayableDurationDidChangeNotification];
+    [self _postNotificationWithName:SJAVMediaLoadedPresentationSizeNotification];
+    [self _postNotificationWithName:SJAVMediaLoadedPlaybackTypeNotification];
+    [self _postNotificationWithName:SJAVMediaLoadedDurationNotification];
+    [self _postNotificationWithName:SJAVMediaItemStatusDidChangeNotification];
+}
 - (void)seekToTime:(CMTime)time completionHandler:(void (^)(BOOL))completionHandler {
     if ( ![self _canSeekToTime:time] ) {
         if ( completionHandler ) completionHandler(NO);
@@ -527,43 +536,6 @@ inline static bool isFloatZero(float value) {
     _sj_playbackInfo->seekingInfo.isSeeking = NO;
     _sj_playbackInfo->seekingInfo.time = kCMTimeZero;
     [self _playbackStatusDidChange];
-}
-- (BOOL)sj_getIsPlaying {
-    if ( !isFloatZero(self.rate) )
-        return YES;
-    if ( _sj_playbackInfo->isPrerolling && SJReachability.shared.networkStatus != SJNetworkStatus_NotReachable )
-        return YES;
-    
-    return NO;
-}
-- (SJMediaPlaybackType)sj_getPlaybackType {
-    return _sj_playbackInfo->playbackType;
-}
-- (NSTimeInterval)sj_getDuration {
-    return _sj_playbackInfo->duration;
-}
-- (NSTimeInterval)sj_getCurrentPlaybackTime {
-    if ( _sj_playbackInfo->seekingInfo.isSeeking )
-        return CMTimeGetSeconds(_sj_playbackInfo->seekingInfo.time);
-    return CMTimeGetSeconds(self.currentTime);
-}
-- (NSTimeInterval)sj_getPlayableDuration {
-    return _sj_playbackInfo->playableDuration;
-}
-- (AVPlayerItemStatus)sj_getAVPlayerItemStatus {
-    return self.currentItem.status;
-}
-- (NSError *_Nullable)sj_getError {
-    return _sj_error;
-}
-- (CGSize)sj_getPresentationSize {
-    return self.currentItem.presentationSize;
-}
-- (AVPlayer *)sj_getAVPlayer {
-    return self;
-}
-- (AVAsset *)sj_getAVAsset {
-    return self.currentItem.asset;
 }
 - (SJVideoPlayerPlayStatus)sj_playbackStatus {
     if      ( _sj_playbackInfo->isPlayedToEndTime ) ///< 已播放完毕
@@ -631,14 +603,49 @@ inline static bool isFloatZero(float value) {
     
     return SJPlayerBufferStatusUnknown;
 }
-- (void)report {
-    [self _postNotificationWithName:SJAVMediaPlaybackStatusDidChangeNotification];
-    [self _postNotificationWithName:SJAVMediaBufferStatusDidChangeNotification];
-    [self _postNotificationWithName:SJAVMediaPlayableDurationDidChangeNotification];
-    [self _postNotificationWithName:SJAVMediaLoadedPresentationSizeNotification];
-    [self _postNotificationWithName:SJAVMediaLoadedPlaybackTypeNotification];
-    [self _postNotificationWithName:SJAVMediaLoadedDurationNotification];
-    [self _postNotificationWithName:SJAVMediaItemStatusDidChangeNotification];
+- (BOOL)sj_getIsPlayed {
+    return _sj_playbackInfo->isPlayed;
+}
+- (BOOL)sj_getIsPlaying {
+    if ( !isFloatZero(self.rate) )
+        return YES;
+    if ( _sj_playbackInfo->isPrerolling && SJReachability.shared.networkStatus != SJNetworkStatus_NotReachable )
+        return YES;
+    
+    return NO;
+}
+- (SJMediaPlaybackType)sj_getPlaybackType {
+    return _sj_playbackInfo->playbackType;
+}
+- (NSTimeInterval)sj_getDuration {
+    return _sj_playbackInfo->duration;
+}
+- (NSTimeInterval)sj_getCurrentPlaybackTime {
+    if ( _sj_playbackInfo->prepareStatus != SJAVMediaPrepareStatusSuccessfullyToPrepare )
+        return 0;
+    if ( _sj_playbackInfo->seekingInfo.isSeeking )
+        return CMTimeGetSeconds(_sj_playbackInfo->seekingInfo.time);
+    return CMTimeGetSeconds(self.currentTime);
+}
+- (NSTimeInterval)sj_getPlayableDuration {
+    if ( _sj_playbackInfo->prepareStatus != SJAVMediaPrepareStatusSuccessfullyToPrepare )
+        return 0;
+    return _sj_playbackInfo->playableDuration;
+}
+- (AVPlayerItemStatus)sj_getAVPlayerItemStatus {
+    return self.currentItem.status;
+}
+- (NSError *_Nullable)sj_getError {
+    return _sj_error;
+}
+- (CGSize)sj_getPresentationSize {
+    return self.currentItem.presentationSize;
+}
+- (AVPlayer *)sj_getAVPlayer {
+    return self;
+}
+- (AVAsset *)sj_getAVAsset {
+    return self.currentItem.asset;
 }
 @end
 

@@ -36,7 +36,8 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaItemStatusDidChangeNotification;
 @property (nonatomic, readonly) SJVideoPlayerPausedReason sj_pausedReason;
 @property (nonatomic, readonly) SJVideoPlayerPlayStatus sj_playbackStatus;
 @property (nonatomic, readonly) SJPlayerBufferStatus sj_bufferStatus;
-- (BOOL)sj_getIsPlaying;
+- (BOOL)sj_getIsPlaying;    ///< 是否正在播放
+- (BOOL)sj_getIsPlayed; ///< 是否调用过play
 - (SJMediaPlaybackType)sj_getPlaybackType;
 - (NSTimeInterval)sj_getDuration;
 - (NSTimeInterval)sj_getCurrentPlaybackTime;

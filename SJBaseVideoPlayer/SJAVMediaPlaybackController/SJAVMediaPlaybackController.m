@@ -63,7 +63,7 @@ NS_ASSUME_NONNULL_BEGIN
         if ( [self.delegate respondsToSelector:@selector(playbackControllerIsReadyForDisplay:)] ) {
             [self.delegate playbackControllerIsReadyForDisplay:self];
         #ifdef SJMAC
-            printf("\nSJAVMediaPlaybackController<%p>.isReadyForDisplay\n", self);
+            printf("\nSJAVMediaPlaybackController<%p>.isReadyForDisplay = %d\n", self, self.isReadyForDisplay);
         #endif
         }
     });
@@ -242,6 +242,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isReadyForDisplay {
     return _mainPresenter.isReadyForDisplay;
 }
+- (BOOL)isPlayed {
+    return _player.sj_getIsPlayed;
+}
 - (BOOL)isReplayed {
     return _player.sj_isReplayed;
 }
@@ -260,8 +263,55 @@ NS_ASSUME_NONNULL_BEGIN
 - (SJMediaPlaybackPrepareStatus)prepareStatus {
     return (NSInteger)_player.sj_getAVPlayerItemStatus;
 }
+- (void)_reset:(id<SJMediaModelProtocol>)meida player:(id<SJAVMediaPlayerProtocol>)player presenter:(id<SJAVMediaPresenter>)presenter {
+    self.media = meida;
+    self.player = player;
+    SJRunLoopTaskQueue.main.enqueue(^{
+        [self.mainPresenter takeOverSubPresenter:presenter];
+    });
+    [self play];
+}
+
+- (void)setMedia:(id<SJMediaModelProtocol> _Nullable)media {
+    [self stop];
+    _media = media;
+    [self _playStatusDidChange];
+}
+
+- (void)setPlayer:(id<SJAVMediaPlayerProtocol> _Nullable)player {
+    _player = player;
+    player.sj_muted = self.mute;
+    player.sj_playbackVolume = self.volume;
+}
+
+- (void)prepareToPlay {
+    __weak typeof(self) _self = self;
+    [SJAVMediaPlayerLoader loadPlayerForMedia:_media completionHandler:^(id<SJMediaModelProtocol>  _Nonnull media, id<SJAVMediaPlayerProtocol>  _Nonnull player) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        SJRunLoopTaskQueue.main.enqueue(^{
+            if ( media == self.media ) {
+                self.player = player;
+                [self.player report];
+                [self _resetMainPresenterIfNeeded];
+            }
+        });
+    }];
+}
+
 - (void)replay {
-    [_player replay];
+    SJRunLoopTaskQueue.main.enqueue(^{
+        [self.player replay];
+    });
+}
+- (void)refresh {
+    SJRunLoopTaskQueue.main.enqueue(^{
+        id<SJMediaModelProtocol> media = self.media;
+        NSTimeInterval currentTime = self.currentTime;
+        if ( 0 != self.currentTime ) media.specifyStartTime = currentTime;
+        self.media = media;
+        [self prepareToPlay];
+    });
 }
 - (void)play {
     SJRunLoopTaskQueue.main.enqueue(^{
@@ -282,7 +332,9 @@ NS_ASSUME_NONNULL_BEGIN
     [player pause];
 }
 - (void)seekToTime:(NSTimeInterval)secs completionHandler:(void (^_Nullable)(BOOL))completionHandler {
-    [_player seekToTime:CMTimeMakeWithSeconds(secs, NSEC_PER_SEC) completionHandler:completionHandler];
+    SJRunLoopTaskQueue.main.enqueue(^{
+        [self.player seekToTime:CMTimeMakeWithSeconds(secs, NSEC_PER_SEC) completionHandler:completionHandler];
+    });
 }
 - (void)switchVideoDefinition:(id<SJMediaModelProtocol>)media {
     if ( !media ) return;
@@ -356,40 +408,6 @@ NS_ASSUME_NONNULL_BEGIN
     }
     printf("\nSJAVMediaPlaybackController<%p>.switchStatus = %s\n", self, str);
 #endif
-}
-
-- (void)_reset:(id<SJMediaModelProtocol>)meida player:(id<SJAVMediaPlayerProtocol>)player presenter:(id<SJAVMediaPresenter>)presenter {
-    self.media = meida;
-    self.player = player;
-    SJRunLoopTaskQueue.main.enqueue(^{
-        [self.mainPresenter takeOverSubPresenter:presenter];
-    });
-    [self play];
-}
-
-- (void)setMedia:(id<SJMediaModelProtocol> _Nullable)media {
-    [self stop];
-    _media = media;
-    [self _playStatusDidChange];
-}
-
-- (void)setPlayer:(id<SJAVMediaPlayerProtocol> _Nullable)player {
-    _player = player;
-    player.sj_muted = self.mute;
-    player.sj_playbackVolume = self.volume;
-}
-
-- (void)prepareToPlay {
-    __weak typeof(self) _self = self;
-    [SJAVMediaPlayerLoader loadPlayerForMedia:_media completionHandler:^(id<SJMediaModelProtocol>  _Nonnull media, id<SJAVMediaPlayerProtocol>  _Nonnull player) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( media == self.media ) {
-            self.player = player;
-            [self.player report];
-            [self _resetMainPresenterIfNeeded];
-        }
-    }];
 }
 
 - (UIImage *_Nullable)screenshot {

@@ -12,27 +12,29 @@
 NS_ASSUME_NONNULL_BEGIN
 @implementation SJAVMediaPlayerLoader
 + (void)loadPlayerForMedia:(id<SJMediaModelProtocol>)media completionHandler:(void(^_Nullable)(id<SJMediaModelProtocol> media, id<SJAVMediaPlayerProtocol> player))completionHandler {
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         id<SJMediaModelProtocol> target = media.otherMedia?:media;
-        SJAVMediaPlayer *_Nullable player = objc_getAssociatedObject(target, _cmd);
-        if ( player && ![player sj_getError] ) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if ( completionHandler ) completionHandler(media, player);
-            });
+        SJAVMediaPlayer *__block _Nullable player = objc_getAssociatedObject(target, _cmd);
+        SJVideoPlayerInactivityReason inactivityReason = player.sj_inactivityReason;
+        BOOL able = inactivityReason != SJVideoPlayerInactivityReasonPlayFailed;
+        if ( player && able ) {
+            if ( completionHandler ) completionHandler(media, player);
             return;
         }
         
-        AVAsset *_Nullable asset = [(id)media respondsToSelector:@selector(avAsset)]?[(id)media avAsset]:nil;
-        if ( asset ) {
-            player = [[SJAVMediaPlayer alloc] initWithAVAsset:asset specifyStartTime:target.specifyStartTime];
-        }
-        else {
-            player = [[SJAVMediaPlayer alloc] initWithURL:target.mediaURL specifyStartTime:target.specifyStartTime];
-        }
-        
-        objc_setAssociatedObject(target, _cmd, player, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if ( completionHandler ) completionHandler(media, player);
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            AVAsset *_Nullable asset = [(id)media respondsToSelector:@selector(avAsset)]?[(id)media avAsset]:nil;
+            if ( asset ) {
+                player = [[SJAVMediaPlayer alloc] initWithAVAsset:asset specifyStartTime:target.specifyStartTime];
+            }
+            else {
+                player = [[SJAVMediaPlayer alloc] initWithURL:target.mediaURL specifyStartTime:target.specifyStartTime];
+            }
+            
+            objc_setAssociatedObject(target, _cmd, player, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if ( completionHandler ) completionHandler(media, player);
+            });
         });
     });
 }

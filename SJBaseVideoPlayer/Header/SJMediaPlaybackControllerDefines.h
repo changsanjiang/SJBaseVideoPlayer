@@ -58,9 +58,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) float rate;
 @property (nonatomic) BOOL mute;
 
-@property (nonatomic, readonly, getter=isReplayed) BOOL replayed;
+@property (nonatomic, readonly) BOOL isPlayed; ///< 当前media是否调用过play
+@property (nonatomic, readonly, getter=isReplayed) BOOL replayed; ///< 当前media是否调用过replay
 - (void)prepareToPlay;
 - (void)replay;
+- (void)refresh;
 - (void)play;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 - (void)pause;
