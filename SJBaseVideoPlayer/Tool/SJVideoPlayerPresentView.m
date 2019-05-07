@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation SJVideoPlayerPresentView {
     BOOL _isHidden;
+    BOOL _isDelayed;
 }
 
 @synthesize placeholderImageView = _placeholderImageView;
@@ -34,7 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)showPlaceholderAnimated:(BOOL)animated {
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_hiddenPlaceholderAnimated:) object:nil];
+    if ( _isDelayed )
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_hiddenPlaceholderAnimated:) object:nil];
     if ( !_isHidden ) return; _isHidden = NO;
     if ( animated ) {
         [UIView animateWithDuration:0.4 animations:^{
@@ -47,13 +49,15 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)hiddenPlaceholderAnimated:(BOOL)animated delay:(NSTimeInterval)secs {
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_hiddenPlaceholderAnimated:) object:nil];
+    if ( _isDelayed )
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_hiddenPlaceholderAnimated:) object:nil];
     if ( _isHidden ) return; _isHidden = YES;
     if ( secs == 0 ) {
         [self _hiddenPlaceholderAnimated:@(animated)];
     }
     else {
         [self performSelector:@selector(_hiddenPlaceholderAnimated:) withObject:@(animated) afterDelay:secs];
+        _isDelayed = YES;
     }
 }
 
@@ -66,6 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
     else {
         _placeholderImageView.alpha = 0.001;
     }
+    _isDelayed = NO;
 }
 
 - (void)_presentSetupView {
