@@ -34,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)showPlaceholderAnimated:(BOOL)animated {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_hiddenPlaceholderAnimated:) object:nil];
     if ( !_isHidden ) return; _isHidden = NO;
     if ( animated ) {
         [UIView animateWithDuration:0.4 animations:^{
@@ -45,15 +46,25 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
-- (void)hiddenPlaceholderAnimated:(BOOL)animated {
+- (void)hiddenPlaceholderAnimated:(BOOL)animated delay:(NSTimeInterval)secs {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_hiddenPlaceholderAnimated:) object:nil];
     if ( _isHidden ) return; _isHidden = YES;
-    if ( animated ) {
+    if ( secs == 0 ) {
+        [self _hiddenPlaceholderAnimated:@(animated)];
+    }
+    else {
+        [self performSelector:@selector(_hiddenPlaceholderAnimated:) withObject:@(animated) afterDelay:secs];
+    }
+}
+
+- (void)_hiddenPlaceholderAnimated:(NSNumber *)animated {
+    if ( [animated boolValue] ) {
         [UIView animateWithDuration:0.4 animations:^{
             self->_placeholderImageView.alpha = 0.001;
         }];
     }
     else {
-        _placeholderImageView.alpha = 0.001; 
+        _placeholderImageView.alpha = 0.001;
     }
 }
 
@@ -62,7 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
     self.placeholderImageView.frame = self.bounds;
     _placeholderImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self addSubview:_placeholderImageView];
-    [self hiddenPlaceholderAnimated:NO];
+    [self hiddenPlaceholderAnimated:NO delay:0];
 }
 
 - (UIImageView *)placeholderImageView {
