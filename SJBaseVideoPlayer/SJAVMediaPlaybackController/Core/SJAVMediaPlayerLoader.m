@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
         SJVideoPlayerInactivityReason inactivityReason = player.sj_inactivityReason;
         BOOL able = inactivityReason != SJVideoPlayerInactivityReasonPlayFailed;
         if ( player && able ) {
+            if ( target == media && [player sj_getIsPlayed] )
+                [player reset];
             if ( completionHandler ) completionHandler(media, player);
             return;
         }
