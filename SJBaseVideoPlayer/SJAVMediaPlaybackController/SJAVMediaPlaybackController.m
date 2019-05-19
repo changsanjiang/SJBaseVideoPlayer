@@ -185,6 +185,10 @@ NS_ASSUME_NONNULL_BEGIN
                 if ( [self.delegate respondsToSelector:@selector(playbackController:currentTimeDidChange:)] ) {
                     [self.delegate playbackController:self currentTimeDidChange:self.player.sj_getCurrentPlaybackTime];
                 }
+                
+                if ( !self.player.sj_getPlayerIsPlaying ) {
+                    [self _invalidateTimeRefreshTimer];
+                }
             } repeats:YES];
             
             [NSRunLoop.mainRunLoop addTimer:_timeRefreshTimer forMode:NSRunLoopCommonModes];
