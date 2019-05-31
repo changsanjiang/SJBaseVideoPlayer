@@ -34,8 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation SJVideoPlayerURLAsset
-@synthesize mediaURL = _mediaURL;
-@synthesize specifyStartTime = _specifyStartTime;
+@synthesize mediaURL = _mediaURL; 
 
 - (instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel {
     self = [super init];

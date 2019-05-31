@@ -23,6 +23,8 @@ typedef struct SJAVMediaPlaybackControlInfo {
     BOOL isPlaying;         ///< 是否调用了播放
     BOOL isError;           ///< 是否播放错误
     BOOL isPlayedToEndTime; ///< 是否播放结束
+    BOOL isReplayed;
+    BOOL isForceDuration;
     
     NSTimeInterval specifyStartTime;
     NSTimeInterval playableDuration;
@@ -62,7 +64,6 @@ inline static bool isFloatZero(float value) {
 @interface SJAVMediaPlayer ()
 @property (nonatomic, readonly) SJAVMediaPlaybackControlInfo *sj_controlInfo;
 @property (nonatomic, strong, nullable) NSError *sj_error;
-@property (nonatomic, getter=sj_isReplayed) BOOL sj_replayed;
 @end
 
 @implementation SJAVMediaPlayer
@@ -72,12 +73,13 @@ inline static bool isFloatZero(float value) {
     return [self initWithURL:URL specifyStartTime:0];
 }
 - (instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime {
-    AVAsset *asset = [AVAsset assetWithURL:URL];
-    return [self initWithAVAsset:asset specifyStartTime:specifyStartTime];
+    return [self initWithAVAsset:[AVAsset assetWithURL:URL] specifyStartTime:specifyStartTime];
 }
 - (instancetype)initWithAVAsset:(__kindof AVAsset *)asset specifyStartTime:(NSTimeInterval)specifyStartTime {
-    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
-    return [self initWithPlayerItem:playerItem specifyStartTime:specifyStartTime];
+    return [self initWithPlayerItem:[[AVPlayerItem alloc] initWithAsset:asset] specifyStartTime:specifyStartTime];
+}
+- (instancetype)initWithPlayerItem:(nullable AVPlayerItem *)item {
+    return [self initWithPlayerItem:item specifyStartTime:0];
 }
 - (instancetype)initWithPlayerItem:(AVPlayerItem *_Nullable)item specifyStartTime:(NSTimeInterval)specifyStartTime {
     self = [super initWithPlayerItem:item];
@@ -300,10 +302,12 @@ inline static bool isFloatZero(float value) {
 }
 
 - (void)_durationDidChange {
-    NSTimeInterval duration = CMTimeGetSeconds(self.currentItem.duration);
-    if ( _sj_controlInfo->duration != duration ) {
-        _sj_controlInfo->duration = duration;
-        [self _postNotificationWithName:SJAVMediaLoadedDurationNotification];
+    if ( !_sj_controlInfo->isForceDuration ) {
+        NSTimeInterval duration = CMTimeGetSeconds(self.currentItem.duration);
+        if ( _sj_controlInfo->duration != duration ) {
+            _sj_controlInfo->duration = duration;
+            [self _postNotificationWithName:SJAVMediaLoadedDurationNotification];
+        }
     }
 }
 
@@ -470,7 +474,7 @@ inline static bool isFloatZero(float value) {
 
     if ( _sj_controlInfo->isPlayedToEndTime ) {
         _sj_controlInfo->isPlayedToEndTime = NO;
-        _sj_replayed = YES;
+        _sj_controlInfo->isReplayed = YES;
         [self _willSeekingToTime:kCMTimeZero];
         [self seekToTime:kCMTimeZero];
         [self _didEndSeeking];
@@ -554,6 +558,11 @@ inline static bool isFloatZero(float value) {
     return !_sj_controlInfo->isError && _sj_controlInfo->prepareStatus == SJAVMediaPrepareStatusSuccessfullyToPrepare;
 }
 - (void)_willSeekingToTime:(CMTime)time {
+    if ( _sj_controlInfo->isPlayedToEndTime ) {
+        _sj_controlInfo->isPlayedToEndTime = NO;
+        _sj_controlInfo->isReplayed = YES;
+    }
+    
     if ( _sj_controlInfo->seekingInfo.isSeeking ) {
         [self.currentItem cancelPendingSeeks];
     }
@@ -569,6 +578,11 @@ inline static bool isFloatZero(float value) {
     _sj_controlInfo->seekingInfo.isSeeking = NO;
     _sj_controlInfo->seekingInfo.time = kCMTimeZero;
     [self _playbackStatusDidChange];
+}
+- (void)sj_setForceDuration:(NSTimeInterval)forceDuration {
+    _sj_controlInfo->isForceDuration = YES;
+    _sj_controlInfo->duration = forceDuration;
+    [self _postNotificationWithName:SJAVMediaLoadedDurationNotification];
 }
 - (SJVideoPlayerPlayStatus)sj_playbackStatus {
     if      ( _sj_controlInfo->isPlayedToEndTime ) ///< 已播放完毕
@@ -679,6 +693,9 @@ inline static bool isFloatZero(float value) {
             return YES;
     }
     return NO;
+}
+- (BOOL)sj_isReplayed {
+    return _sj_controlInfo->isReplayed;
 }
 - (SJMediaPlaybackType)sj_getPlaybackType {
     return _sj_controlInfo->playbackType;

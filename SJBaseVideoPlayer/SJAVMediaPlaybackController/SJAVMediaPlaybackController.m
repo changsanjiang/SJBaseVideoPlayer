@@ -31,8 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) SJAVMediaDefinitionLoader *definitionLoader;
 @property (nonatomic, strong, readonly) SJAVMediaMainPresenter *mainPresenter;
 @property (nonatomic, strong, readonly) SJVideoPlayerRegistrar *registrar;
-@property (nonatomic, strong, nullable) id<SJAVMediaPlayerProtocol> player;
-@property (nonatomic, strong, nullable) NSTimer *timeRefreshTimer;
+@property (nonatomic, strong, nullable) SJAVMediaPlayer *player;
+@property (nonatomic, strong, nullable) id periodicTimeObserver;
 @end
 
 @implementation SJAVMediaPlaybackController
@@ -53,6 +53,10 @@ NS_ASSUME_NONNULL_BEGIN
     _mainPresenter = [SJAVMediaMainPresenter mainPresenter];
     [self _observeEvents];
     return self;
+}
+
+- (void)dealloc {
+    [self removePeriodicTimeObserver];
 }
 
 - (void)_observeEvents {
@@ -133,13 +137,6 @@ NS_ASSUME_NONNULL_BEGIN
     if ( [self.delegate respondsToSelector:@selector(playbackController:playbackStatusDidChange:)] ) {
         [self.delegate playbackController:self playbackStatusDidChange:status];
     }
-    
-    if ( _player.sj_getPlayerIsPlaying ) {
-        [self _activeTimeRefreshTimerIfNeeded];
-    }
-    else {
-        [self _invalidateTimeRefreshTimer];
-    }
 }
 
 - (void)_resetMainPresenterIfNeeded {
@@ -168,41 +165,25 @@ NS_ASSUME_NONNULL_BEGIN
     if ( refreshTimeInterval == _refreshTimeInterval )
         return;
     _refreshTimeInterval = refreshTimeInterval;
-    [self _invalidateTimeRefreshTimer];
-    [self _activeTimeRefreshTimerIfNeeded];
+    [self removePeriodicTimeObserver];
+    [self addPeriodicTimeObserver];
 }
-
-- (void)_activeTimeRefreshTimerIfNeeded {
-    if ( self.player.sj_getPlayerIsPlaying ) {
-        if ( !_timeRefreshTimer ) {
-            __weak typeof(self) _self = self;
-            _timeRefreshTimer = [NSTimer assetAdd_timerWithTimeInterval:_refreshTimeInterval block:^(NSTimer *timer) {
-                __strong typeof(_self) self = _self;
-                if ( !self ) {
-                    [timer invalidate];
-                    return;
-                }
-                if ( [self.delegate respondsToSelector:@selector(playbackController:currentTimeDidChange:)] ) {
-                    [self.delegate playbackController:self currentTimeDidChange:self.player.sj_getCurrentPlaybackTime];
-                }
-                
-                if ( !self.player.sj_getPlayerIsPlaying ) {
-                    [self _invalidateTimeRefreshTimer];
-                }
-            } repeats:YES];
-            
-            [NSRunLoop.mainRunLoop addTimer:_timeRefreshTimer forMode:NSRunLoopCommonModes];
-            [_timeRefreshTimer fire];
+- (void)addPeriodicTimeObserver {
+    __weak typeof(self) _self = self;
+    _periodicTimeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(_refreshTimeInterval, NSEC_PER_SEC) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        if ( [self.delegate respondsToSelector:@selector(playbackController:currentTimeDidChange:)] ) {
+            [self.delegate playbackController:self currentTimeDidChange:self.player.sj_getCurrentPlaybackTime];
         }
+    }];
+}
+- (void)removePeriodicTimeObserver {
+    if ( _periodicTimeObserver != nil ) {
+        [_player removeTimeObserver:_periodicTimeObserver];
+        _periodicTimeObserver = nil;
     }
 }
-- (void)_invalidateTimeRefreshTimer {
-    if ( _timeRefreshTimer ) {
-        [_timeRefreshTimer invalidate];
-        _timeRefreshTimer = nil;
-    }
-}
-
 - (NSError *_Nullable)error {
     return _player.sj_getError;
 }
@@ -282,22 +263,65 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)setPlayer:(id<SJAVMediaPlayerProtocol> _Nullable)player {
+    [self removePeriodicTimeObserver];
     _player = player;
     player.sj_muted = self.mute;
     player.sj_playbackVolume = self.volume;
+    [self addPeriodicTimeObserver];
 }
 
 - (void)prepareToPlay {
-    __weak typeof(self) _self = self;
-    [SJAVMediaPlayerLoader loadPlayerForMedia:_media completionHandler:^(id<SJMediaModelProtocol>  _Nonnull media, id<SJAVMediaPlayerProtocol>  _Nonnull player) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( media == self.media ) {
-            self.player = player;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self _prepareToPlay];
+    });
+}
+
+- (void)_prepareToPlay {
+    NSTimeInterval playableLimit = _media.playableLimit;
+    if ( playableLimit == 0 || _media.mediaURL == nil ) {
+        __weak typeof(self) _self = self;
+        [SJAVMediaPlayerLoader loadPlayerForMedia:_media completionHandler:^(id<SJMediaModelProtocol>  _Nonnull media, id<SJAVMediaPlayerProtocol>  _Nonnull player) {
+            __strong typeof(_self) self = _self;
+            if ( !self ) return;
+            if ( media == self.media ) {
+                self.player = player;
+                [self.player report];
+                [self _resetMainPresenterIfNeeded];
+            }
+        }];
+    }
+    else {
+        id<SJMediaModelProtocol> media = _media;
+        AVURLAsset *source = [[AVURLAsset alloc] initWithURL:media.mediaURL options:nil];
+        NSString *kTracks = @"tracks";
+        NSString *kDuration = @"duration";
+        [source loadValuesAsynchronouslyForKeys:@[kTracks, kDuration] completionHandler:^{
+            if ( media != self.media ) {
+                return ;
+            }
+            
+            AVKeyValueStatus tracksStatus = [source statusOfValueForKey:kTracks error:nil];
+            AVKeyValueStatus durationStatus = [source statusOfValueForKey:kDuration error:nil];
+            if ( tracksStatus != AVKeyValueStatusLoaded || durationStatus != AVKeyValueStatusLoaded ) {
+                return;
+            }
+            
+            AVMutableComposition *asset = [AVMutableComposition composition];
+            CMTime start = kCMTimeZero;
+            CMTime duration = CMTimeMakeWithSeconds(playableLimit, NSEC_PER_SEC);
+            CMTimeRange sourceRange = CMTimeRangeMake(start, duration);
+            AVMutableCompositionTrack *videoTrack = [asset addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:0];
+            [videoTrack insertTimeRange:sourceRange ofTrack:[source tracksWithMediaType:AVMediaTypeVideo].lastObject atTime:kCMTimeZero error:nil];
+            
+            AVMutableCompositionTrack *audioTrack = [asset addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:0];
+            [audioTrack insertTimeRange:sourceRange ofTrack:[source tracksWithMediaType:AVMediaTypeAudio].lastObject atTime:kCMTimeZero error:nil];
+            
+            self.player = [[SJAVMediaPlayer alloc] initWithAVAsset:asset specifyStartTime:media.specifyStartTime];
+            [self.player sj_setForceDuration:CMTimeGetSeconds(source.duration)];
             [self.player report];
             [self _resetMainPresenterIfNeeded];
-        }
-    }];
+        }];
+    }
 }
 
 - (void)replay {
@@ -326,6 +350,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 - (void)stop {
     id<SJAVMediaPlayerProtocol> _Nullable player = _player;
+    [self removePeriodicTimeObserver];
     _player = nil;
     _media = nil;
     _definitionLoader = nil;

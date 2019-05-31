@@ -130,6 +130,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, readonly, nullable) id<SJMediaModelProtocol> otherMedia;
 
 @property (nonatomic) NSTimeInterval specifyStartTime;
+
+@property (nonatomic) NSTimeInterval playableLimit;
 @end
 
 @protocol SJAVMediaModelProtocol<SJMediaModelProtocol>

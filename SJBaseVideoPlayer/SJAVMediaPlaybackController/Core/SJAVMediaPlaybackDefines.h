@@ -25,11 +25,14 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaItemStatusDidChangeNotification;
 - (instancetype)initWithURL:(NSURL *)URL;
 - (instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime;
 - (instancetype)initWithAVAsset:(__kindof AVAsset *)asset specifyStartTime:(NSTimeInterval)specifyStartTime;
+- (instancetype)initWithPlayerItem:(AVPlayerItem *_Nullable)item specifyStartTime:(NSTimeInterval)specifyStartTime;
 
 @property (nonatomic) float sj_playbackRate;
 @property (nonatomic) float sj_playbackVolume;
 @property (nonatomic, getter=sj_isMuted) BOOL sj_muted;
 @property (nonatomic, getter=sj_isReplayed, readonly) BOOL sj_replayed;
+
+- (void)sj_setForceDuration:(NSTimeInterval)forceDuration;
 
 // - status -
 @property (nonatomic, readonly) SJVideoPlayerInactivityReason sj_inactivityReason;
@@ -38,7 +41,7 @@ UIKIT_EXTERN NSNotificationName const SJAVMediaItemStatusDidChangeNotification;
 @property (nonatomic, readonly) SJPlayerBufferStatus sj_bufferStatus;
 @property (nonatomic) NSTimeInterval sj_bufferTimeToContinuePlaying;
 - (BOOL)sj_getPlayerIsPlaying;    ///< 是否正在播放
-- (BOOL)sj_getIsPlayed; ///< 是否调用过play
+- (BOOL)sj_getIsPlayed;           ///< 是否调用过play
 - (SJMediaPlaybackType)sj_getPlaybackType;
 - (NSTimeInterval)sj_getDuration;
 - (NSTimeInterval)sj_getCurrentPlaybackTime;
