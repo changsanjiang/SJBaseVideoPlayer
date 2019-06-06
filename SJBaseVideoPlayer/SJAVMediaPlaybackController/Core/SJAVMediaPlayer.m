@@ -235,6 +235,7 @@ inline static bool isFloatZero(float value) {
         if ( status == AVPlayerItemStatusReadyToPlay ) {
             NSTimeInterval specifyStartTime = _sj_controlInfo->specifyStartTime;
             if ( isFloatZero(specifyStartTime) ) {
+                [self _postNotificationWithName:SJAVMediaItemStatusDidChangeNotification];
                 [self _successfullyToPrepare:item];
                 return;
             }
@@ -244,14 +245,14 @@ inline static bool isFloatZero(float value) {
             [item seekToTime:CMTimeMakeWithSeconds(specifyStartTime, NSEC_PER_SEC) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero completionHandler:^(BOOL finished) {
                 __strong typeof(_self) self = _self;
                 if ( !self ) return;
+                [self _postNotificationWithName:SJAVMediaItemStatusDidChangeNotification];
                 [self _successfullyToPrepare:item];
             }];
         }
         else if ( status == AVPlayerItemStatusFailed ) {
+            [self _postNotificationWithName:SJAVMediaItemStatusDidChangeNotification];
             [self _failedToPrepare:item.error];
         }
-        
-        [self _postNotificationWithName:SJAVMediaItemStatusDidChangeNotification];
     }
 }
 

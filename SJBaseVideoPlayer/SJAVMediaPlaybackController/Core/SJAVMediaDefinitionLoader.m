@@ -20,6 +20,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation SJAVMediaDefinitionLoader
+- (void)dealloc {
+#ifdef DEBUG
+    NSLog(@"%d - %s", (int)__LINE__, __func__);
+#endif
+}
 - (instancetype)initWithMedia:(id<SJMediaModelProtocol>)media handler:(void (^)(SJAVMediaDefinitionLoader * _Nonnull, AVPlayerItemStatus))handler {
     self = [super init];
     if ( !self ) return nil;
