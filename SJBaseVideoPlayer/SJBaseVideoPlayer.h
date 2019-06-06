@@ -41,6 +41,7 @@
 #import "SJDeviceVolumeAndBrightnessManagerDefines.h"
 #import "SJModalViewControlllerManagerDefines.h"
 #import "SJBaseVideoPlayerStatisticsDefines.h"
+#import "SJFloatSmallViewControllerDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -602,6 +603,11 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - 在`tableView`或`collectionView`上播放
 
 @interface SJBaseVideoPlayer (ScrollView)
+
+/// 小窗播放控制器
+/// 播放器将会在适当的时候自动调用controller的对应的方法
+@property (nonatomic, strong, nullable) id<SJFloatSmallViewControllerProtocol> floatSmallViewController;
+
 /// 滚动出去后, 是否暂停. 默认为YES
 ///
 /// - default value is YES.

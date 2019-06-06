@@ -271,6 +271,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     id<SJReachability> _reachability;
     id<SJReachabilityObserver> _reachabilityObserver;
     
+    
+    /// Scroll
+    id<SJFloatSmallViewControllerProtocol> _Nullable _floatSmallViewController;
+    
     /// mvcm => Modal view controller Manager
     id<SJModalViewControlllerManagerProtocol> _mvcm_modalViewControllerManager;
     BOOL _mvcm_needPresentModalViewControlller;
@@ -2353,6 +2357,14 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 #pragma mark - 在`tableView`或`collectionView`上播放
 
 @implementation SJBaseVideoPlayer (ScrollView)
+
+- (void)setFloatSmallViewController:(nullable id<SJFloatSmallViewControllerProtocol>)floatSmallViewController {
+    _floatSmallViewController = floatSmallViewController;
+}
+- (nullable id<SJFloatSmallViewControllerProtocol>)floatSmallViewController {
+    return _floatSmallViewController;
+}
+
 - (void)setPauseWhenScrollDisappeared:(BOOL)pauseWhenScrollDisappeared {
     _controlInfo->scrollControl.pauseWhenScrollDisappeared = pauseWhenScrollDisappeared;
 }
@@ -2515,6 +2527,13 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         }];
     }
     
+    if ( self.floatSmallViewController.isAppeared ) {
+        [self.view addSubview:self.presentView];
+        self.presentView.frame = self.view.bounds;
+        [self.presentView layoutIfNeeded];
+        [self.floatSmallViewController floatSmallViewNeedDisappear];
+    }
+    
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerWillAppearInScrollView:)] ) {
         [self.controlLayerDelegate videoPlayerWillAppearInScrollView:self];
     }
@@ -2528,6 +2547,13 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
     }
 
     _view.hidden = _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared;
+    
+    if ( self.floatSmallViewController != nil ) {
+        [self.floatSmallViewController.view addSubview:self.presentView];
+        self.presentView.frame = self.floatSmallViewController.view.bounds;
+        [self.presentView layoutIfNeeded];
+        [self.floatSmallViewController floatSmallViewNeedAppear];
+    }
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerWillDisappearInScrollView:)] ) {
         [self.controlLayerDelegate videoPlayerWillDisappearInScrollView:self];
