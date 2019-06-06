@@ -88,7 +88,9 @@ inline static bool isFloatZero(float value) {
         _sj_controlInfo = (SJAVMediaPlaybackControlInfo *)calloc(1, sizeof(SJAVMediaPlaybackControlInfo));
         _sj_controlInfo->bufferTimeToContinuePlaying = 2;
         _sj_controlInfo->specifyStartTime = specifyStartTime;
-        [self _sj_prepareToPlay];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self _sj_prepareToPlay];
+        });
     }
     return self;
 }
@@ -102,11 +104,6 @@ inline static bool isFloatZero(float value) {
 }
 
 - (void)_sj_prepareToPlay {
-    if ( ![NSThread.currentThread isMainThread] ) { ///< 确保所有回调都在主线程
-        [self performSelectorOnMainThread:@selector(_sj_prepareToPlay) withObject:nil waitUntilDone:NO];
-        return;
-    }
-    
     if ( _sj_controlInfo->prepareStatus != SJAVMediaPrepareStatusUnknown ) ///< 防止准备过程多次调用
         return;
     

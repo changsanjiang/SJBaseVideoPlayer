@@ -10,11 +10,14 @@
 #import "SJBaseVideoPlayer.h"
 #import <Masonry.h>
 
-@interface Test: NSObject
+@implementation UIViewController (_UIViewControllerRotation)
+
+- (BOOL)shouldAutorotate {
+    return NO;
+}
+
 @end
 
-@implementation Test
-@end
 
 @interface ViewController ()
 

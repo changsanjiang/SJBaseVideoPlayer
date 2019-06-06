@@ -52,10 +52,12 @@ NS_ASSUME_NONNULL_BEGIN
     
     NSString *hashstr = [NSString stringWithFormat:@"%lu-%@", (unsigned long)[observer hash], keyPath];
     
-    if ( [[self sj_observerhashSet] containsObject:hashstr] ) return;
-    else [[self sj_observerhashSet] addObject:hashstr];
+    @synchronized (self) {
+        if ( [[self sj_observerhashSet] containsObject:hashstr] ) return;
+        else [[self sj_observerhashSet] addObject:hashstr];
+    }
     
-    [self addObserver:observer forKeyPath:keyPath options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:context];
+    [self addObserver:observer forKeyPath:keyPath options:options context:context];
     
     __SJKVOAutoremove *helper = [__SJKVOAutoremove new];
     __SJKVOAutoremove *sub = [__SJKVOAutoremove new];

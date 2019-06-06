@@ -15,6 +15,11 @@ NS_ASSUME_NONNULL_BEGIN
     return self;
 }
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    if ( _layoutSubviewsExeBlock ) _layoutSubviewsExeBlock(self);
+}
+
 - (void)willMoveToWindow:(nullable UIWindow *)newWindow {
     [super willMoveToWindow:newWindow];
     if ( !newWindow )

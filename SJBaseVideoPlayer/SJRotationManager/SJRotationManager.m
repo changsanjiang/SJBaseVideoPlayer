@@ -65,6 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if ( !self ) return nil;
     _duration = 0.4;
+    _currentOrientation = SJOrientation_Portrait;
     _rec_deviceOrientation = UIDeviceOrientationPortrait;
     _autorotationSupportedOrientation = SJAutoRotateSupportedOrientation_All;
     [self _observeNotifies];

@@ -18,9 +18,9 @@
  - SJOrientation_LandscapeRight: 全屏, Home键在左侧
  */
 typedef NS_ENUM(NSUInteger, SJOrientation) {
-    SJOrientation_Portrait,
-    SJOrientation_LandscapeLeft,  // UIDeviceOrientationLandscapeLeft
-    SJOrientation_LandscapeRight, // UIDeviceOrientationLandscapeRight
+    SJOrientation_Portrait = UIDeviceOrientationPortrait,
+    SJOrientation_LandscapeLeft = UIDeviceOrientationLandscapeLeft,
+    SJOrientation_LandscapeRight = UIDeviceOrientationLandscapeRight,
 };
 
 /**

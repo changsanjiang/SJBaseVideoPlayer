@@ -53,42 +53,52 @@ NS_ASSUME_NONNULL_BEGIN
 static NSInteger _SJBaseVideoPlayerViewTag = 10000;
 
 typedef struct _SJPlayerControlInfo {
-    struct _PanGesture {
+    struct PanGesture {
         NSTimeInterval offsetTime; ///< pan手势触发过程中的偏移量(secs)
     } pan;
     
-    struct _StatusBar {
-        BOOL tmpShow :1;
-        BOOL tmpHidden :1;
+    struct StatusBar {
+        BOOL needTmpShow;
+        BOOL needTmpHidden;
     } statusBar;
     
-    struct _PlaceholderImageView {
-        BOOL hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay :1;
-        NSTimeInterval delayInSecondsForHiddenPlaceholderImageView;
+    struct PlaceholderImageView {
+        BOOL needToHiddenWhenPlayerIsReadyForDisplay;
+        NSTimeInterval delayHidden;
     } placeholder;
     
-    struct _ViewController {
-        BOOL isDisappeared :1;
-    } vc;
+    struct ViewController {
+        BOOL isDisappeared;
+    } viewController;
     
-    struct _ScrollControl {
-        BOOL pauseWhenScrollDisappeared :1;
-        BOOL hiddenViewWhenScrollDisappeared :1;
-        BOOL resumePlaybackWhenScrollAppeared :1;
+    struct ScrollControl {
+        BOOL pauseWhenScrollDisappeared;
+        BOOL hiddenPlayerViewWhenScrollDisappeared;
+        BOOL resumePlaybackWhenScrollAppeared;
     } scrollControl;
     
-    struct _DeviceVolumeAndBrightnableess {
-        BOOL disableBrightnessSetting :1;
-        BOOL disableVolumeSetting :1;
+    struct DeviceVolumeAndBrightnableess {
+        BOOL disableBrightnessSetting;
+        BOOL disableVolumeSetting;
     } deviceVolumeAndBrightness;
     
-    struct _Rotation {
+    struct Rotation {
         BOOL able;
+        BOOL isLockedScreen;
     } rotation;
     
-//    struct _PlaybackControl {
-//
-//    } plaback;
+    struct PlaybackControl {
+        BOOL autoPlayWhenPlayStatusIsReadyToPlay;
+        BOOL pauseWhenAppDidEnterBackground: 1;
+        BOOL resumePlaybackWhenAppDidEnterForeground;
+        NSTimeInterval delayToAutoRefreshWhenPlayFailed;
+    } plabackControl;
+    
+    struct ControlLayerAppearMgr {
+        BOOL isDisabled;
+        BOOL pausedToKeepAppearState;
+        BOOL autoAppearWhenAssetInitialized;
+    } controlLayer;
     
 } _SJPlayerControlInfo;
 
@@ -103,8 +113,8 @@ typedef struct _SJPlayerControlInfo {
 /// - 管理对象: 监听 App在前台, 后台, 耳机插拔, 来电等的通知
 @property (nonatomic, strong, readonly) SJVideoPlayerRegistrar *registrar;
 
-/// - 控制层的父视图
-@property (nonatomic, strong, readonly) UIView *controlContentView;
+/// - 控制层视图
+@property (nonatomic, strong, nullable) UIView *controlContentView;
 
 /// - 视频画面的呈现层
 @property (nonatomic, strong, readonly) SJVideoPlayerPresentView *presentView;
@@ -218,7 +228,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 @implementation SJBaseVideoPlayer {
     UIView *_view;
     SJVideoPlayerPresentView *_presentView;
-    UIView *_controlContentView;
     SJVideoPlayerRegistrar *_registrar;
     
     /// 当前资源是否播放过
@@ -232,67 +241,35 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     /// gestures
     UITapGestureRecognizer *_lockStateTapGesture;
     SJPlayerGestureControl *_gestureControl;
-    BOOL(^_Nullable _gestureRecognizerShouldTrigger)(__kindof SJBaseVideoPlayer *player, SJPlayerGestureType type, CGPoint location);
     
     /// playback controller
     NSError *_Nullable _error;
     id<SJMediaPlaybackController> _playbackController;
-    void (^_Nullable _assetDeallocExeBlock)(__kindof SJBaseVideoPlayer * _Nonnull);
-    BOOL _lockedScreen;
-    BOOL _autoPlayWhenPlayStatusIsReadyToPlay;
-    BOOL _resumePlaybackWhenAppDidEnterForeground;
-    BOOL(^_Nullable _canPlayAnAsset)(__kindof SJBaseVideoPlayer *player);
-    void(^_Nullable _rateDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player);
-    void(^_Nullable _playTimeDidChangeExeBlok)(__kindof SJBaseVideoPlayer *videoPlayer);
-    void(^_Nullable _playDidToEndExeBlock)(__kindof SJBaseVideoPlayer *player);
     SJVideoPlayerPlayStatus _playStatus;
-    void(^_Nullable _playStatusDidChangeExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
     SJVideoPlayerURLAsset *_URLAsset;
-    BOOL(^_Nullable _canSeekToTime)(__kindof SJBaseVideoPlayer *player);
-    NSTimeInterval _delayToAutoRefreshWhenPlayFailed;
     SJBaseVideoPlayerAutoRefreshController *_Nullable _autoRefresh;
-    void(^_Nullable _presentationSizeDidChangeExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
-    BOOL _pauseWhenAppDidEnterBackground;
     
     /// control layer appear manager
     id<SJControlLayerAppearManager> _controlLayerAppearManager;
     id<SJControlLayerAppearManagerObserver> _controlLayerAppearManagerObserver;
-    BOOL(^_Nullable _canAutomaticallyDisappear)(__kindof SJBaseVideoPlayer *player);
-    void(^_Nullable _controlLayerAppearStateDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player, BOOL state);
-    BOOL _pausedToKeepAppearState;
-    BOOL _controlLayerAutoAppearWhenAssetInitialized;
-    BOOL _disabledControlLayerAppearManager;
     
     /// rotation manager
     id<SJRotationManagerProtocol> _rotationManager;
     id<SJRotationManagerObserver> _rotationManagerObserver;
-    BOOL(^_Nullable _shouldTriggerRotation)(__kindof SJBaseVideoPlayer *player);
-    void(^_Nullable _viewWillRotateExeBlock)(__kindof SJBaseVideoPlayer *player, BOOL isFullScreen);
-    void(^_Nullable _viewDidRotateExeBlock)(__kindof SJBaseVideoPlayer *player, BOOL isFullScreen);;
     
     /// Fit on screen manager
     id<SJFitOnScreenManager> _fitOnScreenManager;
     id<SJFitOnScreenManagerObserver> _fitOnScreenManagerObserver;
     BOOL _useFitOnScreenAndDisableRotation;
-    void(^_Nullable _fitOnScreenWillBeginExeBlock)(__kindof SJBaseVideoPlayer *player);
-    void(^_Nullable _fitOnScreenDidEndExeBlock)(__kindof SJBaseVideoPlayer *player);
-    
     BOOL _autoManageViewToFitOnScreenOrRotation;
     
     /// Flip Transition manager
     id<SJFlipTransitionManager> _flipTransitionManager;
     id<SJFlipTransitionManagerObserver> _flipTransitionManagerObserver;
-    void(^_Nullable _flipTransitionDidStartExeBlock)(__kindof SJBaseVideoPlayer *player);
-    void(^_Nullable _flipTransitionDidStopExeBlock)(__kindof SJBaseVideoPlayer *player);
     
     /// Network status
     id<SJReachability> _reachability;
     id<SJReachabilityObserver> _reachabilityObserver;
-    void(^_Nullable _networkStatusDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player);
-    
-    /// Scroll
-    void(^_Nullable _playerViewWillAppearExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
-    void(^_Nullable _playerViewWillDisappearExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
     
     /// mvcm => Modal view controller Manager
     id<SJModalViewControlllerManagerProtocol> _mvcm_modalViewControllerManager;
@@ -330,13 +307,12 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     self = [super init];
     if ( !self ) return nil;
     _controlInfo = (_SJPlayerControlInfo *)calloc(1, sizeof(struct _SJPlayerControlInfo));
-    _controlInfo->placeholder.hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay = YES;
+    _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay = YES;
     _controlInfo->scrollControl.pauseWhenScrollDisappeared = YES;
-    _controlInfo->scrollControl.hiddenViewWhenScrollDisappeared = YES;
+    _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared = YES;
     _controlInfo->scrollControl.resumePlaybackWhenScrollAppeared = YES;
-    
-    self.autoPlayWhenPlayStatusIsReadyToPlay = YES; // 是否自动播放, 默认yes
-    self.pauseWhenAppDidEnterBackground = YES; // App进入后台是否暂停播放, 默认yes
+    _controlInfo->plabackControl.autoPlayWhenPlayStatusIsReadyToPlay = YES; // 是否自动播放, 默认yes
+    _controlInfo->plabackControl.pauseWhenAppDidEnterBackground = YES; // App进入后台是否暂停播放, 默认yes
     self.autoManageViewToFitOnScreenOrRotation = YES;
     
     [self view];
@@ -385,8 +361,8 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     printf("%s\n", [self getPlayStatusStr:playStatus].UTF8String);
 #endif
     
-    if ( _playStatusDidChangeExeBlock )
-        _playStatusDidChangeExeBlock(self);
+    if ( self.playStatusDidChangeExeBlock )
+        self.playStatusDidChangeExeBlock(self);
     
     [self _showOrHiddenPlaceholderImageViewIfNeeded];
     
@@ -431,9 +407,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _controlLayerDataSource.controlView.clipsToBounds = YES;
     
     // install
-    _controlLayerDataSource.controlView.frame = self.controlContentView.bounds;
-    _controlLayerDataSource.controlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.controlContentView addSubview:_controlLayerDataSource.controlView];
+    [_controlContentView removeFromSuperview];
+    _controlContentView = _controlLayerDataSource.controlView;
+    _controlContentView.frame = self.presentView.bounds;
+    [self.presentView addSubview:_controlContentView];
     
     if ( [self.controlLayerDataSource respondsToSelector:@selector(installedControlViewToVideoPlayer:)] ) {
         [self.controlLayerDataSource installedControlViewToVideoPlayer:self];
@@ -442,8 +419,8 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 
 - (void)_showOrHiddenPlaceholderImageViewIfNeeded {
     if ( _playbackController.isReadyForDisplay ) {
-        if ( _controlInfo->placeholder.hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay ) {
-            [self.presentView hiddenPlaceholderAnimated:YES delay:_controlInfo->placeholder.delayInSecondsForHiddenPlaceholderImageView];
+        if ( _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay ) {
+            [self.presentView hiddenPlaceholderAnimated:YES delay:_controlInfo->placeholder.delayHidden];
         }
     }
     else {
@@ -476,12 +453,19 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         [self.playModelObserver refreshAppearState];
     }];
     
-    [view addSubview:self.presentView];
-    [_presentView addSubview:self.controlContentView];
-    _presentView.autoresizingMask =
-    _controlContentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _presentView.frame =
-    _controlContentView.frame = view.bounds;
+    UIView *presentView = self.presentView;
+    [view addSubview:_presentView];
+    [view setLayoutSubviewsExeBlock:^(SJPlayerView * _Nonnull view) {
+        if ( presentView.superview == view ) {
+            presentView.frame = view.bounds;
+        }
+    }];
+    
+    [_presentView setLayoutSubviewsExeBlock:^(SJVideoPlayerPresentView * _Nonnull view) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        self.controlContentView.frame = view.bounds;
+    }];
     return _view;
 }
 
@@ -500,13 +484,6 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     return _presentView;
 }
 
-- (UIView *)controlContentView {
-    if ( _controlContentView ) return _controlContentView;
-    _controlContentView = [UIView new];
-    _controlContentView.clipsToBounds = YES;
-    return _controlContentView;
-}
-
 - (SJVideoPlayerRegistrar *)registrar {
     if ( _registrar ) return _registrar;
     _registrar = [SJVideoPlayerRegistrar new];
@@ -523,7 +500,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _registrar.didBecomeActive = ^(SJVideoPlayerRegistrar * _Nonnull registrar) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        BOOL canPlay = [self playStatus_isPaused_ReasonPause] && self.resumePlaybackWhenAppDidEnterForeground;
+        BOOL canPlay = [self playStatus_isPaused_ReasonPause] && self.controlInfo->plabackControl.resumePlaybackWhenAppDidEnterForeground;
         if ( self.isPlayOnScrollView ) {
             if ( canPlay && self.isScrollAppeared ) [self play];
         }
@@ -641,18 +618,18 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setHiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay:(BOOL)hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay {
-    _controlInfo->placeholder.hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay = hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
+    _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay = hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
 }
 
 - (BOOL)hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay {
-    return _controlInfo->placeholder.hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
+    return _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay;
 }
 
 - (void)setDelayInSecondsForHiddenPlaceholderImageView:(NSTimeInterval)delayInSecondsForHiddenPlaceholderImageView {
-    _controlInfo->placeholder.delayInSecondsForHiddenPlaceholderImageView = delayInSecondsForHiddenPlaceholderImageView;
+    _controlInfo->placeholder.delayHidden = delayInSecondsForHiddenPlaceholderImageView;
 }
 - (NSTimeInterval)delayInSecondsForHiddenPlaceholderImageView {
-    return _controlInfo->placeholder.delayInSecondsForHiddenPlaceholderImageView;
+    return _controlInfo->placeholder.delayHidden;
 }
 @end
 
@@ -716,18 +693,18 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     }];
 }
 
-- (void)setFlipTransitionDidStartExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))block {
-    _flipTransitionDidStartExeBlock = block;
+- (void)setFlipTransitionDidStartExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))flipTransitionDidStartExeBlock {
+    objc_setAssociatedObject(self, @selector(flipTransitionDidStartExeBlock), flipTransitionDidStartExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))flipTransitionDidStartExeBlock {
-    return _flipTransitionDidStartExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)setFlipTransitionDidStopExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))block {
-    _flipTransitionDidStopExeBlock = block;
+- (void)setFlipTransitionDidStopExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))flipTransitionDidStopExeBlock {
+    objc_setAssociatedObject(self, @selector(flipTransitionDidStopExeBlock), flipTransitionDidStopExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))flipTransitionDidStopExeBlock {
-    return _flipTransitionDidStopExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
@@ -751,7 +728,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         return;
     
     _playbackController.delegate = self;
-    _playbackController.pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
+    _playbackController.pauseWhenAppDidEnterBackground = _controlInfo->plabackControl.pauseWhenAppDidEnterBackground;
     if ( _playbackController.playerView.superview != self.presentView ) {
         _playbackController.playerView.frame = self.presentView.bounds;
         _playbackController.playerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -826,25 +803,20 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     [_playbackController refresh];
 }
 
-- (void)setDelayToAutoRefreshWhenPlayFailed:(NSTimeInterval)delayToAutoRefreshWhenPlayFailed {
-    _delayToAutoRefreshWhenPlayFailed = delayToAutoRefreshWhenPlayFailed;
+- (void)setDelayToAutoRefreshWhenPlayFailed:(NSTimeInterval)delay {
+    _controlInfo->plabackControl.delayToAutoRefreshWhenPlayFailed = delay;
     [_autoRefresh cancel];
-    if ( delayToAutoRefreshWhenPlayFailed > 0 ) {
-        _autoRefresh = [[SJBaseVideoPlayerAutoRefreshController alloc] initWithPlayer:(id)self];
-    }
-    else {
-        _autoRefresh = nil;
-    }
+    _autoRefresh = (delay > 0)?[[SJBaseVideoPlayerAutoRefreshController alloc] initWithPlayer:(id)self]:nil;
 }
 - (NSTimeInterval)delayToAutoRefreshWhenPlayFailed {
-    return _delayToAutoRefreshWhenPlayFailed;
+    return _controlInfo->plabackControl.delayToAutoRefreshWhenPlayFailed;
 }
 
 - (void)setAssetDeallocExeBlock:(nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull))assetDeallocExeBlock {
-    _assetDeallocExeBlock = assetDeallocExeBlock;
+    objc_setAssociatedObject(self, @selector(assetDeallocExeBlock), assetDeallocExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull))assetDeallocExeBlock {
-    return _assetDeallocExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)setPlayerVolume:(float)playerVolume {
@@ -865,54 +837,55 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setLockedScreen:(BOOL)lockedScreen {
-    if ( lockedScreen == _lockedScreen )
-        return;
-    _lockedScreen = lockedScreen;
-    if ( lockedScreen ) {
-        [self.controlLayerDataSource.controlView addGestureRecognizer:self.lockStateTapGesture];
-    }
-    else {
-        [self.controlLayerDataSource.controlView removeGestureRecognizer:self.lockStateTapGesture];
-    }
-    
-    if      ( lockedScreen && [self.controlLayerDelegate respondsToSelector:@selector(lockedVideoPlayer:)] ) {
-        [self.controlLayerDelegate lockedVideoPlayer:self];
-    }
-    else if ( !lockedScreen && [self.controlLayerDelegate respondsToSelector:@selector(unlockedVideoPlayer:)] ) {
-        [self.controlLayerDelegate unlockedVideoPlayer:self];
+    if ( lockedScreen != _controlInfo->rotation.isLockedScreen ) {
+        _controlInfo->rotation.isLockedScreen = lockedScreen;
+       
+        if ( lockedScreen ) {
+            [self.controlLayerDataSource.controlView addGestureRecognizer:self.lockStateTapGesture];
+        }
+        else {
+            [self.controlLayerDataSource.controlView removeGestureRecognizer:self.lockStateTapGesture];
+        }
+        
+        if      ( lockedScreen && [self.controlLayerDelegate respondsToSelector:@selector(lockedVideoPlayer:)] ) {
+            [self.controlLayerDelegate lockedVideoPlayer:self];
+        }
+        else if ( !lockedScreen && [self.controlLayerDelegate respondsToSelector:@selector(unlockedVideoPlayer:)] ) {
+            [self.controlLayerDelegate unlockedVideoPlayer:self];
+        }
     }
 }
 - (BOOL)isLockedScreen {
-    return _lockedScreen;
+    return _controlInfo->rotation.isLockedScreen;
 }
 
 - (void)setAutoPlayWhenPlayStatusIsReadyToPlay:(BOOL)autoPlayWhenPlayStatusIsReadyToPlay {
-    _autoPlayWhenPlayStatusIsReadyToPlay = autoPlayWhenPlayStatusIsReadyToPlay;
+    _controlInfo->plabackControl.autoPlayWhenPlayStatusIsReadyToPlay = autoPlayWhenPlayStatusIsReadyToPlay;
 }
 - (BOOL)autoPlayWhenPlayStatusIsReadyToPlay {
-    return _autoPlayWhenPlayStatusIsReadyToPlay;
+    return _controlInfo->plabackControl.autoPlayWhenPlayStatusIsReadyToPlay;
 }
 
 - (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
-    _pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
-    _playbackController.pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
+    _controlInfo->plabackControl.pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
+    _playbackController.pauseWhenAppDidEnterBackground = _controlInfo->plabackControl.pauseWhenAppDidEnterBackground;
 }
 - (BOOL)pauseWhenAppDidEnterBackground {
-    return _pauseWhenAppDidEnterBackground;
+    return _controlInfo->plabackControl.pauseWhenAppDidEnterBackground;
 }
 
 - (void)setResumePlaybackWhenAppDidEnterForeground:(BOOL)resumePlaybackWhenAppDidEnterForeground {
-    _resumePlaybackWhenAppDidEnterForeground = resumePlaybackWhenAppDidEnterForeground;
+    _controlInfo->plabackControl.resumePlaybackWhenAppDidEnterForeground = resumePlaybackWhenAppDidEnterForeground;
 }
 - (BOOL)resumePlaybackWhenAppDidEnterForeground {
-    return _resumePlaybackWhenAppDidEnterForeground;
+    return _controlInfo->plabackControl.resumePlaybackWhenAppDidEnterForeground;
 }
 
 - (void)setCanPlayAnAsset:(nullable BOOL (^)(__kindof SJBaseVideoPlayer * _Nonnull))canPlayAnAsset {
-    _canPlayAnAsset = canPlayAnAsset;
+    objc_setAssociatedObject(self, @selector(canPlayAnAsset), canPlayAnAsset, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (nullable BOOL (^)(__kindof SJBaseVideoPlayer * _Nonnull))canPlayAnAsset {
-    return _canPlayAnAsset;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)play {
@@ -922,8 +895,8 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     }
     
     if ( !self.URLAsset ) return;
-    if ( _canPlayAnAsset && !_canPlayAnAsset(self) ) return;
-    if ( self.registrar.state == SJVideoPlayerAppState_Background && self.pauseWhenAppDidEnterBackground ) return;
+    if ( self.canPlayAnAsset && !self.canPlayAnAsset(self) ) return;
+    if ( self.registrar.state == SJVideoPlayerAppState_Background && _controlInfo->plabackControl.pauseWhenAppDidEnterBackground ) return;
 
     if ( [self playStatus_isInactivity_ReasonPlayFailed] ) {
         [self refresh];
@@ -995,10 +968,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setCanSeekToTime:(BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))canSeekToTime {
-    _canSeekToTime = canSeekToTime;
+    objc_setAssociatedObject(self, @selector(canSeekToTime), canSeekToTime, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))canSeekToTime {
-    return _canSeekToTime;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)seekToTime:(NSTimeInterval)secs completionHandler:(void (^ __nullable)(BOOL finished))completionHandler {
@@ -1048,10 +1021,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setRateDidChangeExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))rateDidChangeExeBlock {
-    _rateDidChangeExeBlock = rateDidChangeExeBlock;
+    objc_setAssociatedObject(self, @selector(rateDidChangeExeBlock), rateDidChangeExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))rateDidChangeExeBlock {
-    return _rateDidChangeExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)_updatePlayModelObserver:(SJPlayModel *)playModel {
@@ -1086,7 +1059,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
             return;
         }
         
-        if ( _autoPlayWhenPlayStatusIsReadyToPlay ) {
+        if ( _controlInfo->plabackControl.autoPlayWhenPlayStatusIsReadyToPlay ) {
             // - application enter forground
             if ( self.registrar.state != SJVideoPlayerAppState_Background ) {
                 if ( self.isPlayOnScrollView ) {
@@ -1102,7 +1075,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
                 }
             }
             // - application enter background
-            else if ( !_pauseWhenAppDidEnterBackground ) {
+            else if ( _controlInfo->plabackControl.pauseWhenAppDidEnterBackground == NO ) {
                 [self play];
             }
         }
@@ -1290,11 +1263,11 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setNetworkStatusDidChangeExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))networkStatusDidChangeExeBlock {
-    _networkStatusDidChangeExeBlock = networkStatusDidChangeExeBlock;
+    objc_setAssociatedObject(self, @selector(networkStatusDidChangeExeBlock), networkStatusDidChangeExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))networkStatusDidChangeExeBlock {
-    return _networkStatusDidChangeExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
@@ -1380,25 +1353,27 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 @implementation SJBaseVideoPlayer (ViewController)
 /// You should call it when view did appear
 - (void)vc_viewDidAppear {
-    _controlInfo->vc.isDisappeared = NO;
+    _controlInfo->viewController.isDisappeared = NO;
     [self.playModelObserver refreshAppearState];
 }
 /// You should call it when view will disappear
 - (void)vc_viewWillDisappear {
-    _controlInfo->vc.isDisappeared = YES;
+    _controlInfo->viewController.isDisappeared = YES;
 }
 - (void)vc_viewDidDisappear {
     [self pause];
 }
 - (BOOL)vc_prefersStatusBarHidden {
-    if ( _controlInfo->statusBar.tmpShow )
+    if ( _controlInfo->statusBar.needTmpShow )
         return NO;
-    if ( _controlInfo->statusBar.tmpHidden )
+    if ( _controlInfo->statusBar.needTmpHidden )
         return YES;
     if ( self.lockedScreen )
         return YES;
     if ( self.rotationManager.transitioning ) {
-        if ( !self.disabledControlLayerAppearManager && self.controlLayerIsAppeared )
+        if ( !self.rotationManager.isFullscreen )
+            return NO;
+        else if ( !self.disabledControlLayerAppearManager && self.controlLayerIsAppeared )
             return NO;
         else
             return YES;
@@ -1424,27 +1399,27 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setVc_isDisappeared:(BOOL)vc_isDisappeared {
-    _controlInfo->vc.isDisappeared = vc_isDisappeared;
+    _controlInfo->viewController.isDisappeared = vc_isDisappeared;
 }
 - (BOOL)vc_isDisappeared {
-    return _controlInfo->vc.isDisappeared;
+    return _controlInfo->viewController.isDisappeared;
 }
 
 - (void)needShowStatusBar {
-    if ( _controlInfo->statusBar.tmpShow ) return;
-    _controlInfo->statusBar.tmpShow = YES;
+    if ( _controlInfo->statusBar.needTmpShow ) return;
+    _controlInfo->statusBar.needTmpShow = YES;
     [self.atViewController setNeedsStatusBarAppearanceUpdate];
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.controlInfo->statusBar.tmpShow = NO;
+        self.controlInfo->statusBar.needTmpShow = NO;
     });
 }
 
 - (void)needHiddenStatusBar {
-    if ( _controlInfo->statusBar.tmpHidden ) return;
-    _controlInfo->statusBar.tmpHidden = YES;
+    if ( _controlInfo->statusBar.needTmpHidden ) return;
+    _controlInfo->statusBar.needTmpHidden = YES;
     [self.atViewController setNeedsStatusBarAppearanceUpdate];
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.controlInfo->statusBar.tmpHidden = NO;
+        self.controlInfo->statusBar.needTmpHidden = NO;
     });
 }
 @end
@@ -1495,19 +1470,19 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setPlayTimeDidChangeExeBlok:(nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playTimeDidChangeExeBlok {
-    _playTimeDidChangeExeBlok = playTimeDidChangeExeBlok;
+    objc_setAssociatedObject(self, @selector(playTimeDidChangeExeBlok), playTimeDidChangeExeBlok, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playTimeDidChangeExeBlok {
-    return _playTimeDidChangeExeBlok;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)setPlayDidToEndExeBlock:(nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playDidToEndExeBlock {
-    _playDidToEndExeBlock = playDidToEndExeBlock;
+    objc_setAssociatedObject(self, @selector(playDidToEndExeBlock), playDidToEndExeBlock, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull))playDidToEndExeBlock {
-    return _playDidToEndExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
@@ -1524,16 +1499,16 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 - (id<SJPlayerGestureControl>)gestureControl {
     if ( _gestureControl )
         return _gestureControl;
-    _gestureControl = [[SJPlayerGestureControl alloc] initWithTargetView:self.controlContentView];
+    _gestureControl = [[SJPlayerGestureControl alloc] initWithTargetView:self.presentView];
     [self _needUpdateGestureControlProperties];
     return _gestureControl;
 }
 
 - (void)setGestureRecognizerShouldTrigger:(BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull, SJPlayerGestureType, CGPoint))gestureRecognizerShouldTrigger {
-    _gestureRecognizerShouldTrigger = gestureRecognizerShouldTrigger;
+    objc_setAssociatedObject(self, @selector(gestureRecognizerShouldTrigger), gestureRecognizerShouldTrigger, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull, SJPlayerGestureType, CGPoint))gestureRecognizerShouldTrigger {
-    return _gestureRecognizerShouldTrigger;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)_needUpdateGestureControlProperties {
@@ -1773,17 +1748,17 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setCanAutomaticallyDisappear:(BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))canAutomaticallyDisappear {
-    _canAutomaticallyDisappear = canAutomaticallyDisappear;
+    objc_setAssociatedObject(self, @selector(canAutomaticallyDisappear), canAutomaticallyDisappear, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))canAutomaticallyDisappear {
-    return _canAutomaticallyDisappear;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)_needUpdateControlLayerAppearManagerProperties {
     if ( !_controlLayerAppearManager )
         return;
     
-    _controlLayerAppearManager.disabled = _disabledControlLayerAppearManager;
+    _controlLayerAppearManager.disabled = _controlInfo->controlLayer.isDisabled;
     __weak typeof(self) _self = self;
     _controlLayerAppearManager.canAutomaticallyDisappear = ^BOOL(id<SJControlLayerAppearManager>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
@@ -1844,11 +1819,11 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 
 /// 是否禁止控制层管理
 - (void)setDisabledControlLayerAppearManager:(BOOL)disabledControlLayerAppearManager {
-    _disabledControlLayerAppearManager = disabledControlLayerAppearManager;
+    _controlInfo->controlLayer.isDisabled = disabledControlLayerAppearManager;
     _controlLayerAppearManager.disabled = disabledControlLayerAppearManager;
 }
 - (BOOL)disabledControlLayerAppearManager {
-    return _disabledControlLayerAppearManager;
+    return _controlInfo->controlLayer.isDisabled;
 }
 
 /// 控制层是否显示
@@ -1866,26 +1841,26 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 
 /// 暂停时是否保持控制层一直显示
 - (void)setPausedToKeepAppearState:(BOOL)pausedToKeepAppearState {
-    _pausedToKeepAppearState = pausedToKeepAppearState;
+    _controlInfo->controlLayer.pausedToKeepAppearState = pausedToKeepAppearState;
 }
 - (BOOL)pausedToKeepAppearState {
-    return _pausedToKeepAppearState;
+    return _controlInfo->controlLayer.pausedToKeepAppearState;
 }
 
 /// 资源初始化完成后, 是否自动显示控制层
 - (void)setControlLayerAutoAppearWhenAssetInitialized:(BOOL)controlLayerAutoAppearWhenAssetInitialized {
-    _controlLayerAutoAppearWhenAssetInitialized = controlLayerAutoAppearWhenAssetInitialized;
+    _controlInfo->controlLayer.autoAppearWhenAssetInitialized = controlLayerAutoAppearWhenAssetInitialized;
 }
 - (BOOL)controlLayerAutoAppearWhenAssetInitialized {
-    return _controlLayerAutoAppearWhenAssetInitialized;
+    return _controlInfo->controlLayer.autoAppearWhenAssetInitialized;
 }
 
 /// 控制层显示状态改变时的回调
 - (void)setControlLayerAppearStateDidChangeExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))controlLayerAppearStateDidChangeExeBlock {
-    _controlLayerAppearStateDidChangeExeBlock = controlLayerAppearStateDidChangeExeBlock;
+    objc_setAssociatedObject(self, @selector(controlLayerAppearStateDidChangeExeBlock), controlLayerAppearStateDidChangeExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))controlLayerAppearStateDidChangeExeBlock {
-    return _controlLayerAppearStateDidChangeExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
@@ -2051,17 +2026,17 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setFitOnScreenWillBeginExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))fitOnScreenWillBeginExeBlock {
-    _fitOnScreenWillBeginExeBlock = fitOnScreenWillBeginExeBlock;
+    objc_setAssociatedObject(self, @selector(fitOnScreenWillBeginExeBlock), fitOnScreenWillBeginExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))fitOnScreenWillBeginExeBlock {
-    return _fitOnScreenWillBeginExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)setFitOnScreenDidEndExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))fitOnScreenDidEndExeBlock {
-    _fitOnScreenDidEndExeBlock = fitOnScreenDidEndExeBlock;
+    objc_setAssociatedObject(self, @selector(fitOnScreenDidEndExeBlock), fitOnScreenDidEndExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))fitOnScreenDidEndExeBlock {
-    return _fitOnScreenDidEndExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
@@ -2083,10 +2058,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setShouldTriggerRotation:(BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))shouldTriggerRotation {
-    _shouldTriggerRotation = shouldTriggerRotation;
+    objc_setAssociatedObject(self, @selector(shouldTriggerRotation), shouldTriggerRotation, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (BOOL (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))shouldTriggerRotation {
-    return _shouldTriggerRotation;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)_configRotationManager:(id<SJRotationManagerProtocol>)rotationManager {
@@ -2107,7 +2082,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         if ( self.registrar.state == SJVideoPlayerAppState_ResignActive ) return NO;
         if ( !self.controlInfo->rotation.able ) return NO;
         if ( self.useFitOnScreenAndDisableRotation ) return NO;
-        if ( self.controlInfo->vc.isDisappeared ) return NO;
+        if ( self.controlInfo->viewController.isDisappeared ) return NO;
         if ( [self.controlLayerDelegate respondsToSelector:@selector(canTriggerRotationOfVideoPlayer:)] ) {
             if ( ![self.controlLayerDelegate canTriggerRotationOfVideoPlayer:self] )
                 return NO;
@@ -2233,17 +2208,17 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setViewWillRotateExeBlock:(nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))viewWillRotateExeBlock {
-    _viewWillRotateExeBlock = viewWillRotateExeBlock;
+    objc_setAssociatedObject(self, @selector(viewWillRotateExeBlock), viewWillRotateExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))viewWillRotateExeBlock {
-    return _viewWillRotateExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)setViewDidRotateExeBlock:(nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))viewDidRotateExeBlock {
-    _viewDidRotateExeBlock = viewDidRotateExeBlock;
+    objc_setAssociatedObject(self, @selector(viewDidRotateExeBlock), viewDidRotateExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (nullable void (^)(__kindof SJBaseVideoPlayer * _Nonnull, BOOL))viewDidRotateExeBlock {
-    return _viewDidRotateExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
@@ -2252,10 +2227,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 @implementation SJBaseVideoPlayer (Screenshot)
 
 - (void)setPresentationSizeDidChangeExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))presentationSizeDidChangeExeBlock {
-    _presentationSizeDidChangeExeBlock = presentationSizeDidChangeExeBlock;
+    objc_setAssociatedObject(self, @selector(presentationSizeDidChangeExeBlock), presentationSizeDidChangeExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))presentationSizeDidChangeExeBlock {
-    return _presentationSizeDidChangeExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (CGSize)videoPresentationSize {
@@ -2386,10 +2361,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setHiddenViewWhenScrollDisappeared:(BOOL)hiddenViewWhenScrollDisappeared {
-    _controlInfo->scrollControl.hiddenViewWhenScrollDisappeared = hiddenViewWhenScrollDisappeared;
+    _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared = hiddenViewWhenScrollDisappeared;
 }
 - (BOOL)hiddenViewWhenScrollDisappeared {
-    return _controlInfo->scrollControl.hiddenViewWhenScrollDisappeared;
+    return _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared;
 }
 
 - (void)setResumePlaybackWhenScrollAppeared:(BOOL)resumePlaybackWhenScrollAppeared {
@@ -2408,17 +2383,17 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)setPlayerViewWillAppearExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))playerViewWillAppearExeBlock {
-    _playerViewWillAppearExeBlock = playerViewWillAppearExeBlock;
+    objc_setAssociatedObject(self, @selector(playerViewWillAppearExeBlock), playerViewWillAppearExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))playerViewWillAppearExeBlock {
-    return _playerViewWillAppearExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (void)setPlayerViewWillDisappearExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))playerViewWillDisappearExeBlock {
-    _playerViewWillDisappearExeBlock = playerViewWillDisappearExeBlock;
+    objc_setAssociatedObject(self, @selector(playerViewWillDisappearExeBlock), playerViewWillDisappearExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))playerViewWillDisappearExeBlock {
-    return _playerViewWillDisappearExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
@@ -2430,7 +2405,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 - (SJPrompt *)prompt {
     SJPrompt *prompt = objc_getAssociatedObject(self, _cmd);
     if ( prompt ) return prompt;
-    prompt = [SJPrompt promptWithPresentView:self.controlContentView];
+    prompt = [SJPrompt promptWithPresentView:self.presentView];
     prompt.update(^(SJPromptConfig * _Nonnull config) {
         config.cornerRadius = 4;
         config.font = [UIFont systemFontOfSize:12];
@@ -2519,12 +2494,12 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
 - (void)observer:(nonnull SJPlayModelPropertiesObserver *)observer userTouchedTableView:(BOOL)touched { /* nothing */ }
 
 - (void)playerWillAppearForObserver:(nonnull SJPlayModelPropertiesObserver *)observer superview:(nonnull UIView *)superview {
-    if ( _controlInfo->scrollControl.hiddenViewWhenScrollDisappeared ) {
+    if ( _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared ) {
         _view.hidden = NO;
     }
     
     if ( _playbackController.isPlayed ) {
-        if ( !_controlInfo->vc.isDisappeared ) {
+        if ( !_controlInfo->viewController.isDisappeared ) {
             if ( self.isPlayOnScrollView ) {
                 if ( _controlInfo->scrollControl.resumePlaybackWhenScrollAppeared ) {
                     [self play];
@@ -2544,22 +2519,22 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         [self.controlLayerDelegate videoPlayerWillAppearInScrollView:self];
     }
     
-    if ( _playerViewWillAppearExeBlock )
-        _playerViewWillAppearExeBlock(self);
+    if ( self.playerViewWillAppearExeBlock )
+        self.playerViewWillAppearExeBlock(self);
 }
 - (void)playerWillDisappearForObserver:(nonnull SJPlayModelPropertiesObserver *)observer {
     if ( _controlInfo->scrollControl.pauseWhenScrollDisappeared ) {
         [self pause];
     }
 
-    _view.hidden = _controlInfo->scrollControl.hiddenViewWhenScrollDisappeared;
+    _view.hidden = _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared;
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerWillDisappearInScrollView:)] ) {
         [self.controlLayerDelegate videoPlayerWillDisappearInScrollView:self];
     }
     
-    if ( _playerViewWillDisappearExeBlock )
-        _playerViewWillDisappearExeBlock(self);
+    if ( self.playerViewWillDisappearExeBlock )
+        self.playerViewWillDisappearExeBlock(self);
 }
 @end
 
@@ -2701,10 +2676,10 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
 }
 
 - (void)setPlayStatusDidChangeExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))playStatusDidChangeExeBlock {
-    _playStatusDidChangeExeBlock = playStatusDidChangeExeBlock;
+    objc_setAssociatedObject(self, @selector(playStatusDidChangeExeBlock), playStatusDidChangeExeBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 - (void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))playStatusDidChangeExeBlock {
-    return _playStatusDidChangeExeBlock;
+    return objc_getAssociatedObject(self, _cmd);
 }
 - (void)playWithURL:(NSURL *)URL {
     self.assetURL = URL;
