@@ -36,6 +36,7 @@
 #import "SJVCRotationManager.h"
 #import "SJPlayerView.h"
 #import "SJPlayStatusObserver.h"
+#import "SJFloatSmallViewController.h"
 
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
@@ -100,6 +101,10 @@ typedef struct _SJPlayerControlInfo {
         BOOL autoAppearWhenAssetInitialized;
     } controlLayer;
     
+    struct FloatSmallViewControl {
+        BOOL autoDisappearFloatSmallView;
+    } floatSmallViewControl;
+    
 } _SJPlayerControlInfo;
 
 @interface SJBaseVideoPlayer ()
@@ -114,7 +119,7 @@ typedef struct _SJPlayerControlInfo {
 @property (nonatomic, strong, readonly) SJVideoPlayerRegistrar *registrar;
 
 /// - 控制层视图
-@property (nonatomic, strong, nullable) UIView *controlContentView;
+@property (nonatomic, strong, nullable) UIView *controlLayerView;
 
 /// - 视频画面的呈现层
 @property (nonatomic, strong, readonly) SJVideoPlayerPresentView *presentView;
@@ -271,9 +276,9 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     id<SJReachability> _reachability;
     id<SJReachabilityObserver> _reachabilityObserver;
     
-    
     /// Scroll
     id<SJFloatSmallViewControllerProtocol> _Nullable _floatSmallViewController;
+    id<SJFloatSmallViewControllerObserverProtocol> _Nullable _floatSmallViewControllerObesrver;
     
     /// mvcm => Modal view controller Manager
     id<SJModalViewControlllerManagerProtocol> _mvcm_modalViewControllerManager;
@@ -317,6 +322,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _controlInfo->scrollControl.resumePlaybackWhenScrollAppeared = YES;
     _controlInfo->plabackControl.autoPlayWhenPlayStatusIsReadyToPlay = YES; // 是否自动播放, 默认yes
     _controlInfo->plabackControl.pauseWhenAppDidEnterBackground = YES; // App进入后台是否暂停播放, 默认yes
+    _controlInfo->floatSmallViewControl.autoDisappearFloatSmallView = YES;
     self.autoManageViewToFitOnScreenOrRotation = YES;
     
     [self view];
@@ -399,6 +405,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
                 [scrollView sj_playNextVisibleAsset];
             }
         }
+        
+        if ( _floatSmallViewController.isAppeared )
+            if ( _controlInfo->floatSmallViewControl.autoDisappearFloatSmallView )
+                [_floatSmallViewController dismissFloatSmallView];
     }
 }
 
@@ -411,10 +421,9 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _controlLayerDataSource.controlView.clipsToBounds = YES;
     
     // install
-    [_controlContentView removeFromSuperview];
-    _controlContentView = _controlLayerDataSource.controlView;
-    _controlContentView.frame = self.presentView.bounds;
-    [self.presentView addSubview:_controlContentView];
+    _controlLayerView = _controlLayerDataSource.controlView;
+    _controlLayerView.frame = self.presentView.bounds;
+    [self.presentView addSubview:_controlLayerView];
     
     if ( [self.controlLayerDataSource respondsToSelector:@selector(installedControlViewToVideoPlayer:)] ) {
         [self.controlLayerDataSource installedControlViewToVideoPlayer:self];
@@ -468,7 +477,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     [_presentView setLayoutSubviewsExeBlock:^(SJVideoPlayerPresentView * _Nonnull view) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        self.controlContentView.frame = view.bounds;
+        self.controlLayerView.frame = view.bounds;
     }];
     return _view;
 }
@@ -1067,7 +1076,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
             // - application enter forground
             if ( self.registrar.state != SJVideoPlayerAppState_Background ) {
                 if ( self.isPlayOnScrollView ) {
-                    if ( self.isScrollAppeared ) {
+                    if ( self.isScrollAppeared || !self.pauseWhenScrollDisappeared ) {
                         [self play];
                     }
                     else {
@@ -2360,9 +2369,56 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 
 - (void)setFloatSmallViewController:(nullable id<SJFloatSmallViewControllerProtocol>)floatSmallViewController {
     _floatSmallViewController = floatSmallViewController;
+    [self _resetFloatSmallViewControllerObserver:floatSmallViewController];
 }
-- (nullable id<SJFloatSmallViewControllerProtocol>)floatSmallViewController {
+- (id<SJFloatSmallViewControllerProtocol>)floatSmallViewController {
+    if ( _floatSmallViewController == nil ) {
+        _floatSmallViewController = [[SJFloatSmallViewController alloc] init];
+        __weak typeof(self) _self = self;
+        _floatSmallViewController.floatSmallViewShouldAppear = ^BOOL(id<SJFloatSmallViewControllerProtocol>  _Nonnull controller) {
+            __strong typeof(_self) self = _self;
+            if ( !self ) return NO;
+            switch ( self.playStatus ) {
+                case SJVideoPlayerPlayStatusPrepare:
+                case SJVideoPlayerPlayStatusReadyToPlay:
+                    return self.autoPlayWhenPlayStatusIsReadyToPlay;
+                case SJVideoPlayerPlayStatusPlaying:
+                    return YES;
+                case SJVideoPlayerPlayStatusUnknown:
+                case SJVideoPlayerPlayStatusInactivity:
+                    return NO;
+                case SJVideoPlayerPlayStatusPaused:
+                    return self.pausedReason == SJVideoPlayerPausedReasonPause;
+            }
+        };
+        
+        [self _resetFloatSmallViewControllerObserver:_floatSmallViewController];
+    }
     return _floatSmallViewController;
+}
+- (void)_resetFloatSmallViewControllerObserver:(nullable id<SJFloatSmallViewControllerProtocol>)floatSmallViewController {
+    if ( _floatSmallViewController == nil ) {
+        _floatSmallViewControllerObesrver = nil;
+        return;
+    }
+    
+    floatSmallViewController.targetSuperview = self.view;
+    floatSmallViewController.target = self.presentView;
+    
+    __weak typeof(self) _self = self;
+    _floatSmallViewControllerObesrver = [_floatSmallViewController getObserver];
+    _floatSmallViewControllerObesrver.appearStateDidChangeExeBlock = ^(id<SJFloatSmallViewControllerProtocol>  _Nonnull controller) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        self.rotationManager.superview = controller.isAppeared?controller.view:self.view;
+    };
+}
+
+- (void)setAutoDisappearFloatSmallView:(BOOL)autoDisappearFloatSmallView {
+    _controlInfo->floatSmallViewControl.autoDisappearFloatSmallView = autoDisappearFloatSmallView;
+}
+- (BOOL)autoDisappearFloatSmallView {
+    return _controlInfo->floatSmallViewControl.autoDisappearFloatSmallView;
 }
 
 - (void)setPauseWhenScrollDisappeared:(BOOL)pauseWhenScrollDisappeared {
@@ -2527,11 +2583,8 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         }];
     }
     
-    if ( self.floatSmallViewController.isAppeared ) {
-        [self.view addSubview:self.presentView];
-        self.presentView.frame = self.view.bounds;
-        [self.presentView layoutIfNeeded];
-        [self.floatSmallViewController floatSmallViewNeedDisappear];
+    if ( _floatSmallViewController.isAppeared ) {
+        [_floatSmallViewController dismissFloatSmallView];
     }
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerWillAppearInScrollView:)] ) {
@@ -2542,17 +2595,13 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         self.playerViewWillAppearExeBlock(self);
 }
 - (void)playerWillDisappearForObserver:(nonnull SJPlayModelPropertiesObserver *)observer {
-    if ( _controlInfo->scrollControl.pauseWhenScrollDisappeared ) {
-        [self pause];
-    }
-
     _view.hidden = _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared;
     
-    if ( self.floatSmallViewController != nil ) {
-        [self.floatSmallViewController.view addSubview:self.presentView];
-        self.presentView.frame = self.floatSmallViewController.view.bounds;
-        [self.presentView layoutIfNeeded];
-        [self.floatSmallViewController floatSmallViewNeedAppear];
+    if ( _floatSmallViewController.isEnabled ) {
+        [_floatSmallViewController showFloatSmallView];
+    }
+    else if ( _controlInfo->scrollControl.pauseWhenScrollDisappeared ) {
+        [self pause];
     }
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerWillDisappearInScrollView:)] ) {

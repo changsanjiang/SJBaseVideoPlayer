@@ -604,9 +604,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SJBaseVideoPlayer (ScrollView)
 
-/// 小窗播放控制器
-/// 播放器将会在适当的时候自动调用controller的对应的方法
-@property (nonatomic, strong, nullable) id<SJFloatSmallViewControllerProtocol> floatSmallViewController;
+/// 小浮窗控制
+///
+/// 默认不启用, 当需要开启时, 请设置`player.floatSmallViewController.enabled = YES;`
+@property (nonatomic, strong, null_resettable) id<SJFloatSmallViewControllerProtocol> floatSmallViewController;
+
+/// 当开启小浮窗控制时, 播放结束后, 会默认隐藏小浮窗
+///
+/// - default value is YES.
+@property (nonatomic) BOOL autoDisappearFloatSmallView;
 
 /// 滚动出去后, 是否暂停. 默认为YES
 ///

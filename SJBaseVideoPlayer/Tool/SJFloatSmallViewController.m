@@ -14,24 +14,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJFloatSmallView : UIView
-@property (nonatomic, strong, readonly) UIPanGestureRecognizer *panGesture;
+@property (nonatomic) CGFloat safeMargin;
 @end
 
-@implementation SJFloatSmallView {
-    CGFloat _safeEdge;
-}
-- (instancetype)initWithFrame:(CGRect)frame safeEdge:(CGFloat)safeEdge {
+@implementation SJFloatSmallView  
+- (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if ( !self ) return nil;
-    _safeEdge = safeEdge;
-    [self _setupView];
+    
+    UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_handlePanGesture:)];
+    panGesture.delaysTouchesBegan = YES;
+    [self addGestureRecognizer:panGesture];
     return self;
-}
-
-- (void)_setupView {
-    _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_handlePanGesture:)];
-    _panGesture.delaysTouchesBegan = YES;
-    [self addGestureRecognizer:_panGesture];
 }
 
 - (void)_handlePanGesture:(UIPanGestureRecognizer *)panGesture {
@@ -44,10 +38,10 @@ NS_ASSUME_NONNULL_BEGIN
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateFailed: {
-            CGFloat safeEdge = _safeEdge;
+            CGFloat safeMargin = _safeMargin;
             [UIView animateWithDuration:0.4 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-                CGFloat left = safeEdge;
-                CGFloat right = UIScreen.mainScreen.bounds.size.width - safeEdge - self.w;
+                CGFloat left = safeMargin;
+                CGFloat right = UIScreen.mainScreen.bounds.size.width - safeMargin - self.w;
                 if ( self.x <= left ) {
                     [self setX:left];
                 }
@@ -55,13 +49,13 @@ NS_ASSUME_NONNULL_BEGIN
                     [self setX:right];
                 }
                 
-                UIWindow *window = UIApplication.sharedApplication.keyWindow;
+                UIView *superview = self.superview;
                 UIEdgeInsets insets = UIEdgeInsetsZero;
                 if (@available(iOS 11.0, *)) {
-                    insets = window.safeAreaInsets;
+                    insets = superview.safeAreaInsets;
                 }
-                CGFloat top = insets.top + 44 + safeEdge;
-                CGFloat bottom = window.bounds.size.height - (insets.bottom + 49 + safeEdge + self.h);
+                CGFloat top = insets.top + safeMargin;
+                CGFloat bottom = superview.bounds.size.height - (insets.bottom + safeMargin + self.h);
                 if ( self.y <= top ) {
                     [self setY:top];
                 }
@@ -113,11 +107,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation SJFloatSmallViewControllerObserver
 @synthesize appearStateDidChangeExeBlock = _appearStateDidChangeExeBlock;
-@synthesize disabledControllerExeBlock = _disabledControllerExeBlock;
+@synthesize enabledControllerExeBlock = _enabledControllerExeBlock;
+@synthesize controller = _controller;
 
 - (instancetype)initWithController:(id<SJFloatSmallViewControllerProtocol>)controller {
     self = [super init];
     if ( self ) {
+        _controller = controller;
+        
         sjkvo_observe(controller, @"isAppeared", ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if ( self.appearStateDidChangeExeBlock )
@@ -125,10 +122,10 @@ NS_ASSUME_NONNULL_BEGIN
             });
         });
         
-        sjkvo_observe(controller, @"disabled", ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
+        sjkvo_observe(controller, @"enabled", ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                if ( self.disabledControllerExeBlock )
-                    self.disabledControllerExeBlock(controller);
+                if ( self.enabledControllerExeBlock )
+                    self.enabledControllerExeBlock(controller);
             });
         });
     }
@@ -141,8 +138,20 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation SJFloatSmallViewController
-@synthesize disabled = _disabled;
+@synthesize floatSmallViewShouldAppear = _floatSmallViewShouldAppear;
+@synthesize targetSuperview = _targetSuperview;
+@synthesize enabled = _enabled;
+@synthesize target = _target;
+@synthesize safeMargin = _safeMargin;
 @synthesize view = _view;
+
+- (instancetype)init {
+    self = [super init];
+    if ( self ) {
+        _safeMargin = 12;
+    }
+    return self;
+}
 
 - (void)dealloc {
     [_view removeFromSuperview];
@@ -150,48 +159,84 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (UIView *)view {
     if ( _view == nil ) {
-        
-        CGFloat safeEdge = 12;
-        _view = [[SJFloatSmallView alloc] initWithFrame:CGRectZero safeEdge:safeEdge];
-        
-        CGRect bounds = UIScreen.mainScreen.bounds;
-        CGFloat width = bounds.size.width;
-        
-        UIWindow *window = UIApplication.sharedApplication.keyWindow;
-        CGFloat maxW = ceil(width * 0.48);
-        CGFloat w = maxW>300?300:maxW;
-        CGFloat h = w * 9 /16.0;
-        CGFloat x = width - w - safeEdge;
-        CGFloat y = 64 + safeEdge;
-        if (@available(iOS 11.0, *)) {
-            y = window.safeAreaInsets.top + 44 + safeEdge;
-        }
-        _view.frame = CGRectMake(x, y, w, h);
-        _view.backgroundColor = [UIColor clearColor];
-        [window addSubview:_view];
+        SJFloatSmallView *view = [[SJFloatSmallView alloc] initWithFrame:CGRectZero];
+        view.safeMargin = _safeMargin;
+        _view = view;
     }
     return _view;
 }
 
-- (void)floatSmallViewNeedAppear {
-    self.isAppeared = YES;
-    
-    self.view.alpha = 0.001;
-    [UIView animateWithDuration:0.3 animations:^{
-        self.view.alpha = 1;
-    }];
+- (void)setSafeMargin:(CGFloat)safeMargin {
+    _safeMargin = safeMargin;
+    [(SJFloatSmallView *)_view setSafeMargin:safeMargin];
 }
 
-- (void)floatSmallViewNeedDisappear {
-    self.isAppeared = NO;
+- (void)showFloatSmallView {
+    if ( !self.isEnabled ) return;
+    
+    //
+    if ( _floatSmallViewShouldAppear && _floatSmallViewShouldAppear(self) ) {
+        //
+        UIViewController *currentViewController = [self atViewController];
+        UIView *superview = currentViewController.view;
+        if ( self.view.superview != superview ) {
+            [superview addSubview:self.view];
+            CGRect bounds = superview.bounds;
+            CGFloat width = bounds.size.width;
+            
+            //
+            CGFloat maxW = ceil(width * 0.48);
+            CGFloat w = maxW>300?300:maxW;
+            CGFloat h = w * 9 /16.0;
+            CGFloat x = width - w - _safeMargin;
+            CGFloat y = _safeMargin;
+            if (@available(iOS 11.0, *)) {
+                y += superview.safeAreaInsets.top;
+            }
+
+            self.view.frame = CGRectMake(x, y, w, h);
+        }
+        
+        //
+        self.target.frame = self.view.bounds;
+        [self.view addSubview:self.target];
+        [self.target layoutIfNeeded];
+
+        [UIView animateWithDuration:0.3 animations:^{
+            self.view.alpha = 1;
+        }];
+        
+        self.isAppeared = YES;
+    }
+}
+
+- (void)dismissFloatSmallView {
+    if ( !self.isEnabled ) return;
+    
+    self.target.frame = self.targetSuperview.bounds;
+    [self.targetSuperview addSubview:self.target];
+    [self.target layoutIfNeeded];
     
     [UIView animateWithDuration:0.3 animations:^{
         self.view.alpha = 0.001;
     }];
+    
+    self.isAppeared = NO;
 }
 
 - (id<SJFloatSmallViewControllerObserverProtocol>)getObserver {
     return [[SJFloatSmallViewControllerObserver alloc] initWithController:self];
+}
+
+- (nullable __kindof UIViewController *)atViewController {
+    UIResponder *_Nullable responder = _targetSuperview;
+    if ( responder != nil ) {
+        while ( ![responder isKindOfClass:[UIViewController class]] ) {
+            responder = responder.nextResponder;
+            if ( [responder isMemberOfClass:[UIResponder class]] || !responder ) return nil;
+        }
+    }
+    return (__kindof UIViewController *)responder;
 }
 @end
 NS_ASSUME_NONNULL_END
