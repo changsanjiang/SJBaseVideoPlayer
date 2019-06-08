@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) CGPoint beforeOffset;
 @property (nonatomic) BOOL isAppeared;
 @property (nonatomic, strong, readonly) SJRunLoopTaskQueue *taskQueue;
+@property (nonatomic) BOOL isScrolling;
 @end
 
 @implementation SJPlayModelPropertiesObserver
@@ -222,6 +223,41 @@ static NSString *kState = @"state";
         return;
     }
     self.isAppeared = [self _isAppearedInTheScrollingView:superview];
+}
+
+- (BOOL)isScrolling {
+    if ( [_playModel isKindOfClass:[SJUITableViewCellPlayModel class]] ) {
+        SJUITableViewCellPlayModel *playModel = _playModel;
+        return playModel.tableView.isDragging || playModel.tableView.isDecelerating;
+    }
+    else if ( [_playModel isKindOfClass:[SJUICollectionViewCellPlayModel class]] ) {
+        SJUICollectionViewCellPlayModel *playModel = _playModel;
+        return playModel.collectionView.isDragging || playModel.collectionView.isDecelerating;
+    }
+    else if ( [_playModel isKindOfClass:[SJUITableViewHeaderViewPlayModel class]] ) {
+        SJUITableViewHeaderViewPlayModel *playModel = _playModel;
+        return playModel.tableView.isDragging || playModel.tableView.isDecelerating;
+    }
+    else if ( [_playModel isKindOfClass:[SJUICollectionViewNestedInUITableViewHeaderViewPlayModel class]] ) {
+        SJUICollectionViewNestedInUITableViewHeaderViewPlayModel *playModel = _playModel;
+        return playModel.collectionView.isDragging || playModel.collectionView.isDecelerating ||
+        playModel.tableView.isDragging || playModel.tableView.isDecelerating;
+    }
+    else if ( [_playModel isKindOfClass:[SJUICollectionViewNestedInUITableViewCellPlayModel class]] ) {
+        SJUICollectionViewNestedInUITableViewCellPlayModel *playModel = _playModel;
+        return playModel.collectionView.isDragging || playModel.collectionView.isDecelerating ||
+        playModel.tableView.isDragging || playModel.tableView.isDecelerating;
+    }
+    else if ( [_playModel isKindOfClass:[SJUICollectionViewNestedInUICollectionViewCellPlayModel class]] ) {
+        SJUICollectionViewNestedInUICollectionViewCellPlayModel *playModel = _playModel;
+        return playModel.collectionView.isDragging || playModel.collectionView.isDecelerating ||
+        playModel.rootCollectionView.isDragging || playModel.rootCollectionView.isDecelerating;
+    }
+    else if ( [_playModel isKindOfClass:[SJUITableViewHeaderFooterViewPlayModel class]] ) {
+        SJUITableViewHeaderFooterViewPlayModel *playModel = _playModel;
+        return playModel.tableView.isDragging || playModel.tableView.isDecelerating;
+    }
+    return NO;
 }
 @end
 NS_ASSUME_NONNULL_END

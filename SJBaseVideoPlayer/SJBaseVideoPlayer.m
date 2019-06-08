@@ -73,6 +73,7 @@ typedef struct _SJPlayerControlInfo {
     } viewController;
     
     struct ScrollControl {
+        BOOL isScrollAppeared;
         BOOL pauseWhenScrollDisappeared;
         BOOL hiddenPlayerViewWhenScrollDisappeared;
         BOOL resumePlaybackWhenScrollAppeared;
@@ -1042,7 +1043,11 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)_updatePlayModelObserver:(SJPlayModel *)playModel {
-    if ( !playModel )
+    // clean
+    _playModelObserver = nil;
+    _controlInfo->scrollControl.isScrollAppeared = NO;
+    
+    if ( playModel == nil || [playModel isMemberOfClass:SJPlayModel.class] )
         return;
     
     // update playModel
@@ -2090,11 +2095,14 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     rotationManager.shouldTriggerRotation = ^BOOL(id<SJRotationManagerProtocol>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return NO;
-        if ( !self.view.superview ) return NO;
-        UIWindow *_Nullable window = self.view.window;
-        if ( window && !window.isKeyWindow ) return NO;
-        if ( self.touchedOnTheScrollView ) return NO;
-        if ( self.isPlayOnScrollView && !(self.isScrollAppeared || self.controlInfo->floatSmallViewControl.isAppeared) ) return NO;
+        if ( mgr.isFullscreen == NO ) {
+            if ( self.playModelObserver.isScrolling ) return NO;
+            if ( !self.view.superview ) return NO;
+            UIWindow *_Nullable window = self.view.window;
+            if ( window && !window.isKeyWindow ) return NO;
+            if ( self.isPlayOnScrollView && !(self.isScrollAppeared || self.controlInfo->floatSmallViewControl.isAppeared) ) return NO;
+            if ( self.touchedOnTheScrollView ) return NO;
+        }
         if ( self.isLockedScreen ) return NO;
         if ( self.registrar.state == SJVideoPlayerAppState_ResignActive ) return NO;
         if ( !self.controlInfo->rotation.able ) return NO;
@@ -2140,6 +2148,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _rotationManagerObserver.rotationDidEndExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
+        [self.playModelObserver refreshAppearState];
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:didEndRotation:)] ) {
             [self.controlLayerDelegate videoPlayer:self didEndRotation:mgr.isFullscreen];
         }
@@ -2453,7 +2462,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (BOOL)isScrollAppeared {
-    return self.playModelObserver.isAppeared;
+    return _controlInfo->scrollControl.isScrollAppeared;
 }
 
 - (void)setPlayerViewWillAppearExeBlock:(void (^_Nullable)(__kindof SJBaseVideoPlayer * _Nonnull))playerViewWillAppearExeBlock {
@@ -2568,6 +2577,12 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
 - (void)observer:(nonnull SJPlayModelPropertiesObserver *)observer userTouchedTableView:(BOOL)touched { /* nothing */ }
 
 - (void)playerWillAppearForObserver:(nonnull SJPlayModelPropertiesObserver *)observer superview:(nonnull UIView *)superview {
+    if ( _controlInfo->scrollControl.isScrollAppeared ) {
+        return;
+    }
+    
+    _controlInfo->scrollControl.isScrollAppeared = YES;
+    
     if ( _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared ) {
         _view.hidden = NO;
     }
@@ -2601,6 +2616,15 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         self.playerViewWillAppearExeBlock(self);
 }
 - (void)playerWillDisappearForObserver:(nonnull SJPlayModelPropertiesObserver *)observer {
+    if ( _controlInfo->scrollControl.isScrollAppeared == NO ) {
+        return;
+    }
+    
+    _controlInfo->scrollControl.isScrollAppeared = NO;
+    
+    if ( _rotationManager.isTransitioning )
+        return;
+    
     _view.hidden = _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared;
     
     if ( _floatSmallViewController.isEnabled ) {

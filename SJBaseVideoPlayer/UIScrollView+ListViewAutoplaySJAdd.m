@@ -64,8 +64,12 @@ static void sj_removeContentOffsetObserver(UIScrollView *scrollView);
     sj_scrollViewContentOffsetDidChange(self, ^{
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sj_playNextAssetAfterEndScroll) object:nil];
+        if ( self.sj_hasDelayedEndScrollTask == YES ) {
+            self.sj_hasDelayedEndScrollTask = NO;
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sj_playNextAssetAfterEndScroll) object:nil];
+        }
         queue.empty().enqueue(^{
+            self.sj_hasDelayedEndScrollTask = YES;
             [self performSelector:@selector(sj_playNextAssetAfterEndScroll) withObject:nil afterDelay:0.4];
         });
     });
@@ -84,6 +88,7 @@ static void sj_removeContentOffsetObserver(UIScrollView *scrollView);
 }
 
 - (void)sj_playNextAssetAfterEndScroll {
+    self.sj_hasDelayedEndScrollTask = NO;
     dispatch_async(dispatch_get_main_queue(), ^{
         sj_playNextAssetAfterEndScroll(self);
     });
@@ -98,6 +103,13 @@ static void sj_removeContentOffsetObserver(UIScrollView *scrollView);
             return [obj1 compare:obj2];
         }];
     return visibleIndexPaths;
+}
+
+- (void)setSj_hasDelayedEndScrollTask:(BOOL)sj_hasDelayedEndScrollTask {
+    objc_setAssociatedObject(self, @selector(sj_hasDelayedEndScrollTask), @(sj_hasDelayedEndScrollTask), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+- (BOOL)sj_hasDelayedEndScrollTask {
+    return [objc_getAssociatedObject(self, _cmd) boolValue];
 }
 @end
 

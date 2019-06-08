@@ -66,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 @synthesize shouldTriggerRotation = _shouldTriggerRotation;
 @synthesize duration = _duration;
 @synthesize superview = _superview;
-@synthesize target = _target;
+@synthesize target = _target; 
 
 - (instancetype)initWithViewController:(__weak UIViewController *)atViewController {
     self = [super init];

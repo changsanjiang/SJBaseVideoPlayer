@@ -10,6 +10,7 @@
 
 #import <UIKit/UIKit.h>
 @protocol SJRotationManagerProtocol, SJRotationManagerObserver;
+@class SJPlayModel;
 /**
  视图方向
  
