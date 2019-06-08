@@ -12,7 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 @implementation SJAVMediaPlayerLoader
 + (void)loadPlayerForMedia:(id<SJMediaModelProtocol>)media completionHandler:(void(^_Nullable)(id<SJMediaModelProtocol> media, id<SJAVMediaPlayerProtocol> player))completionHandler {
-    id<SJMediaModelProtocol> target = media.otherMedia?:media;
+    id<SJMediaModelProtocol> target = media.originMedia?:media;
     SJAVMediaPlayer *__block _Nullable player = objc_getAssociatedObject(target, _cmd);
     SJVideoPlayerInactivityReason inactivityReason = player.sj_inactivityReason;
     BOOL able = inactivityReason != SJVideoPlayerInactivityReasonPlayFailed;

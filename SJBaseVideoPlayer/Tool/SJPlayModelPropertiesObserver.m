@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if ( !self ) return nil;
     _playModel = playModel;
-    _taskQueue = SJRunLoopTaskQueue.queue(@"SJPlayModelObserverRunLoopTaskQueue").delay(6);
+    _taskQueue = SJRunLoopTaskQueue.queue(@"SJPlayModelObserverRunLoopTaskQueue").delay(3);
     
     if ( [playModel isMemberOfClass:[SJPlayModel class]] ) {
         _isAppeared = YES;

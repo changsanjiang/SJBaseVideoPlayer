@@ -92,13 +92,14 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation SJFloatSmallViewController
-@synthesize floatSmallViewShouldAppear = _floatSmallViewShouldAppear;
-@synthesize singleTappedOnTheFloatSmallViewExeBlock = _singleTappedOnTheFloatSmallViewExeBlock;
-@synthesize doubleTappedOnTheFloatSmallViewExeBlock = _doubleTappedOnTheFloatSmallViewExeBlock;
+@synthesize floatViewShouldAppear = _floatViewShouldAppear;
+@synthesize singleTappedOnTheFloatViewExeBlock = _singleTappedOnTheFloatViewExeBlock;
+@synthesize doubleTappedOnTheFloatViewExeBlock = _doubleTappedOnTheFloatViewExeBlock;
 @synthesize targetSuperview = _targetSuperview;
 @synthesize enabled = _enabled;
 @synthesize target = _target;
 @synthesize safeMargin = _safeMargin;
+@synthesize addFloatViewToKeyWindow = _addFloatViewToKeyWindow;
 
 - (instancetype)init {
     self = [super init];
@@ -120,14 +121,20 @@ NS_ASSUME_NONNULL_BEGIN
     return _floatView;
 }
 
-- (void)showFloatSmallView {
+- (void)showFloatView {
     if ( !self.isEnabled ) return;
     
     //
-    if ( _floatSmallViewShouldAppear && _floatSmallViewShouldAppear(self) ) {
+    if ( _floatViewShouldAppear && _floatViewShouldAppear(self) ) {
         //
-        UIViewController *currentViewController = [self atViewController];
-        UIView *superview = currentViewController.view;
+        UIView *superview = nil;
+        if ( _addFloatViewToKeyWindow == NO ) {
+            UIViewController *currentViewController = [self atViewController];
+            superview = currentViewController.view;
+        }
+        else {
+            superview = UIApplication.sharedApplication.keyWindow;
+        }
         if ( self.floatView.superview != superview ) {
             [superview addSubview:_floatView];
             CGRect bounds = superview.bounds;
@@ -159,7 +166,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
-- (void)dismissFloatSmallView {
+- (void)dismissFloatView {
     if ( !self.isEnabled ) return;
     
     self.target.frame = self.targetSuperview.bounds;
@@ -197,14 +204,14 @@ NS_ASSUME_NONNULL_BEGIN
     [self.singleTapGesture requireGestureRecognizerToFail:self.doubleTapGesture];
 }
 
-- (void)setSingleTappedOnTheFloatSmallViewExeBlock:(void (^_Nullable)(id<SJFloatSmallViewControllerProtocol> _Nonnull))singleTappedOnTheFloatSmallViewExeBlock {
-    _singleTappedOnTheFloatSmallViewExeBlock = singleTappedOnTheFloatSmallViewExeBlock;
-    self.singleTapGesture.enabled = singleTappedOnTheFloatSmallViewExeBlock != nil;
+- (void)setSingleTappedOnTheFloatViewExeBlock:(void (^_Nullable)(id<SJFloatSmallViewControllerProtocol> _Nonnull))singleTappedOnTheFloatViewExeBlock {
+    _singleTappedOnTheFloatViewExeBlock = singleTappedOnTheFloatViewExeBlock;
+    self.singleTapGesture.enabled = singleTappedOnTheFloatViewExeBlock != nil;
 }
 
-- (void)setDoubleTappedOnTheFloatSmallViewExeBlock:(void (^_Nullable)(id<SJFloatSmallViewControllerProtocol> _Nonnull))doubleTappedOnTheFloatSmallViewExeBlock {
-    _doubleTappedOnTheFloatSmallViewExeBlock = doubleTappedOnTheFloatSmallViewExeBlock;
-    self.doubleTapGesture.enabled = doubleTappedOnTheFloatSmallViewExeBlock != nil;
+- (void)setDoubleTappedOnTheFloatViewExeBlock:(void (^_Nullable)(id<SJFloatSmallViewControllerProtocol> _Nonnull))doubleTappedOnTheFloatViewExeBlock {
+    _doubleTappedOnTheFloatViewExeBlock = doubleTappedOnTheFloatViewExeBlock;
+    self.doubleTapGesture.enabled = doubleTappedOnTheFloatViewExeBlock != nil;
 }
 
 - (void)setSlidable:(BOOL)slidable {
@@ -228,7 +235,6 @@ NS_ASSUME_NONNULL_BEGIN
         _doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_doubleTappedOnTheFloatSmallView:)];
         _doubleTapGesture.numberOfTapsRequired = 2;
         _doubleTapGesture.enabled = NO;
-        _doubleTapGesture.delegate = self;
     }
     return _doubleTapGesture;
 }
@@ -249,28 +255,31 @@ NS_ASSUME_NONNULL_BEGIN
             _isDelayed = YES;
             [self performSelector:@selector(_singleTappedOnTheFloatSmallView:) withObject:gestureRecognizer afterDelay:200/1000.0 inModes:@[NSRunLoopCommonModes]];
         }
-        else {
-            [self _singleTappedOnTheFloatSmallView:gestureRecognizer];
-        }
-        return NO;
     }
     
     return YES;
 }
 
-- (void)_nothing {}
+- (void)_nothing {
+    if ( _isDelayed ) {
+        _isDelayed = NO;
+        [NSObject cancelPreviousPerformRequestsWithTarget:self];
+        _singleTappedOnTheFloatViewExeBlock(self);
+    }
+}
 
 - (void)_doubleTappedOnTheFloatSmallView:(UITapGestureRecognizer *)tapGesture {
     if ( _isDelayed ) {
         _isDelayed = NO;
         [NSObject cancelPreviousPerformRequestsWithTarget:self];
     }
-    _doubleTappedOnTheFloatSmallViewExeBlock(self);
+    _doubleTappedOnTheFloatViewExeBlock(self);
 }
 
 - (void)_singleTappedOnTheFloatSmallView:(UITapGestureRecognizer *)tapGesture {
     _isDelayed = NO;
-    _singleTappedOnTheFloatSmallViewExeBlock(self);
+    if ( tapGesture.state != UIGestureRecognizerStateFailed )
+        _singleTappedOnTheFloatViewExeBlock(self);
 }
 
 - (void)_handlePanGesture:(UIPanGestureRecognizer *)panGesture {

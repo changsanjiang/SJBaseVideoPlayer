@@ -21,26 +21,26 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 显示小浮窗视图
 ///
-/// - 只有`floatSmallViewShouldAppear`返回YES, 小浮窗才会显示.
-- (void)showFloatSmallView;
+/// - 只有`floatViewShouldAppear`返回YES, 小浮窗才会显示.
+- (void)showFloatView;
 
 /// 隐藏小浮窗视图
 ///
 /// - 调用该方法将会立刻隐藏小浮窗视图.
-- (void)dismissFloatSmallView;
+- (void)dismissFloatView;
 
-/// 该block将会在`showFloatSmallView`时被调用
+/// 该block将会在`showFloatView`时被调用
 ///
 /// - 如果返回NO, 将不显示小浮窗.
-@property (nonatomic, copy, nullable) BOOL(^floatSmallViewShouldAppear)(id<SJFloatSmallViewControllerProtocol> controller);
+@property (nonatomic, copy, nullable) BOOL(^floatViewShouldAppear)(id<SJFloatSmallViewControllerProtocol> controller);
 
 /// 该block将会在单击小浮窗视图时被调用
 ///
-@property (nonatomic, copy, nullable) void(^singleTappedOnTheFloatSmallViewExeBlock)(id<SJFloatSmallViewControllerProtocol> controller);
+@property (nonatomic, copy, nullable) void(^singleTappedOnTheFloatViewExeBlock)(id<SJFloatSmallViewControllerProtocol> controller);
 
 /// 该block将会在双击小浮窗视图时被调用
 ///
-@property (nonatomic, copy, nullable) void(^doubleTappedOnTheFloatSmallViewExeBlock)(id<SJFloatSmallViewControllerProtocol> controller);
+@property (nonatomic, copy, nullable) void(^doubleTappedOnTheFloatViewExeBlock)(id<SJFloatSmallViewControllerProtocol> controller);
 
 /// 小浮窗视图是否已显示
 ///
@@ -51,6 +51,11 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// - default value is YES.
 @property (nonatomic) BOOL slidable;
+
+/// 是否将小浮窗添加到window中. (注意: 小浮窗默认会添加到播放器同级的控制器视图上)
+///
+/// - default value is NO.
+@property (nonatomic) BOOL addFloatViewToKeyWindow;
 
 @property (nonatomic, strong, readonly) __kindof UIView *floatView; ///< float view
 

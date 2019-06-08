@@ -71,11 +71,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) UIImageView *placeholderImageView;
 
 /// 播放器准备好显示时, 是否隐藏占位图
+///
 /// - 默认为YES
 @property (nonatomic) BOOL hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
 
 /// 将要隐藏 placeholderImageView 时, 延迟多少秒才去隐藏
-/// - 默认为0
+///
+/// - 默认为0.8s
 @property (nonatomic) NSTimeInterval delayInSecondsForHiddenPlaceholderImageView;
 @end
 
@@ -130,6 +132,7 @@ NS_ASSUME_NONNULL_BEGIN
 // - Asset -
 
 /// 资源
+///
 /// - 播放一个资源
 /// - 使用URL及相关的视图信息进行初始化
 @property (nonatomic, strong, nullable) SJVideoPlayerURLAsset *URLAsset;
@@ -167,6 +170,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// - 如果该block == nil, 则调用`play`时, 默认为执行.
 @property (nonatomic, copy, nullable) BOOL(^canPlayAnAsset)(__kindof SJBaseVideoPlayer *player);
 /// 自动刷新, 播放失败时每隔多少秒刷新一次.
+///
 /// - 默认是0, 即不自动刷新
 /// - 单位是秒
 @property (nonatomic) NSTimeInterval delayToAutoRefreshWhenPlayFailed;

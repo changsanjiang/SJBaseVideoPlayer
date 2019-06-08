@@ -53,15 +53,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithURL:(NSURL *)URL {
     return [self initWithURL:URL specifyStartTime:0];
 }
-- (instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherMedia playModel:(nullable __kindof SJPlayModel *)playModel {
+- (instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherAsset playModel:(nullable __kindof SJPlayModel *)playModel {
     self = [super init];
     if ( !self ) return nil;
-    SJVideoPlayerURLAsset *origin = otherMedia;
-    while ( origin.otherMedia && origin != origin.otherMedia ) {
-        origin = origin.otherMedia;
+    SJVideoPlayerURLAsset *curr = otherAsset;
+    while ( curr.originAsset != nil && curr != curr.originAsset ) {
+        curr = curr.originAsset;
     }
-    _mediaURL = origin.mediaURL;
-    _otherMedia = origin;
+    _originAsset = curr;
+    _mediaURL = curr.mediaURL;
     _playModel = playModel?:[SJPlayModel new];
     return self;
 } 
@@ -75,6 +75,9 @@ NS_ASSUME_NONNULL_BEGIN
 }
 - (id<SJVideoPlayerURLAssetObserver>)getObserver {
     return [[SJVideoPlayerURLAssetObserver alloc] initWithAsset:self];
+}
+- (nullable id<SJMediaModelProtocol>)originMedia {
+    return _originAsset;
 }
 @end
 

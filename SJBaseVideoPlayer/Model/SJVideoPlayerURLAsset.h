@@ -20,8 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithURL:(NSURL *)URL playModel:(__kindof SJPlayModel *)playModel;
 - (instancetype)initWithURL:(NSURL *)URL;
 
-@property (nonatomic, strong, readonly, nullable) SJVideoPlayerURLAsset *otherMedia;
-- (instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherMedia playModel:(nullable __kindof SJPlayModel *)playModel;
+@property (nonatomic, strong, readonly, nullable) SJVideoPlayerURLAsset *originAsset;
+- (instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherAsset playModel:(nullable __kindof SJPlayModel *)playModel;
 
 /// - v2.4.5 新增
 /// 限制播放时间, `可用于试看`. 例如试看5分钟

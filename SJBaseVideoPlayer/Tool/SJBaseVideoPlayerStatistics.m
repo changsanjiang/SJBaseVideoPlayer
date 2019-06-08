@@ -27,8 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation SJVideoPlayerURLAsset (StatisticsAdd)
 - (void)setStatistics_currentPlayingTime:(NSTimeInterval)statistics_currentPlayingTime {
-    if (self.otherMedia && self.otherMedia != self ) {
-        self.otherMedia.statistics_currentPlayingTime = statistics_currentPlayingTime;
+    if (self.originAsset && self.originAsset != self ) {
+        self.originAsset.statistics_currentPlayingTime = statistics_currentPlayingTime;
     }
     else {
         objc_setAssociatedObject(self, @selector(statistics_currentPlayingTime), @(statistics_currentPlayingTime), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -36,8 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 - (NSTimeInterval)statistics_currentPlayingTime {
-    if (self.otherMedia && self.otherMedia != self ) {
-        return self.otherMedia.statistics_currentPlayingTime;
+    if (self.originAsset && self.originAsset != self ) {
+        return self.originAsset.statistics_currentPlayingTime;
     }
     return [objc_getAssociatedObject(self, _cmd) doubleValue];
 }

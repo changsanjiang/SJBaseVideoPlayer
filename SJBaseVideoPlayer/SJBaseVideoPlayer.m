@@ -36,7 +36,7 @@
 #import "SJVCRotationManager.h"
 #import "SJPlayerView.h"
 #import "SJPlayStatusObserver.h"
-#import "SJFloatSmallViewController.h"
+#import "SJFloatSmallViewController.h" 
 
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
@@ -319,6 +319,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     if ( !self ) return nil;
     _controlInfo = (_SJPlayerControlInfo *)calloc(1, sizeof(struct _SJPlayerControlInfo));
     _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay = YES;
+    _controlInfo->placeholder.delayHidden = 0.8;
     _controlInfo->scrollControl.pauseWhenScrollDisappeared = YES;
     _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared = YES;
     _controlInfo->scrollControl.resumePlaybackWhenScrollAppeared = YES;
@@ -410,7 +411,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         
         if ( _floatSmallViewController.isAppeared )
             if ( _controlInfo->floatSmallViewControl.autoDisappearFloatSmallView )
-                [_floatSmallViewController dismissFloatSmallView];
+                [_floatSmallViewController dismissFloatView];
     }
 }
 
@@ -433,6 +434,11 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 - (void)_showOrHiddenPlaceholderImageViewIfNeeded {
+    if ( _URLAsset.originMedia != nil ) { ///< URLAsset is subasset
+        [_presentView hiddenPlaceholderAnimated:NO delay:0];
+        return;
+    }
+    
     if ( _playbackController.isReadyForDisplay ) {
         if ( _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay ) {
             [self.presentView hiddenPlaceholderAnimated:YES delay:_controlInfo->placeholder.delayHidden];
@@ -795,6 +801,8 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     else {
         [self stop];
     }
+    
+    [self _showOrHiddenPlaceholderImageViewIfNeeded];
 }
 - (nullable SJVideoPlayerURLAsset *)URLAsset {
     return _URLAsset;
@@ -959,6 +967,8 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     [_playbackController stop];
     _playModelObserver = nil;
     _URLAsset = nil;
+    
+    [self _showOrHiddenPlaceholderImageViewIfNeeded];
 }
 
 - (void)stopAndFadeOut {
@@ -2395,7 +2405,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     if ( _floatSmallViewController == nil ) {
         _floatSmallViewController = [[SJFloatSmallViewController alloc] init];
         __weak typeof(self) _self = self;
-        _floatSmallViewController.floatSmallViewShouldAppear = ^BOOL(id<SJFloatSmallViewControllerProtocol>  _Nonnull controller) {
+        _floatSmallViewController.floatViewShouldAppear = ^BOOL(id<SJFloatSmallViewControllerProtocol>  _Nonnull controller) {
             __strong typeof(_self) self = _self;
             if ( !self ) return NO;
             switch ( self.playStatus ) {
@@ -2612,7 +2622,7 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
     }
     
     if ( _floatSmallViewController.isAppeared ) {
-        [_floatSmallViewController dismissFloatSmallView];
+        [_floatSmallViewController dismissFloatView];
     }
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerWillAppearInScrollView:)] ) {
@@ -2635,7 +2645,7 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
     _view.hidden = _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared;
     
     if ( _floatSmallViewController.isEnabled ) {
-        [_floatSmallViewController showFloatSmallView];
+        [_floatSmallViewController showFloatView];
     }
     else if ( _controlInfo->scrollControl.pauseWhenScrollDisappeared ) {
         [self pause];

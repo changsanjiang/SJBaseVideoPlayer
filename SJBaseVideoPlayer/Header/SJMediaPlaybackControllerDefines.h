@@ -127,7 +127,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) NSURL *mediaURL;
 
 /// played by other media
-@property (nonatomic, weak, readonly, nullable) id<SJMediaModelProtocol> otherMedia;
+@property (nonatomic, weak, readonly, nullable) id<SJMediaModelProtocol> originMedia;
 
 @property (nonatomic) NSTimeInterval specifyStartTime;
 
