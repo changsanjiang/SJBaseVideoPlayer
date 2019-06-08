@@ -14,20 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol SJFloatSmallViewControllerProtocol
 - (id<SJFloatSmallViewControllerObserverProtocol>)getObserver;
 
-/// 是否开启小浮窗, 注意: 默认为 不开启
+/// 开启小浮窗, 注意: 默认为 不开启
 ///
 /// - default value is NO.
 @property (nonatomic, getter=isEnabled) BOOL enabled;
-
-/// 该block将会在`showFloatSmallView`时被调用
-///
-/// - 如果返回NO, 将不显示小浮窗.
-@property (nonatomic, copy, nullable) BOOL(^floatSmallViewShouldAppear)(id<SJFloatSmallViewControllerProtocol> controller);
-
-/// 小浮窗视图是否已显示
-///
-/// - default value is NO.
-@property (nonatomic, readonly) BOOL isAppeared;
 
 /// 显示小浮窗视图
 ///
@@ -39,7 +29,30 @@ NS_ASSUME_NONNULL_BEGIN
 /// - 调用该方法将会立刻隐藏小浮窗视图.
 - (void)dismissFloatSmallView;
 
-@property (nonatomic, strong, readonly) UIView *view;
+/// 该block将会在`showFloatSmallView`时被调用
+///
+/// - 如果返回NO, 将不显示小浮窗.
+@property (nonatomic, copy, nullable) BOOL(^floatSmallViewShouldAppear)(id<SJFloatSmallViewControllerProtocol> controller);
+
+/// 该block将会在单击小浮窗视图时被调用
+///
+@property (nonatomic, copy, nullable) void(^singleTappedOnTheFloatSmallViewExeBlock)(id<SJFloatSmallViewControllerProtocol> controller);
+
+/// 该block将会在双击小浮窗视图时被调用
+///
+@property (nonatomic, copy, nullable) void(^doubleTappedOnTheFloatSmallViewExeBlock)(id<SJFloatSmallViewControllerProtocol> controller);
+
+/// 小浮窗视图是否已显示
+///
+/// - default value is NO.
+@property (nonatomic, readonly) BOOL isAppeared;
+
+/// 小浮窗视图是否可以移动
+///
+/// - default value is YES.
+@property (nonatomic) BOOL slidable;
+
+@property (nonatomic, strong, readonly) __kindof UIView *view; ///< float view
 
 @property (nonatomic) CGFloat safeMargin; ///< default value is 12.
 

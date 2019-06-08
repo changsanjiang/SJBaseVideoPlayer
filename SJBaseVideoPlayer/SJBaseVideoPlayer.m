@@ -102,6 +102,7 @@ typedef struct _SJPlayerControlInfo {
     } controlLayer;
     
     struct FloatSmallViewControl {
+        BOOL isAppeared;
         BOOL autoDisappearFloatSmallView;
     } floatSmallViewControl;
     
@@ -1533,6 +1534,9 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         __strong typeof(_self) self = _self;
         if ( !self ) return NO;
         
+        if ( self.controlInfo->floatSmallViewControl.isAppeared )
+            return NO;
+        
         if ( self.isTransitioning )
             return NO;
         
@@ -2410,7 +2414,9 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _floatSmallViewControllerObesrver.appearStateDidChangeExeBlock = ^(id<SJFloatSmallViewControllerProtocol>  _Nonnull controller) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
-        self.rotationManager.superview = controller.isAppeared?controller.view:self.view;
+        BOOL isAppeared = controller.isAppeared;
+        self.controlInfo->floatSmallViewControl.isAppeared = isAppeared;
+        self.rotationManager.superview = isAppeared?controller.view:self.view;
     };
 }
 

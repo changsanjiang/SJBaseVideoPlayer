@@ -14,61 +14,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJFloatSmallView : UIView
-@property (nonatomic) CGFloat safeMargin;
 @end
 
-@implementation SJFloatSmallView  
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if ( !self ) return nil;
-    
-    UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_handlePanGesture:)];
-    panGesture.delaysTouchesBegan = YES;
-    [self addGestureRecognizer:panGesture];
-    return self;
-}
-
-- (void)_handlePanGesture:(UIPanGestureRecognizer *)panGesture {
-    CGPoint offset = [panGesture translationInView:self.superview];
-    CGPoint center = self.center;
-    self.center = CGPointMake(center.x + offset.x, center.y + offset.y);
-    [panGesture setTranslation:CGPointZero inView:self.superview];
-    
-    switch ( panGesture.state ) {
-        case UIGestureRecognizerStateEnded:
-        case UIGestureRecognizerStateCancelled:
-        case UIGestureRecognizerStateFailed: {
-            CGFloat safeMargin = _safeMargin;
-            [UIView animateWithDuration:0.4 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-                CGFloat left = safeMargin;
-                CGFloat right = UIScreen.mainScreen.bounds.size.width - safeMargin - self.w;
-                if ( self.x <= left ) {
-                    [self setX:left];
-                }
-                else if ( self.x >= right ) {
-                    [self setX:right];
-                }
-                
-                UIView *superview = self.superview;
-                UIEdgeInsets insets = UIEdgeInsetsZero;
-                if (@available(iOS 11.0, *)) {
-                    insets = superview.safeAreaInsets;
-                }
-                CGFloat top = insets.top + safeMargin;
-                CGFloat bottom = superview.bounds.size.height - (insets.bottom + safeMargin + self.h);
-                if ( self.y <= top ) {
-                    [self setY:top];
-                }
-                else if ( self.y >= bottom ) {
-                    [self setY:bottom];
-                }
-            } completion:nil];
-        }
-            break;
-        default: break;
-    }
-}
-
+@implementation SJFloatSmallView
 - (void)setX:(CGFloat)x {
     CGRect frame = self.frame;
     frame.origin.x = x;
@@ -133,17 +81,24 @@ NS_ASSUME_NONNULL_BEGIN
 }
 @end
 
-@interface SJFloatSmallViewController ()
+@interface SJFloatSmallViewController ()<UIGestureRecognizerDelegate> {
+    SJFloatSmallView *_Nullable _view;
+    BOOL _isDelayed;
+}
 @property (nonatomic) BOOL isAppeared;
+@property (nonatomic, strong, readonly) UIPanGestureRecognizer *panGesture;
+@property (nonatomic, strong, readonly) UITapGestureRecognizer *doubleTapGesture;
+@property (nonatomic, strong, readonly) UITapGestureRecognizer *singleTapGesture;
 @end
 
 @implementation SJFloatSmallViewController
 @synthesize floatSmallViewShouldAppear = _floatSmallViewShouldAppear;
+@synthesize singleTappedOnTheFloatSmallViewExeBlock = _singleTappedOnTheFloatSmallViewExeBlock;
+@synthesize doubleTappedOnTheFloatSmallViewExeBlock = _doubleTappedOnTheFloatSmallViewExeBlock;
 @synthesize targetSuperview = _targetSuperview;
 @synthesize enabled = _enabled;
 @synthesize target = _target;
 @synthesize safeMargin = _safeMargin;
-@synthesize view = _view;
 
 - (instancetype)init {
     self = [super init];
@@ -157,18 +112,12 @@ NS_ASSUME_NONNULL_BEGIN
     [_view removeFromSuperview];
 }
 
-- (UIView *)view {
+- (__kindof UIView *)view {
     if ( _view == nil ) {
-        SJFloatSmallView *view = [[SJFloatSmallView alloc] initWithFrame:CGRectZero];
-        view.safeMargin = _safeMargin;
-        _view = view;
+        _view = [[SJFloatSmallView alloc] initWithFrame:CGRectZero];
+        [self _addGesturesToFloatView:_view];
     }
     return _view;
-}
-
-- (void)setSafeMargin:(CGFloat)safeMargin {
-    _safeMargin = safeMargin;
-    [(SJFloatSmallView *)_view setSafeMargin:safeMargin];
 }
 
 - (void)showFloatSmallView {
@@ -238,5 +187,128 @@ NS_ASSUME_NONNULL_BEGIN
     }
     return (__kindof UIViewController *)responder;
 }
+
+// - gestures -
+
+- (void)_addGesturesToFloatView:(SJFloatSmallView *)floatView {
+    [floatView addGestureRecognizer:self.panGesture];
+    [floatView addGestureRecognizer:self.doubleTapGesture];
+    [floatView addGestureRecognizer:self.singleTapGesture];
+    [self.singleTapGesture requireGestureRecognizerToFail:self.doubleTapGesture];
+}
+
+- (void)setSingleTappedOnTheFloatSmallViewExeBlock:(void (^_Nullable)(id<SJFloatSmallViewControllerProtocol> _Nonnull))singleTappedOnTheFloatSmallViewExeBlock {
+    _singleTappedOnTheFloatSmallViewExeBlock = singleTappedOnTheFloatSmallViewExeBlock;
+    self.singleTapGesture.enabled = singleTappedOnTheFloatSmallViewExeBlock != nil;
+}
+
+- (void)setDoubleTappedOnTheFloatSmallViewExeBlock:(void (^_Nullable)(id<SJFloatSmallViewControllerProtocol> _Nonnull))doubleTappedOnTheFloatSmallViewExeBlock {
+    _doubleTappedOnTheFloatSmallViewExeBlock = doubleTappedOnTheFloatSmallViewExeBlock;
+    self.doubleTapGesture.enabled = doubleTappedOnTheFloatSmallViewExeBlock != nil;
+}
+
+- (void)setSlidable:(BOOL)slidable {
+    self.panGesture.enabled = slidable;
+}
+- (BOOL)slidable {
+    return self.panGesture.enabled;
+}
+
+@synthesize panGesture = _panGesture;
+- (UIPanGestureRecognizer *)panGesture {
+    if ( _panGesture == nil ) {
+        _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_handlePanGesture:)];
+    }
+    return _panGesture;
+}
+
+@synthesize doubleTapGesture = _doubleTapGesture;
+- (UITapGestureRecognizer *)doubleTapGesture {
+    if ( _doubleTapGesture == nil ) {
+        _doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_doubleTappedOnTheFloatSmallView:)];
+        _doubleTapGesture.numberOfTapsRequired = 2;
+        _doubleTapGesture.enabled = NO;
+        _doubleTapGesture.delegate = self;
+    }
+    return _doubleTapGesture;
+}
+
+@synthesize singleTapGesture = _singleTapGesture;
+- (UITapGestureRecognizer *)singleTapGesture {
+    if ( _singleTapGesture == nil ) {
+        _singleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_nothing)];
+        _singleTapGesture.delegate = self;
+        _singleTapGesture.enabled = NO;
+    }
+    return _singleTapGesture;
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    if ( gestureRecognizer == self.singleTapGesture ) {
+        _isDelayed = YES;
+        [self performSelector:@selector(_singleTappedOnTheFloatSmallView:) withObject:gestureRecognizer afterDelay:160/1000.0 inModes:@[NSRunLoopCommonModes]];
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (void)_nothing {}
+
+- (void)_doubleTappedOnTheFloatSmallView:(UITapGestureRecognizer *)tapGesture {
+    if ( _isDelayed ) {
+        _isDelayed = NO;
+        [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    }
+    _doubleTappedOnTheFloatSmallViewExeBlock(self);
+}
+
+- (void)_singleTappedOnTheFloatSmallView:(UITapGestureRecognizer *)tapGesture {
+    _isDelayed = NO;
+    _singleTappedOnTheFloatSmallViewExeBlock(self);
+}
+
+- (void)_handlePanGesture:(UIPanGestureRecognizer *)panGesture {
+    SJFloatSmallView *view = _view;
+    UIView *superview = view.superview;
+    CGPoint offset = [panGesture translationInView:superview];
+    CGPoint center = view.center;
+    view.center = CGPointMake(center.x + offset.x, center.y + offset.y);
+    [panGesture setTranslation:CGPointZero inView:superview];
+    
+    switch ( panGesture.state ) {
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateFailed: {
+            CGFloat safeMargin = _safeMargin;
+            [UIView animateWithDuration:0.4 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
+                CGFloat left = safeMargin;
+                CGFloat right = UIScreen.mainScreen.bounds.size.width - safeMargin - view.w;
+                if ( view.x <= left ) {
+                    [view setX:left];
+                }
+                else if ( view.x >= right ) {
+                    [view setX:right];
+                }
+                
+                UIEdgeInsets insets = UIEdgeInsetsZero;
+                if (@available(iOS 11.0, *)) {
+                    insets = superview.safeAreaInsets;
+                }
+                CGFloat top = insets.top + safeMargin;
+                CGFloat bottom = superview.bounds.size.height - (insets.bottom + safeMargin + view.h);
+                if ( view.y <= top ) {
+                    [view setY:top];
+                }
+                else if ( view.y >= bottom ) {
+                    [view setY:bottom];
+                }
+            } completion:nil];
+        }
+            break;
+        default: break;
+    }
+}
+
 @end
 NS_ASSUME_NONNULL_END
