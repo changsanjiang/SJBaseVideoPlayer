@@ -52,7 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// - default value is YES.
 @property (nonatomic) BOOL slidable;
 
-@property (nonatomic, strong, readonly) __kindof UIView *view; ///< float view
+@property (nonatomic, strong, readonly) __kindof UIView *floatView; ///< float view
 
 @property (nonatomic) CGFloat safeMargin; ///< default value is 12.
 

@@ -82,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface SJFloatSmallViewController ()<UIGestureRecognizerDelegate> {
-    SJFloatSmallView *_Nullable _view;
+    SJFloatSmallView *_Nullable _floatView;
     BOOL _isDelayed;
 }
 @property (nonatomic) BOOL isAppeared;
@@ -109,15 +109,15 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)dealloc {
-    [_view removeFromSuperview];
+    [_floatView removeFromSuperview];
 }
 
-- (__kindof UIView *)view {
-    if ( _view == nil ) {
-        _view = [[SJFloatSmallView alloc] initWithFrame:CGRectZero];
-        [self _addGesturesToFloatView:_view];
+- (__kindof UIView *)floatView {
+    if ( _floatView == nil ) {
+        _floatView = [[SJFloatSmallView alloc] initWithFrame:CGRectZero];
+        [self _addGesturesToFloatView:_floatView];
     }
-    return _view;
+    return _floatView;
 }
 
 - (void)showFloatSmallView {
@@ -128,8 +128,8 @@ NS_ASSUME_NONNULL_BEGIN
         //
         UIViewController *currentViewController = [self atViewController];
         UIView *superview = currentViewController.view;
-        if ( self.view.superview != superview ) {
-            [superview addSubview:self.view];
+        if ( self.floatView.superview != superview ) {
+            [superview addSubview:_floatView];
             CGRect bounds = superview.bounds;
             CGFloat width = bounds.size.width;
             
@@ -143,16 +143,16 @@ NS_ASSUME_NONNULL_BEGIN
                 y += superview.safeAreaInsets.top;
             }
 
-            self.view.frame = CGRectMake(x, y, w, h);
+            _floatView.frame = CGRectMake(x, y, w, h);
         }
         
         //
-        self.target.frame = self.view.bounds;
-        [self.view addSubview:self.target];
+        self.target.frame = _floatView.bounds;
+        [_floatView addSubview:self.target];
         [self.target layoutIfNeeded];
 
         [UIView animateWithDuration:0.3 animations:^{
-            self.view.alpha = 1;
+            self->_floatView.alpha = 1;
         }];
         
         self.isAppeared = YES;
@@ -167,7 +167,7 @@ NS_ASSUME_NONNULL_BEGIN
     [self.target layoutIfNeeded];
     
     [UIView animateWithDuration:0.3 animations:^{
-        self.view.alpha = 0.001;
+        self->_floatView.alpha = 0.001;
     }];
     
     self.isAppeared = NO;
@@ -269,7 +269,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)_handlePanGesture:(UIPanGestureRecognizer *)panGesture {
-    SJFloatSmallView *view = _view;
+    SJFloatSmallView *view = _floatView;
     UIView *superview = view.superview;
     CGPoint offset = [panGesture translationInView:superview];
     CGPoint center = view.center;

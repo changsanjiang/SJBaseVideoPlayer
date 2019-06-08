@@ -112,6 +112,11 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
             if ( !self ) return;
             [self volumeDidChange];
         });
+        
+        CGFloat value = [AVAudioSession sharedInstance].outputVolume;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.volume = value;
+        });
     });
     return self;
 }

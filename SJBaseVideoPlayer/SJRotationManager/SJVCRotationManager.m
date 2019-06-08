@@ -165,7 +165,7 @@ NS_ASSUME_NONNULL_BEGIN
         CGFloat max = MAX(bounds.size.width, bounds.size.height);
         CGFloat min = MIN(bounds.size.width, bounds.size.height);
         CGRect fullscreenRect = CGRectMake(0, 0, max, min);
-        if ( isFullscreen ) {
+        if ( isFullscreen && _currentOrientation == SJOrientation_Portrait ) {
             _smlFrame = [_superview convertRect:_target.frame toView:window];
             _target.frame = _smlFrame;
         }

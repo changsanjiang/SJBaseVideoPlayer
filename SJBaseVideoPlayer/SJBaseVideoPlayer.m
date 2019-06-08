@@ -2094,7 +2094,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         UIWindow *_Nullable window = self.view.window;
         if ( window && !window.isKeyWindow ) return NO;
         if ( self.touchedOnTheScrollView ) return NO;
-        if ( self.isPlayOnScrollView && !self.isScrollAppeared ) return NO;
+        if ( self.isPlayOnScrollView && !(self.isScrollAppeared || self.controlInfo->floatSmallViewControl.isAppeared) ) return NO;
         if ( self.isLockedScreen ) return NO;
         if ( self.registrar.state == SJVideoPlayerAppState_ResignActive ) return NO;
         if ( !self.controlInfo->rotation.able ) return NO;
@@ -2416,7 +2416,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         if ( !self ) return ;
         BOOL isAppeared = controller.isAppeared;
         self.controlInfo->floatSmallViewControl.isAppeared = isAppeared;
-        self.rotationManager.superview = isAppeared?controller.view:self.view;
+        self.rotationManager.superview = isAppeared?controller.floatView:self.view;
     };
 }
 
