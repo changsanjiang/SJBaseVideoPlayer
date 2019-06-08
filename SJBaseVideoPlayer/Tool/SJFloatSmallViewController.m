@@ -247,7 +247,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ( gestureRecognizer == self.singleTapGesture ) {
         if ( self.doubleTapGesture.enabled == YES ) {
             _isDelayed = YES;
-            [self performSelector:@selector(_singleTappedOnTheFloatSmallView:) withObject:gestureRecognizer afterDelay:160/1000.0 inModes:@[NSRunLoopCommonModes]];
+            [self performSelector:@selector(_singleTappedOnTheFloatSmallView:) withObject:gestureRecognizer afterDelay:200/1000.0 inModes:@[NSRunLoopCommonModes]];
         }
         else {
             [self _singleTappedOnTheFloatSmallView:gestureRecognizer];
