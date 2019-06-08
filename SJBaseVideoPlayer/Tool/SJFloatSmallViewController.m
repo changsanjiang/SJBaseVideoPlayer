@@ -243,10 +243,15 @@ NS_ASSUME_NONNULL_BEGIN
     return _singleTapGesture;
 }
 
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+- (BOOL)gestureRecognizerShouldBegin:(__kindof UIGestureRecognizer *)gestureRecognizer {
     if ( gestureRecognizer == self.singleTapGesture ) {
-        _isDelayed = YES;
-        [self performSelector:@selector(_singleTappedOnTheFloatSmallView:) withObject:gestureRecognizer afterDelay:160/1000.0 inModes:@[NSRunLoopCommonModes]];
+        if ( self.doubleTapGesture.enabled == YES ) {
+            _isDelayed = YES;
+            [self performSelector:@selector(_singleTappedOnTheFloatSmallView:) withObject:gestureRecognizer afterDelay:160/1000.0 inModes:@[NSRunLoopCommonModes]];
+        }
+        else {
+            [self _singleTappedOnTheFloatSmallView:gestureRecognizer];
+        }
         return NO;
     }
     

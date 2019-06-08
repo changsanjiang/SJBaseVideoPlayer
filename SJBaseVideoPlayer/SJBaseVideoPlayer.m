@@ -2392,7 +2392,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
                 case SJVideoPlayerPlayStatusInactivity:
                     return NO;
                 case SJVideoPlayerPlayStatusPaused:
-                    return self.pausedReason == SJVideoPlayerPausedReasonPause;
+                    return self.pausedReason != SJVideoPlayerPausedReasonPause;
             }
         };
         
