@@ -1550,12 +1550,11 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
         
         if ( SJPlayerGestureType_Pan == type ) {
             if ( self.isPlayOnScrollView ) {
-                if ( self.useFitOnScreenAndDisableRotation &&
-                    !self.isFitOnScreen ) {
-                    return NO;
+                if ( self.useFitOnScreenAndDisableRotation ) {
+                    if ( !self.isFitOnScreen ) return NO;
                 }
-                else if ( !self.isFullScreen ) {
-                    return NO;
+                else {
+                    if ( !self.isFullScreen ) return NO;
                 }
             }
             
@@ -2010,6 +2009,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _fitOnScreenManagerObserver.fitOnScreenDidEndExeBlock = ^(id<SJFitOnScreenManager> mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
+        if ( self.autoManageViewToFitOnScreenOrRotation && !mgr.isFitOnScreen ) {
+            CGSize presentationSize = self.playbackController.presentationSize;
+            self.useFitOnScreenAndDisableRotation = presentationSize.width < presentationSize.height;
+        }
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:didCompleteFitOnScreen:)] ) {
             [self.controlLayerDelegate videoPlayer:self didCompleteFitOnScreen:mgr.isFitOnScreen];
         }
@@ -2148,6 +2151,10 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     _rotationManagerObserver.rotationDidEndExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
+        if ( self.autoManageViewToFitOnScreenOrRotation && !mgr.isFullscreen ) {
+            CGSize presentationSize = self.playbackController.presentationSize;
+            self.useFitOnScreenAndDisableRotation = presentationSize.width < presentationSize.height;
+        }
         [self.playModelObserver refreshAppearState];
         if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:didEndRotation:)] ) {
             [self.controlLayerDelegate videoPlayer:self didEndRotation:mgr.isFullscreen];
