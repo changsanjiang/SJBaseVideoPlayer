@@ -1,75 +1,75 @@
 PODS:
   - Masonry (1.1.0)
   - Reachability (3.2)
-  - SJBaseVideoPlayer (2.4.4):
+  - SJBaseVideoPlayer (2.4.5):
     - Masonry
     - Reachability
-    - SJBaseVideoPlayer/Header (= 2.4.4)
-    - SJBaseVideoPlayer/Model (= 2.4.4)
-    - SJBaseVideoPlayer/SJAVMediaPlaybackController (= 2.4.4)
-    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (= 2.4.4)
-    - SJBaseVideoPlayer/SJPrompt (= 2.4.4)
-    - SJBaseVideoPlayer/SJRotationManager (= 2.4.4)
-    - SJBaseVideoPlayer/Tool (= 2.4.4)
+    - SJBaseVideoPlayer/Header (= 2.4.5)
+    - SJBaseVideoPlayer/Model (= 2.4.5)
+    - SJBaseVideoPlayer/SJAVMediaPlaybackController (= 2.4.5)
+    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (= 2.4.5)
+    - SJBaseVideoPlayer/SJPrompt (= 2.4.5)
+    - SJBaseVideoPlayer/SJRotationManager (= 2.4.5)
+    - SJBaseVideoPlayer/Tool (= 2.4.5)
     - SJUIKit/ObserverHelper (>= 0.0.0.23)
     - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/Header (2.4.4):
+  - SJBaseVideoPlayer/Header (2.4.5):
     - Masonry
     - Reachability
     - SJUIKit/ObserverHelper (>= 0.0.0.23)
     - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/Model (2.4.4):
-    - Masonry
-    - Reachability
-    - SJBaseVideoPlayer/Header
-    - SJUIKit/ObserverHelper (>= 0.0.0.23)
-    - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/SJAVMediaPlaybackController (2.4.4):
-    - Masonry
-    - Reachability
-    - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (= 2.4.4)
-    - SJBaseVideoPlayer/Tool
-    - SJUIKit/ObserverHelper (>= 0.0.0.23)
-    - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (2.4.4):
-    - Masonry
-    - Reachability
-    - SJBaseVideoPlayer/Tool
-    - SJUIKit/ObserverHelper (>= 0.0.0.23)
-    - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (2.4.4):
+  - SJBaseVideoPlayer/Model (2.4.5):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Header
-    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (= 2.4.4)
-    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (= 2.4.4)
     - SJUIKit/ObserverHelper (>= 0.0.0.23)
     - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (2.4.4):
+  - SJBaseVideoPlayer/SJAVMediaPlaybackController (2.4.5):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (= 2.4.5)
+    - SJBaseVideoPlayer/Tool
+    - SJUIKit/ObserverHelper (>= 0.0.0.23)
+    - SJUIKit/Queues (>= 0.0.0.23)
+  - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (2.4.5):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/Tool
+    - SJUIKit/ObserverHelper (>= 0.0.0.23)
+    - SJUIKit/Queues (>= 0.0.0.23)
+  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (2.4.5):
+    - Masonry
+    - Reachability
+    - SJBaseVideoPlayer/Header
+    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (= 2.4.5)
+    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (= 2.4.5)
+    - SJUIKit/ObserverHelper (>= 0.0.0.23)
+    - SJUIKit/Queues (>= 0.0.0.23)
+  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (2.4.5):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Header
     - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader
     - SJUIKit/ObserverHelper (>= 0.0.0.23)
     - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (2.4.4):
+  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (2.4.5):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Header
     - SJUIKit/ObserverHelper (>= 0.0.0.23)
     - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/SJPrompt (2.4.4):
+  - SJBaseVideoPlayer/SJPrompt (2.4.5):
     - Masonry
     - Reachability
     - SJUIKit/ObserverHelper (>= 0.0.0.23)
     - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/SJRotationManager (2.4.4):
+  - SJBaseVideoPlayer/SJRotationManager (2.4.5):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Header
     - SJUIKit/ObserverHelper (>= 0.0.0.23)
     - SJUIKit/Queues (>= 0.0.0.23)
-  - SJBaseVideoPlayer/Tool (2.4.4):
+  - SJBaseVideoPlayer/Tool (2.4.5):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Header
@@ -95,9 +95,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SJBaseVideoPlayer: 1bad3814d67dab69ffdf3503b325c93b639d9024
+  SJBaseVideoPlayer: 86ab1fe217a2bd15d6c7aeeca3ab078604deb400
   SJUIKit: 3e5356c9321ebe0ec81766668f3398fa220638b8
 
-PODFILE CHECKSUM: 8f638c6968bc999ab2423b4f654fb00b0c39c1c4
+PODFILE CHECKSUM: 8b9107f80673bb180537f670bf095c09a94ea1a5
 
 COCOAPODS: 1.7.0.beta.3
