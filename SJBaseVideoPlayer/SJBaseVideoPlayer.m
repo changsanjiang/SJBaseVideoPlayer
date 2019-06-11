@@ -2633,14 +2633,14 @@ static id<SJBaseVideoPlayerStatistics> _statistics;
         self.playerViewWillAppearExeBlock(self);
 }
 - (void)playerWillDisappearForObserver:(nonnull SJPlayModelPropertiesObserver *)observer {
+    if ( _rotationManager.isTransitioning )
+        return;
+
     if ( _controlInfo->scrollControl.isScrollAppeared == NO ) {
         return;
     }
     
     _controlInfo->scrollControl.isScrollAppeared = NO;
-    
-    if ( _rotationManager.isTransitioning )
-        return;
     
     _view.hidden = _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared;
     
