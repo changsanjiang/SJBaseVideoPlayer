@@ -143,101 +143,6 @@ typedef struct _SJPlayerControlInfo {
 @property (nonatomic, strong, nullable) SJBaseVideoPlayerAutoRefreshController *autoRefresh;
 @end
 
-@implementation UITabBarController (SJBaseVideoPlayerAdded)
-- (UIViewController *)sj_topViewController {
-    if ( self.selectedIndex == NSNotFound )
-        return self.viewControllers.firstObject;
-    return self.selectedViewController;
-}
-
-- (BOOL)shouldAutorotate {
-    return [[self sj_topViewController] shouldAutorotate];
-}
-
-- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return [[self sj_topViewController] supportedInterfaceOrientations];
-}
-
-- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
-    return [[self sj_topViewController] preferredInterfaceOrientationForPresentation];
-}
-@end
-
-@implementation UINavigationController (SJBaseVideoPlayerAdded)
-- (BOOL)shouldAutorotate {
-    return self.topViewController.shouldAutorotate;
-}
-
-- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return self.topViewController.supportedInterfaceOrientations;
-}
-
-- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
-    return self.topViewController.preferredInterfaceOrientationForPresentation;
-}
-
-- (nullable UIViewController *)childViewControllerForStatusBarStyle {
-    return self.topViewController;
-}
-
-- (nullable UIViewController *)childViewControllerForStatusBarHidden {
-    return self.topViewController;
-}
-@end
-
-@interface UIViewController (SJBaseVideoPlayerAdded)
-- (BOOL)sj_shouldAutorotate;
-- (UIInterfaceOrientationMask)sj_supportedInterfaceOrientations;
-@end
-
-@implementation UIViewController (SJBaseVideoPlayerAdded)
-static void
-sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
-    Method originalMethod = class_getInstanceMethod(cls, originalSelector);
-    Method swizzledMethod = class_getInstanceMethod(cls, swizzledSelector);
-    method_exchangeImplementations(originalMethod, swizzledMethod);
-}
-
-+ (void)load {
-    sj_swizzleMethod([UIViewController class], @selector(shouldAutorotate), @selector(sj_shouldAutorotate));
-    sj_swizzleMethod([UIViewController class], @selector(supportedInterfaceOrientations), @selector(sj_supportedInterfaceOrientations));
-}
-
-- (BOOL)sj_shouldAutorotate {
-    if ( !self.nextResponder ) return NO;
-    SJBaseVideoPlayer *_Nullable player = [self sj_viewPlayer];
-    if ( player ) {
-        if ( [player.rotationManager isKindOfClass:[SJVCRotationManager class]] ) {
-            SJVCRotationManager *mgr = player.rotationManager;
-            return [mgr vc_shouldAutorotate];
-        }
-        return NO;
-    }
-    return [self sj_shouldAutorotate];
-}
-
-- (UIInterfaceOrientationMask)sj_supportedInterfaceOrientations {
-    if ( !self.nextResponder ) return UIInterfaceOrientationMaskPortrait;
-    SJBaseVideoPlayer *_Nullable player = [self sj_viewPlayer];
-    if ( player ) {
-        if ( [player.rotationManager isKindOfClass:[SJVCRotationManager class]] ) {
-            SJVCRotationManager *mgr = player.rotationManager;
-            return [mgr vc_supportedInterfaceOrientations];
-        }
-        return UIInterfaceOrientationMaskPortrait;
-    }
-    return [self sj_supportedInterfaceOrientations];
-}
-
-- (SJBaseVideoPlayer *_Nullable)sj_viewPlayer {
-    __kindof UIView *_Nullable view = [self.view viewWithTag:_SJBaseVideoPlayerViewTag];
-    if ( view && [view isKindOfClass:[SJPlayerView class]] ) {
-        return [(SJPlayerView *)view player];
-    }
-    return nil;
-}
-@end
-
 @implementation SJBaseVideoPlayer {
     UIView *_view;
     SJVideoPlayerPresentView *_presentView;
@@ -299,7 +204,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 + (NSString *)version {
-    return @"2.4.7";
+    return @"2.5.0";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -1433,8 +1338,9 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
             return !self.controlLayerIsAppeared;
     }
     // 全屏播放时, 使状态栏根据控制层显示或隐藏
-    if ( self.isFullScreen )
+    if ( self.isFullScreen || self.isFitOnScreen )
         return !self.controlLayerIsAppeared;
+    
     return NO;
 }
 - (UIStatusBarStyle)vc_preferredStatusBarStyle {
