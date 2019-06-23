@@ -107,6 +107,12 @@ typedef struct _SJPlayerControlInfo {
         BOOL autoDisappearFloatSmallView;
     } floatSmallViewControl;
     
+    
+    struct GestureControl {
+        BOOL allowHorizontalTriggeringOfPanGesturesInCells;
+        SJPlayerDisabledGestures disabledGestures;
+    } gestureControl;
+    
 } _SJPlayerControlInfo;
 
 @interface SJBaseVideoPlayer ()
@@ -293,7 +299,7 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
 }
 
 + (NSString *)version {
-    return @"2.4.6";
+    return @"2.4.7";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
@@ -1557,6 +1563,8 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     if ( !_gestureControl )
         return;
     
+    _gestureControl.disabledGestures = _controlInfo->gestureControl.disabledGestures;
+    
     __weak typeof(self) _self = self;
     _gestureControl.gestureRecognizerShouldTrigger = ^BOOL(id<SJPlayerGestureControl>  _Nonnull control, SJPlayerGestureType type, CGPoint location) {
         __strong typeof(_self) self = _self;
@@ -1572,43 +1580,58 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
             return NO;
         
         if ( SJPlayerGestureType_Pan == type ) {
-            if ( self.isPlayOnScrollView ) {
-                if ( self.useFitOnScreenAndDisableRotation ) {
-                    if ( !self.isFitOnScreen ) return NO;
-                }
-                else {
-                    if ( !self.isFullScreen ) return NO;
-                }
-            }
-            
             switch ( control.movingDirection ) {
                 case SJPanGestureMovingDirection_H: {
-                    if ( [self playStatus_isPrepare] ||
-                         [self playStatus_isUnknown] )
+                    if ( self.playbackType == SJMediaPlaybackTypeLIVE )
+                        return NO;
+                    
+                    if ( [self playStatus_isPrepare] || [self playStatus_isUnknown] )
                         return NO;
                     
                     if ( self.totalTime <= 0 )
                         return NO;
                     
-                    if ( self.canSeekToTime ) {
-                        if ( !self.canSeekToTime(self) ) {
-                            return NO;
-                        }
-                    }
-                    
-                    if ( self.playbackType == SJMediaPlaybackTypeLIVE ) {
+                    if ( self.canSeekToTime != nil && !self.canSeekToTime(self) )
                         return NO;
+                    
+                    if ( self.isPlayOnScrollView ) {
+                        if ( NO == self.controlInfo->gestureControl.allowHorizontalTriggeringOfPanGesturesInCells ) {
+                            if ( YES == self.useFitOnScreenAndDisableRotation ) {
+                                if ( NO == self.isFitOnScreen )
+                                    return NO;
+                            }
+                            else {
+                                if ( NO == self.isFullScreen )
+                                    return NO;
+                            }
+                        }
                     }
                 }
                     break;
                 case SJPanGestureMovingDirection_V: {
+                    if ( self.isPlayOnScrollView ) {
+                        if ( YES == self.useFitOnScreenAndDisableRotation ) {
+                            if ( NO == self.isFitOnScreen )
+                                return NO;
+                        }
+                        else {
+                            if ( NO == self.isFullScreen )
+                                return NO;
+                        }
+                    }
                     switch ( control.triggeredPosition ) {
                             /// Brightness
-                        case SJPanGestureTriggeredPosition_Left:
-                            return !self.controlInfo->deviceVolumeAndBrightness.disableBrightnessSetting;
+                        case SJPanGestureTriggeredPosition_Left: {
+                            if ( self.controlInfo->deviceVolumeAndBrightness.disableBrightnessSetting )
+                                return NO;
+                        }
+                            break;
                             /// Volume
-                        case SJPanGestureTriggeredPosition_Right:
-                            return !self.controlInfo->deviceVolumeAndBrightness.disableVolumeSetting || self.mute;
+                        case SJPanGestureTriggeredPosition_Right: {
+                            if ( self.controlInfo->deviceVolumeAndBrightness.disableVolumeSetting || self.isMute )
+                                return NO;
+                        }
+                            break;
                     }
                 }
             }
@@ -1755,8 +1778,17 @@ sj_swizzleMethod(Class cls, SEL originalSelector, SEL swizzledSelector) {
     };
 }
 
+- (void)setAllowHorizontalTriggeringOfPanGesturesInCells:(BOOL)allowHorizontalTriggeringOfPanGesturesInCells {
+    _controlInfo->gestureControl.allowHorizontalTriggeringOfPanGesturesInCells = allowHorizontalTriggeringOfPanGesturesInCells;
+}
+
+- (BOOL)allowHorizontalTriggeringOfPanGesturesInCells {
+    return _controlInfo->gestureControl.allowHorizontalTriggeringOfPanGesturesInCells;
+}
+
 - (void)setDisabledGestures:(SJPlayerDisabledGestures)disabledGestures {
-    self.gestureControl.disabledGestures = disabledGestures;
+    _controlInfo->gestureControl.disabledGestures = disabledGestures;
+    _gestureControl.disabledGestures = disabledGestures;
 }
 
 - (SJPlayerDisabledGestures)disabledGestures {
