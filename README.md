@@ -26,7 +26,7 @@ ___
 
 * 新增 左右边缘快进快退. 开启如下:
 ```Objective-C
-    // 开启小浮窗. 其余配置请查看`fastForwardViewController`
+    // 开启左右边缘快进快退. 其余配置请查看`fastForwardViewController`
     _player.fastForwardViewController.enabled = YES;
 ```
 
