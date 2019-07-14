@@ -1358,10 +1358,6 @@ typedef struct _SJPlayerControlInfo {
     [self pause];
 }
 - (BOOL)vc_prefersStatusBarHidden {
-#ifdef DEBUG
-    NSLog(@"%d - -[%@ %s]", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
-#endif
-
     if ( _controlInfo->statusBar.needTmpShow )
         return NO;
     if ( _controlInfo->statusBar.needTmpHidden )

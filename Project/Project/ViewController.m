@@ -39,9 +39,9 @@
         make.height.equalTo(self->_videoPlayer.view.mas_width).multipliedBy(9 / 16.0f);
     }];
 
-    _videoPlayer.placeholderImageView.image = [UIImage imageNamed:@"placeholder"];
+//    _videoPlayer.placeholderImageView.image =
     
-    _videoPlayer.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:[[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"] specifyStartTime:20];
+    _videoPlayer.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:[NSURL URLWithString:@"https://dh2.v.netease.com/2017/cg/fxtpty.mp4"]];
     
     _videoPlayer.pauseWhenAppDidEnterBackground = NO;
     
