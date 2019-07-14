@@ -274,7 +274,8 @@ typedef struct _SJPlayerControlInfo {
 #endif
     free(_controlInfo);
     if ( _autoRefresh ) [_autoRefresh cancel];
-    if ( _URLAsset && self.assetDeallocExeBlock ) self.assetDeallocExeBlock(self);
+    if ( _URLAsset != nil && self.assetDeallocExeBlock )
+        self.assetDeallocExeBlock(self);
     [_presentView removeFromSuperview];
     [_view removeFromSuperview];
 }
@@ -914,6 +915,8 @@ typedef struct _SJPlayerControlInfo {
     
     _operationOfInitializing = nil;
     _playModelObserver = nil;
+    if ( _URLAsset != nil && self.assetDeallocExeBlock )
+        self.assetDeallocExeBlock(self);
     _URLAsset = nil;
     [_playbackController stop];
     [self _resetDefinitionSwitchingInfo];
