@@ -37,6 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, nullable) id<SJFullscreenModeViewControllerDelegate> delegate;
 @property (nonatomic) UIDeviceOrientation currentOrientation;
 @property (nonatomic, readonly) BOOL isFullscreen;
+@property (nonatomic) BOOL isRotated;
 @end
 
 @implementation SJFullscreenModeViewController
@@ -63,12 +64,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
+    
     UIDeviceOrientation new = UIDevice.currentDevice.orientation;
     UIDeviceOrientation old = _currentOrientation;
     
     if ( new == UIDeviceOrientationLandscapeLeft ||
-         new == UIDeviceOrientationLandscapeRight ) {
+        new == UIDeviceOrientationLandscapeRight ) {
         if ( self.delegate.target.superview != self.view ) {
             [self.view addSubview:self.delegate.target];
         }
@@ -79,7 +80,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     _currentOrientation = new;
-
+    
     [self.delegate fullscreenModeViewController:self willRotateToOrientation:_currentOrientation];
     
     BOOL isFullscreen = size.width > size.height;
@@ -91,6 +92,9 @@ NS_ASSUME_NONNULL_BEGIN
         
         [self.delegate.target layoutIfNeeded];
     } completion:^(BOOL finished) {
+        
+        NSAssert(self.delegate, @"HHHH");
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.delegate fullscreenModeViewController:self didRotateFromOrientation:self.currentOrientation];
         });
@@ -133,7 +137,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if ( !self ) return nil;
-//    self.windowLevel = UIWindowLevelStatusBar - 1;
+    //    self.windowLevel = UIWindowLevelStatusBar - 1;
     self.hidden = YES;
     self.rootViewController = SJFullscreenModeViewController.new;;
     return self;
@@ -196,12 +200,19 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if (self) {
         _autorotationSupportedOrientation = SJAutoRotateSupportedOrientation_All;
-        _window = [SJFullscreenModeWindow new];
-        _window.rootViewController.delegate = self;
-        [_window.rootViewController loadViewIfNeeded];
         [self _observeDeviceOrientationChangeNotification];
     }
     return self;
+}
+
+@synthesize window = _window;
+- (SJFullscreenModeWindow *)window {
+    if ( _window == nil ) {
+        _window = [SJFullscreenModeWindow new];
+        _window.rootViewController.delegate = self;
+        [_window.rootViewController loadViewIfNeeded];
+    }
+    return _window;
 }
 
 - (void)_observeDeviceOrientationChangeNotification {
@@ -243,7 +254,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)rotate {
     if ( ![self _isSupported:SJOrientation_LandscapeLeft] &&
-         ![self _isSupported:SJOrientation_LandscapeRight] ) {
+        ![self _isSupported:SJOrientation_LandscapeRight] ) {
         if ( self.isFullscreen )
             [self rotate:SJOrientation_Portrait animated:YES];
         else
@@ -258,9 +269,9 @@ NS_ASSUME_NONNULL_BEGIN
     
     
     if ( [self _isSupported:SJOrientation_LandscapeLeft] &&
-         [self _isSupported:SJOrientation_LandscapeRight] ) {
+        [self _isSupported:SJOrientation_LandscapeRight] ) {
         SJOrientation orientation = (NSInteger)_deviceOrientation;
-        if ( _window.rootViewController.currentOrientation == SJOrientation_Portrait )
+        if ( self.window.rootViewController.currentOrientation == SJOrientation_Portrait )
             orientation = SJOrientation_LandscapeLeft;
         [self rotate:orientation animated:YES];
         return;
@@ -273,7 +284,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     if ( ![self _isSupported:SJOrientation_LandscapeLeft] &&
-          [self _isSupported:SJOrientation_LandscapeRight] ) {
+        [self _isSupported:SJOrientation_LandscapeRight] ) {
         [self rotate:SJOrientation_LandscapeRight animated:YES];
         return;
     }
@@ -285,7 +296,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManagerProtocol> mgr))completionHandler {
     _completionHandler = completionHandler;
-    if ( orientation == (NSInteger)_window.rootViewController.currentOrientation ) {
+    if ( orientation == (NSInteger)self.window.rootViewController.currentOrientation ) {
         [self _finishTransition];
         return;
     }
@@ -315,7 +326,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ( _disableAutorotation && !_forcedRotation )
         return NO;
     
-    if ( self.isTransitioning )
+    if ( self.isTransitioning && _window.rootViewController.isRotated )
         return NO;
     
     if ( !_forcedRotation ) {
@@ -326,10 +337,11 @@ NS_ASSUME_NONNULL_BEGIN
     if ( _shouldTriggerRotation && !_shouldTriggerRotation(self) )
         return NO;
     
-    [self _beginTransition];
-
+    if ( self.isTransitioning == NO )
+        [self _beginTransition];
+    
     if ( orientation == UIDeviceOrientationLandscapeLeft ||
-         orientation == UIDeviceOrientationLandscapeRight ) {
+        orientation == UIDeviceOrientationLandscapeRight ) {
         self.window.hidden = NO;
     }
     
@@ -359,15 +371,25 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)_beginTransition {
     self.transitioning = YES;
+    self.window.rootViewController.isRotated = NO;
+    
+    //#ifdef DEBUG
+    //    NSLog(@"%d - %s", (int)__LINE__, __func__);
+    //#endif
 }
 
 - (void)_finishTransition {
     self.transitioning = NO;
+    self.window.rootViewController.isRotated = YES;
     
     if ( _completionHandler )
         _completionHandler(self);
     
     _completionHandler = nil;
+    
+    //#ifdef DEBUG
+    //    NSLog(@"%d - %s", (int)__LINE__, __func__);
+    //#endif
 }
 
 - (BOOL)_isSupported:(SJOrientation)orientation {
