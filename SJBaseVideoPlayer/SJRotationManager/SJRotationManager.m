@@ -54,6 +54,8 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    if ( self.presentedViewController != nil )
+        return 1 << _currentOrientation;
     return UIInterfaceOrientationMaskAll;
 }
 
@@ -64,12 +66,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-    
+
     UIDeviceOrientation new = UIDevice.currentDevice.orientation;
     UIDeviceOrientation old = _currentOrientation;
     
     if ( new == UIDeviceOrientationLandscapeLeft ||
-        new == UIDeviceOrientationLandscapeRight ) {
+         new == UIDeviceOrientationLandscapeRight ) {
         if ( self.delegate.target.superview != self.view ) {
             [self.view addSubview:self.delegate.target];
         }
@@ -80,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     _currentOrientation = new;
-    
+
     [self.delegate fullscreenModeViewController:self willRotateToOrientation:_currentOrientation];
     
     BOOL isFullscreen = size.width > size.height;
@@ -137,7 +139,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if ( !self ) return nil;
-    //    self.windowLevel = UIWindowLevelStatusBar - 1;
+//    self.windowLevel = UIWindowLevelStatusBar - 1;
     self.hidden = YES;
     self.rootViewController = SJFullscreenModeViewController.new;;
     return self;
@@ -254,7 +256,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)rotate {
     if ( ![self _isSupported:SJOrientation_LandscapeLeft] &&
-        ![self _isSupported:SJOrientation_LandscapeRight] ) {
+         ![self _isSupported:SJOrientation_LandscapeRight] ) {
         if ( self.isFullscreen )
             [self rotate:SJOrientation_Portrait animated:YES];
         else
@@ -269,7 +271,7 @@ NS_ASSUME_NONNULL_BEGIN
     
     
     if ( [self _isSupported:SJOrientation_LandscapeLeft] &&
-        [self _isSupported:SJOrientation_LandscapeRight] ) {
+         [self _isSupported:SJOrientation_LandscapeRight] ) {
         SJOrientation orientation = (NSInteger)_deviceOrientation;
         if ( self.window.rootViewController.currentOrientation == SJOrientation_Portrait )
             orientation = SJOrientation_LandscapeLeft;
@@ -284,7 +286,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     if ( ![self _isSupported:SJOrientation_LandscapeLeft] &&
-        [self _isSupported:SJOrientation_LandscapeRight] ) {
+          [self _isSupported:SJOrientation_LandscapeRight] ) {
         [self rotate:SJOrientation_LandscapeRight animated:YES];
         return;
     }
@@ -334,14 +336,21 @@ NS_ASSUME_NONNULL_BEGIN
             return NO;
     }
     
-    if ( _shouldTriggerRotation && !_shouldTriggerRotation(self) )
+    BOOL trigger = _shouldTriggerRotation(self);
+    
+    NSLog(@"%d", trigger);
+
+    if ( !trigger )
         return NO;
+    
+//    if ( _shouldTriggerRotation && !_shouldTriggerRotation(self) )
+//        return NO;
     
     if ( self.isTransitioning == NO )
         [self _beginTransition];
-    
+
     if ( orientation == UIDeviceOrientationLandscapeLeft ||
-        orientation == UIDeviceOrientationLandscapeRight ) {
+         orientation == UIDeviceOrientationLandscapeRight ) {
         self.window.hidden = NO;
     }
     
@@ -373,9 +382,9 @@ NS_ASSUME_NONNULL_BEGIN
     self.transitioning = YES;
     self.window.rootViewController.isRotated = NO;
     
-    //#ifdef DEBUG
-    //    NSLog(@"%d - %s", (int)__LINE__, __func__);
-    //#endif
+//#ifdef DEBUG
+//    NSLog(@"%d - %s", (int)__LINE__, __func__);
+//#endif
 }
 
 - (void)_finishTransition {
@@ -386,10 +395,10 @@ NS_ASSUME_NONNULL_BEGIN
         _completionHandler(self);
     
     _completionHandler = nil;
-    
-    //#ifdef DEBUG
-    //    NSLog(@"%d - %s", (int)__LINE__, __func__);
-    //#endif
+
+//#ifdef DEBUG
+//    NSLog(@"%d - %s", (int)__LINE__, __func__);
+//#endif
 }
 
 - (BOOL)_isSupported:(SJOrientation)orientation {
