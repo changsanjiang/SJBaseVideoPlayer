@@ -35,7 +35,12 @@
     [self.view addSubview:_videoPlayer.view];
     
     [_videoPlayer.view mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.leading.trailing.offset(0);
+        if (@available(iOS 11.0, *)) {
+            make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop);
+        } else {
+            make.top.offset(0);
+        }
+        make.leading.trailing.offset(0);
         make.height.equalTo(self->_videoPlayer.view.mas_width).multipliedBy(9 / 16.0f);
     }];
 
@@ -50,6 +55,14 @@
     
     
     // Do any additional setup after loading the view, typically from a nib.
+}
+
+- (BOOL)prefersStatusBarHidden {
+    return _videoPlayer.vc_prefersStatusBarHidden;
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return _videoPlayer.vc_preferredStatusBarStyle;
 }
 
 - (void)didReceiveMemoryWarning {
