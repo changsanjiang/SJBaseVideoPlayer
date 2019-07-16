@@ -186,6 +186,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) UIDeviceOrientation deviceOrientation;
 @property (nonatomic) BOOL forcedRotation;
 @property (nonatomic, getter=isTransitioning) BOOL transitioning;
+@property (nonatomic) SJOrientation currentOrientation;
 @end
 
 @implementation SJRotationManager {
@@ -201,20 +202,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init {
     self = [super init];
     if (self) {
+        _window = [SJFullscreenModeWindow new];
+        _window.rootViewController.delegate = self;
+        [_window.rootViewController loadViewIfNeeded];
         _autorotationSupportedOrientation = SJAutoRotateSupportedOrientation_All;
         [self _observeDeviceOrientationChangeNotification];
     }
     return self;
-}
-
-@synthesize window = _window;
-- (SJFullscreenModeWindow *)window {
-    if ( _window == nil ) {
-        _window = [SJFullscreenModeWindow new];
-        _window.rootViewController.delegate = self;
-        [_window.rootViewController loadViewIfNeeded];
-    }
-    return _window;
 }
 
 - (void)_observeDeviceOrientationChangeNotification {
@@ -242,12 +236,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-- (SJOrientation)currentOrientation {
-    return (NSInteger)self.window.rootViewController.currentOrientation;
-}
-
 - (BOOL)isFullscreen {
-    return self.window.rootViewController.isFullscreen;
+    return _currentOrientation == (NSInteger)UIDeviceOrientationLandscapeLeft ||
+           _currentOrientation == (NSInteger)UIDeviceOrientationLandscapeRight;
 }
 
 - (id<SJRotationManagerObserver>)getObserver {
@@ -336,23 +327,18 @@ NS_ASSUME_NONNULL_BEGIN
             return NO;
     }
     
-    BOOL trigger = _shouldTriggerRotation(self);
-    
-    NSLog(@"%d", trigger);
-
-    if ( !trigger )
+    if ( _shouldTriggerRotation && !_shouldTriggerRotation(self) )
         return NO;
     
-//    if ( _shouldTriggerRotation && !_shouldTriggerRotation(self) )
-//        return NO;
+    self.currentOrientation = (NSInteger)orientation;
     
-    if ( self.isTransitioning == NO )
-        [self _beginTransition];
-
     if ( orientation == UIDeviceOrientationLandscapeLeft ||
          orientation == UIDeviceOrientationLandscapeRight ) {
         self.window.hidden = NO;
     }
+    
+    if ( self.isTransitioning == NO )
+        [self _beginTransition];
     
     return YES;
 }
