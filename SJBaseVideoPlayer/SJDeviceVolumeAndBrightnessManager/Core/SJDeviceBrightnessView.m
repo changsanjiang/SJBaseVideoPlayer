@@ -16,6 +16,19 @@
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
+
+@interface SJView1 : UIView
+
+@end
+
+@implementation SJView1
+
+- (void)setBackgroundColor:(nullable UIColor *)backgroundColor {
+    [super setBackgroundColor:backgroundColor];
+}
+
+@end
+
 @interface SJDeviceBrightnessView ()
 
 @property (nonatomic, strong, readonly) UIColor *themeColor;
@@ -130,7 +143,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (UIView *)tipsContainerView {
     if ( _tipsContainerView ) return _tipsContainerView;
-    _tipsContainerView = [UIView new];
+    _tipsContainerView = [SJView1 new];
     _tipsContainerView.backgroundColor = self.themeColor;
     return _tipsContainerView;
 }
@@ -160,6 +173,11 @@ NS_ASSUME_NONNULL_BEGIN
                            green:51 / 255.0
                             blue:51 / 255.0
                            alpha:1];
+}
+
+- (void)setAlpha:(CGFloat)alpha {
+    [super setAlpha:alpha];
+    NSLog(@"%lf", alpha);
 }
 @end
 NS_ASSUME_NONNULL_END
