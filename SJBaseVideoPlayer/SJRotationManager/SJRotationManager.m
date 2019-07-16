@@ -94,8 +94,8 @@ NS_ASSUME_NONNULL_BEGIN
         
         [self.delegate.target layoutIfNeeded];
     } completion:^(BOOL finished) {
-        
-        NSAssert(self.delegate, @"HHHH");
+//
+//        NSAssert(self.delegate, @"HHHH");
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.delegate fullscreenModeViewController:self didRotateFromOrientation:self.currentOrientation];
