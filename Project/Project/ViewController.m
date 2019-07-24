@@ -10,7 +10,7 @@
 #import "SJBaseVideoPlayer.h"
 #import <Masonry.h>
 
-@implementation UIViewController (_UIViewControllerRotation)
+@implementation UIViewController (RotationControl)
 
 - (BOOL)shouldAutorotate {
     return NO;

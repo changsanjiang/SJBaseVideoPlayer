@@ -1,1 +1,0 @@
-../../../../../SJBaseVideoPlayer/Tool/SJPlayerGestureControl.h
