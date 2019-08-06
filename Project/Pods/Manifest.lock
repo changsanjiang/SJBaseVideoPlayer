@@ -4,13 +4,18 @@ PODS:
   - SJBaseVideoPlayer (2.6.4):
     - Masonry
     - Reachability
+    - SJBaseVideoPlayer/Const (= 2.6.4)
     - SJBaseVideoPlayer/Header (= 2.6.4)
     - SJBaseVideoPlayer/Model (= 2.6.4)
     - SJBaseVideoPlayer/SJAVMediaPlaybackController (= 2.6.4)
     - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (= 2.6.4)
     - SJBaseVideoPlayer/SJPrompt (= 2.6.4)
-    - SJBaseVideoPlayer/SJRotationManager (= 2.6.4)
     - SJBaseVideoPlayer/Tool (= 2.6.4)
+    - SJUIKit/ObserverHelper (>= 0.0.0.31)
+    - SJUIKit/Queues (>= 0.0.0.31)
+  - SJBaseVideoPlayer/Const (2.6.4):
+    - Masonry
+    - Reachability
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
   - SJBaseVideoPlayer/Header (2.6.4):
@@ -63,12 +68,6 @@ PODS:
     - Reachability
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/SJRotationManager (2.6.4):
-    - Masonry
-    - Reachability
-    - SJBaseVideoPlayer/Header
-    - SJUIKit/ObserverHelper (>= 0.0.0.31)
-    - SJUIKit/Queues (>= 0.0.0.31)
   - SJBaseVideoPlayer/Tool (2.6.4):
     - Masonry
     - Reachability
@@ -95,7 +94,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SJBaseVideoPlayer: 4d42ca038e572491a0fff887936efb5352c2fe86
+  SJBaseVideoPlayer: e7633e1842007e475ff0ba8b51ef94c76170e58c
   SJUIKit: 9fc7b17d7f421ca64304c42d1a9ae387bed35bb1
 
 PODFILE CHECKSUM: 8b9107f80673bb180537f670bf095c09a94ea1a5

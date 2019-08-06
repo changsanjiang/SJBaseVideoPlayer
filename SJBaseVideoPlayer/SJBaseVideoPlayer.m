@@ -38,6 +38,7 @@
 #import "SJEdgeFastForwardViewController.h"
 #import "SJVideoDefinitionSwitchingInfo+Private.h"
 #import "SJPopPromptController.h"
+#import "SJBaseVideoPlayerConst.h"
 
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
@@ -370,6 +371,7 @@ typedef struct _SJPlayerControlInfo {
     _view = [SJPlayerView new];
     SJPlayerView *view = _view;
     view.delegate = self;
+    view.tag = SJBaseVideoPlayerViewTag;
     view.backgroundColor = [UIColor blackColor];
     
     _presentView = [SJVideoPlayerPresentView new];

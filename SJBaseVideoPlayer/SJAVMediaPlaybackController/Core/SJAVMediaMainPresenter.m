@@ -162,7 +162,9 @@ NS_ASSUME_NONNULL_BEGIN
     sjkvo_observe(presenter, @"readyForDisplay", ^(SJAVMediaSubPresenter *presenter, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        self.readyForDisplay = presenter.isReadyForDisplay;
+        dispatch_async(dispatch_get_main_queue(), ^{        
+            self.readyForDisplay = presenter.isReadyForDisplay;
+        });
     });
 }
 - (void)removeAllPresenters {

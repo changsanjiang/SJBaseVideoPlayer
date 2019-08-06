@@ -44,6 +44,10 @@
       "source_files": "SJBaseVideoPlayer/Header/*.{h}"
     },
     {
+      "name": "Const",
+      "source_files": "SJBaseVideoPlayer/Const/*.{h,m}"
+    },
+    {
       "name": "Tool",
       "source_files": "SJBaseVideoPlayer/Tool/*.{h,m}",
       "dependencies": {
@@ -82,15 +86,6 @@
     {
       "name": "SJPrompt",
       "source_files": "SJBaseVideoPlayer/SJPrompt/*.{h,m}"
-    },
-    {
-      "name": "SJRotationManager",
-      "source_files": "SJBaseVideoPlayer/SJRotationManager/*.{h,m}",
-      "dependencies": {
-        "SJBaseVideoPlayer/Header": [
-
-        ]
-      }
     },
     {
       "name": "SJDeviceVolumeAndBrightnessManager",

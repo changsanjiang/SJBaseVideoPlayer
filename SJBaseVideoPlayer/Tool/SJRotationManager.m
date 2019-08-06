@@ -157,8 +157,14 @@ NS_ASSUME_NONNULL_BEGIN
     // 如果是大屏转大屏 就不需要修改了
     
     if ( !CGRectEqualToRect(bounds, self.bounds) ) {
+        
+        UIView *superview = self;
+        if ( @available(iOS 13.0, *) ) {
+            superview = self.subviews.firstObject;
+        }
+
         [UIView performWithoutAnimation:^{
-            for ( UIView *view in self.subviews ) {
+            for ( UIView *view in superview.subviews ) {
                 if ( view != self.rootViewController.view && [view isMemberOfClass:UIView.class] ) {
                     view.backgroundColor = UIColor.clearColor;
                     for ( UIView *subview in view.subviews ) {
@@ -183,6 +189,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SJRotationManager ()<SJFullscreenModeViewControllerDelegate>
 @property (nonatomic, strong) SJFullscreenModeWindow *window;
+@property (nonatomic, weak, nullable) UIWindow *previousKeyWindow;
+
 @property (nonatomic) UIDeviceOrientation deviceOrientation;
 @property (nonatomic) BOOL forcedRotation;
 @property (nonatomic, getter=isTransitioning) BOOL transitioning;
@@ -343,7 +351,12 @@ NS_ASSUME_NONNULL_BEGIN
     
     if ( orientation == UIDeviceOrientationLandscapeLeft ||
          orientation == UIDeviceOrientationLandscapeRight ) {
-        self.window.hidden = NO;
+        UIWindow *keyWindow = UIApplication.sharedApplication.keyWindow;
+        if ( keyWindow != self.window && self.previousKeyWindow != keyWindow ) {
+            self.previousKeyWindow = UIApplication.sharedApplication.keyWindow;
+        }
+        if ( self.window.isKeyWindow == NO )
+            [self.window makeKeyAndVisible];
     }
     return YES;
 }
@@ -359,6 +372,9 @@ NS_ASSUME_NONNULL_BEGIN
             [self.superview addSubview:self.target];
         }).enqueue(^{
             [snapshot removeFromSuperview];
+            UIWindow *previousKeyWindow = self.previousKeyWindow?:UIApplication.sharedApplication.delegate.window;
+            [previousKeyWindow makeKeyAndVisible];
+            self.previousKeyWindow = nil;
             self.window.hidden = YES;
             [self _finishTransition];
         });
