@@ -177,6 +177,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     bounds = self.bounds;
+    self.rootViewController.view.frame = bounds;
 }
 @end
 
@@ -314,8 +315,9 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark -
 
 - (CGRect)targetOriginFrame {
-    UIWindow *window = UIApplication.sharedApplication.delegate.window;
-    return [self.superview convertRect:self.superview.bounds toView:window];
+    if ( self.superview.window == nil )
+        return CGRectZero;
+    return [self.superview convertRect:self.superview.bounds toView:self.superview.window];
 }
 
 - (BOOL)prefersStatusBarHidden {
@@ -372,7 +374,7 @@ NS_ASSUME_NONNULL_BEGIN
             [self.superview addSubview:self.target];
         }).enqueue(^{
             [snapshot removeFromSuperview];
-            UIWindow *previousKeyWindow = self.previousKeyWindow?:UIApplication.sharedApplication.delegate.window;
+            UIWindow *previousKeyWindow = self.previousKeyWindow?:UIApplication.sharedApplication.windows.firstObject;
             [previousKeyWindow makeKeyAndVisible];
             self.previousKeyWindow = nil;
             self.window.hidden = YES;
