@@ -4,13 +4,14 @@
 //
 //  Created by BlueDancer on 2019/8/6.
 //
-
-#import <UIKit/UIKit.h>
+//  适配 iOS 13.0
+//
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
 
+#import <UIKit/UIKit.h>
+
 NS_ASSUME_NONNULL_BEGIN
-/// 适配 iOS 13.0
 @interface UIViewController (SJRotationPrivate_FixSafeArea)
 
 @end
