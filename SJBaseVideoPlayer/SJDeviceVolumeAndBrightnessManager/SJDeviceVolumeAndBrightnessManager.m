@@ -116,13 +116,6 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
     if ( !self ) return nil;
     _taskQueue = SJRunLoopTaskQueue.queue(@"SJDeviceVolumeAndBrightnessManagerTaskQueue").update(CFRunLoopGetMain(), kCFRunLoopCommonModes).delay(5);
     
-    for ( UIView *subview in self.sysVolumeView.subviews ) {
-        if ( [subview.class.description isEqualToString:@"MPVolumeSlider"] ) {
-            self->_sysVolumeSlider = (UISlider *)subview;
-            break;
-        }
-    }
-    
     __weak typeof(self) _self = self;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         __strong typeof(_self) self = _self;
@@ -138,10 +131,20 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
             if ( !self ) return ;
             [self handleVolumeDidChangeEvent];
         }];
+        
+        float volume = [AVAudioSession sharedInstance].outputVolume;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self->_volume = volume;
+        });
     });
-
+    
     SJRunLoopTaskQueue.main.enqueue(^{
-       [self _updateDeviceVolume];
+        for ( UIView *subview in self.sysVolumeView.subviews ) {
+            if ( [subview.class.description isEqualToString:@"MPVolumeSlider"] ) {
+                self->_sysVolumeSlider = (UISlider *)subview;
+                break;
+            }
+        }
     });
 
     return self;
