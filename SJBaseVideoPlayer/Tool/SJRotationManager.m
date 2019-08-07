@@ -139,12 +139,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if ( !self ) return nil;
-//    self.windowLevel = UIWindowLevelStatusBar - 1;
     self.rootViewController = SJFullscreenModeViewController.new;
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
     if ( @available(iOS 13.0, *) ) {
         if ( self.windowScene == nil )
             self.windowScene = UIApplication.sharedApplication.keyWindow.windowScene;
     }
+#endif
     self.hidden = YES;
     return self;
 }

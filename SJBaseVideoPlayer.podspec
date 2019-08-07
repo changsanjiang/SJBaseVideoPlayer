@@ -29,6 +29,7 @@ Pod::Spec.new do |s|
       ss.source_files = 'SJBaseVideoPlayer/Tool/*.{h,m}'
       ss.dependency 'SJBaseVideoPlayer/Header'
       ss.dependency 'SJBaseVideoPlayer/Model'
+      ss.dependency 'SJBaseVideoPlayer/Const'
   end
 
   s.subspec 'Model' do |ss|
@@ -42,10 +43,6 @@ Pod::Spec.new do |s|
           sss.source_files = 'SJBaseVideoPlayer/SJAVMediaPlaybackController/Core/*.{h,m}'
       end
       ss.dependency 'SJBaseVideoPlayer/Tool'
-  end
-
-  s.subspec 'SJPrompt' do |ss|
-      ss.source_files = 'SJBaseVideoPlayer/SJPrompt/*.{h,m}'
   end
 
   s.subspec 'SJDeviceVolumeAndBrightnessManager' do |ss|
