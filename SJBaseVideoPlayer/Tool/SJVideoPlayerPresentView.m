@@ -51,6 +51,20 @@ NS_ASSUME_NONNULL_BEGIN
 }
 #endif
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    if ( [self.delegate respondsToSelector:@selector(presentViewDidLayoutSubviews:)] ) {
+        [self.delegate presentViewDidLayoutSubviews:self];
+    }
+}
+
+- (void)willMoveToWindow:(nullable UIWindow *)newWindow {
+    [super willMoveToWindow:newWindow];
+    if ( [self.delegate respondsToSelector:@selector(presentViewWillMoveToWindow:)] ) {
+        [self.delegate presentViewWillMoveToWindow:newWindow];
+    }
+}
+
 - (void)handleSingleTap:(UITouch *)tap {
     if ( _disabledGestures & SJPlayerGestureType_SingleTap )
         return;
@@ -226,13 +240,6 @@ NS_ASSUME_NONNULL_BEGIN
     _placeholderImageView.contentMode = UIViewContentModeScaleAspectFill;
     _placeholderImageView.clipsToBounds = YES;
     return _placeholderImageView;
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    if ( [self.delegate respondsToSelector:@selector(presentViewDidLayoutSubviews:)] ) {
-        [self.delegate presentViewDidLayoutSubviews:self];
-    }
 }
 
 - (BOOL)isPlaceholderImageViewHidden {
