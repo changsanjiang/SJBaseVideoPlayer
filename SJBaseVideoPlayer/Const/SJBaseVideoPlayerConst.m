@@ -11,4 +11,5 @@ NS_ASSUME_NONNULL_BEGIN
 
 NSInteger const SJBaseVideoPlayerViewTag = 10000;
 
+NSInteger const SJBaseVideoPlayerPresentViewTag = 10001;
 NS_ASSUME_NONNULL_END

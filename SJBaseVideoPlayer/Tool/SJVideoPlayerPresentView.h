@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @protocol SJVideoPlayerPresentViewDelegate <NSObject>
+@optional
 - (void)presentViewDidLayoutSubviews:(SJVideoPlayerPresentView *)presentView;
 - (void)presentViewWillMoveToWindow:(nullable UIWindow *)window;
 @end

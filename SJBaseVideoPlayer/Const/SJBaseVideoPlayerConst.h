@@ -15,4 +15,5 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern NSInteger const SJBaseVideoPlayerViewTag;
 
+extern NSInteger const SJBaseVideoPlayerPresentViewTag;
 NS_ASSUME_NONNULL_END

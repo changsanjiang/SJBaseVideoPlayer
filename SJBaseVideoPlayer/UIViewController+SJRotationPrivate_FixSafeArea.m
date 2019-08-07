@@ -13,18 +13,21 @@
 #import <objc/message.h>
 
 NS_ASSUME_NONNULL_BEGIN
-@protocol _UIViewControllerPrivateMethodsProtocol <NSObject>
+API_AVAILABLE(ios(13.0)) @protocol _UIViewControllerPrivateMethodsProtocol <NSObject>
 - (void)_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
 @end
 
-@implementation UIViewController (SJRotationPrivate_FixSafeArea)
+API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationPrivate_FixSafeArea)
 - (BOOL)sj_containsPlayerView {
-    return [self.view viewWithTag:SJBaseVideoPlayerViewTag] != nil;
+    return [self.view viewWithTag:SJBaseVideoPlayerPresentViewTag] != nil ||
+           [self.view viewWithTag:SJBaseVideoPlayerViewTag] != nil;
 }
 
 - (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin {
-    if ( insets.top != 0 || [self sj_containsPlayerView] == NO ) {
-        [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
+    if ( ![NSStringFromClass(self.class) isEqualToString:@"SJFullscreenModeViewController"] ) {
+        if ( insets.top != 0 || [self sj_containsPlayerView] == NO ) {
+            [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
+        }
     }
 }
 @end
@@ -32,28 +35,30 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-@implementation SJBaseVideoPlayer (SJRotationPrivate_FixSafeArea)
+API_AVAILABLE(ios(13.0)) @implementation SJBaseVideoPlayer (SJRotationPrivate_FixSafeArea)
 + (void)initialize {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        Class cls = UIViewController.class;
-        SEL originalSelector = @selector(_setContentOverlayInsets:andLeftMargin:rightMargin:);
-        SEL swizzledSelector = @selector(sj_setContentOverlayInsets:andLeftMargin:rightMargin:);
-        
-        Method originalMethod = class_getInstanceMethod(cls, originalSelector);
-        Method swizzledMethod = class_getInstanceMethod(cls, swizzledSelector);
-        method_exchangeImplementations(originalMethod, swizzledMethod);
-    });
+    if ( @available(iOS 13.0, *) ) {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            Class cls = UIViewController.class;
+            SEL originalSelector = @selector(_setContentOverlayInsets:andLeftMargin:rightMargin:);
+            SEL swizzledSelector = @selector(sj_setContentOverlayInsets:andLeftMargin:rightMargin:);
+            
+            Method originalMethod = class_getInstanceMethod(cls, originalSelector);
+            Method swizzledMethod = class_getInstanceMethod(cls, swizzledSelector);
+            method_exchangeImplementations(originalMethod, swizzledMethod);
+        });
+    }
 }
 @end
 
-@implementation UINavigationController (SJRotationPrivate_FixSafeArea)
+API_AVAILABLE(ios(13.0)) @implementation UINavigationController (SJRotationPrivate_FixSafeArea)
 - (BOOL)sj_containsPlayerView {
     return [self.topViewController sj_containsPlayerView];
 }
 @end
 
-@implementation UITabBarController (SJRotationPrivate_FixSafeArea)
+API_AVAILABLE(ios(13.0)) @implementation UITabBarController (SJRotationPrivate_FixSafeArea)
 - (BOOL)sj_containsPlayerView {
     UIViewController *vc = self.selectedIndex != NSNotFound ? self.selectedViewController : self.viewControllers.firstObject;
     return [vc sj_containsPlayerView];

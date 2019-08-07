@@ -9,6 +9,7 @@
 #import "SJDeviceVolumeAndBrightnessManager.h"
 #import "SJDeviceVolumeAndBrightnessManagerResourceLoader.h"
 #import "SJDeviceOutputPromptView.h"
+#import "SJBaseVideoPlayerConst.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MPVolumeView.h>
 
@@ -91,7 +92,6 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 @end
 
 @implementation SJDeviceVolumeAndBrightnessManager
-@synthesize targetView = _targetView;
 @synthesize sysVolumeSlider = _sysVolumeSlider;
 @synthesize volumeTracking = _volumeTracking;
 @synthesize brightnessTracking = _brightnessTracking;
@@ -161,16 +161,14 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 
 #pragma mark - target view
 
-- (void)setTargetView:(nullable UIView *)targetView {
-    _targetView = targetView;
-    [self targetViewWillMoveToWindow:targetView.window];
+- (nullable UIView *)targetView {
+    return [UIApplication.sharedApplication.keyWindow.rootViewController.view viewWithTag:SJBaseVideoPlayerPresentViewTag];
 }
 
-- (void)targetViewWillMoveToWindow:(nullable UIWindow *)newWindow {
+- (void)_addOrRemoveSysVolumeView:(nullable UIWindow *)newWindow {
     if ( newWindow != nil ) {
-        UIView *superview = UIApplication.sharedApplication.keyWindow.rootViewController.view;
-        if ( self.sysVolumeView.superview != superview )
-            [superview addSubview:self.sysVolumeView];
+        if ( self.sysVolumeView.superview != newWindow )
+            [newWindow addSubview:self.sysVolumeView];
     }
     else {
         [self.sysVolumeView removeFromSuperview];
@@ -261,8 +259,9 @@ static UIImage *volumeImage = nil;
 }
 
 - (void)_showVolumeViewIfNeeded {
-    if ( self.targetView != nil && self.volumeView.superview != self.targetView ) {
-        [self.targetView addSubview:self.volumeView];
+    UIView *targetView = self.targetView;
+    if ( targetView.window != nil && self.volumeView.superview != targetView ) {
+        [targetView addSubview:self.volumeView];
         [self.volumeView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.center.offset(0);
         }];
@@ -339,8 +338,9 @@ static UIImage *volumeImage = nil;
 }
 
 - (void)_showBrightnessViewIfNeeded {
-    if ( self.targetView != nil && self.brightnessView.superview != self.targetView ) {
-        [self.targetView addSubview:self.brightnessView];
+    UIView *targetView = self.targetView;
+    if ( targetView != nil && self.brightnessView.superview != targetView ) {
+        [targetView addSubview:self.brightnessView];
         [self.brightnessView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.center.offset(0);
         }];
@@ -354,10 +354,11 @@ static UIImage *volumeImage = nil;
 #pragma mark - notifies
 
 - (void)handleVolumeDidChangeEvent {
-    [self targetViewWillMoveToWindow:self.targetView.window];
+    UIView *targetView = self.targetView;
+    [self _addOrRemoveSysVolumeView:targetView.window];
     if ( self.isVolumeTracking == NO ) {
         [self _updateDeviceVolume];
-        if ( self.targetView.window != nil ) {
+        if ( targetView.window != nil ) {
             self.volumeTracking = YES;
             [self _volumeDidChange];
             self.volumeTracking = NO;

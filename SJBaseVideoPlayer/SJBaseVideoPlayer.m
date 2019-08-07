@@ -372,7 +372,6 @@ typedef struct _SJPlayerControlInfo {
     _view = [SJPlayerView new];
     SJPlayerView *view = _view;
     view.delegate = self;
-    view.tag = SJBaseVideoPlayerViewTag;
     view.backgroundColor = [UIColor blackColor];
     
     _presentView = [SJVideoPlayerPresentView new];
@@ -410,9 +409,7 @@ typedef struct _SJPlayerControlInfo {
     self.controlLayerView.frame = presentView.bounds;
 }
 
-- (void)presentViewWillMoveToWindow:(nullable UIWindow *)window {
-    [_deviceVolumeAndBrightnessManager targetViewWillMoveToWindow:window];
-}
+//- (void)presentViewWillMoveToWindow:(nullable UIWindow *)window { }
 
 #pragma mark -
 
@@ -1566,8 +1563,6 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)_configDeviceVolumeAndBrightnessManager:(id<SJDeviceVolumeAndBrightnessManager>)mgr {
-    mgr.targetView = self.presentView;
-    
     _deviceVolumeAndBrightnessManagerObserver = [mgr getObserver];
     __weak typeof(self) _self = self;
     _deviceVolumeAndBrightnessManagerObserver.volumeDidChangeExeBlock = ^(id<SJDeviceVolumeAndBrightnessManager>  _Nonnull mgr, float volume) {

@@ -7,7 +7,7 @@
 //
 
 #import "SJVideoPlayerPresentView.h"
-#import <UIKit/UIGestureRecognizerSubclass.h>
+#import "SJBaseVideoPlayerConst.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @interface _SJPerformRequestInfo : NSObject
@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if ( !self ) return nil;
+    self.tag = SJBaseVideoPlayerPresentViewTag;
     [self _setupViews];
     return self;
 }
