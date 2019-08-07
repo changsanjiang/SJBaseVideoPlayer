@@ -198,7 +198,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 + (NSString *)version {
-    return @"2.6.4";
+    return @"2.7.0";
 }
 
 - (nullable __kindof UIViewController *)atViewController {
