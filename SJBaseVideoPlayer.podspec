@@ -50,6 +50,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'SJDeviceVolumeAndBrightnessManager' do |ss|
       ss.dependency 'SJBaseVideoPlayer/Header'
+      ss.dependency 'SJBaseVideoPlayer/Const'
       ss.source_files = 'SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/*.{h,m}'
       ss.subspec 'Core' do |sss|
         sss.source_files = 'SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core/*.{h,m}'
