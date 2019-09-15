@@ -12,8 +12,10 @@ pod 'SJVideoPlayer'
 
 # The base player, without the control layer, can be used if you need a custom control layer.
 pod 'SJBaseVideoPlayer'
+```
 
-# 天朝
+### 天朝
+```ruby
 # 如果网络不行安装不了, 可改成以下方式进行安装
 pod 'SJBaseVideoPlayer', :git => 'https://gitee.com/changsanjiang/SJBaseVideoPlayer.git'
 pod 'SJVideoPlayer', :git => 'https://gitee.com/changsanjiang/SJVideoPlayer.git'
@@ -22,19 +24,6 @@ pod 'SJUIKit/ObserverHelper', :git => 'https://gitee.com/changsanjiang/SJUIKit.g
 pod 'SJUIKit/Queues', :git => 'https://gitee.com/changsanjiang/SJUIKit.git'
 $ pod update --no-repo-update   (不要用 pod install 了, 用这个命令安装)
 ```
-- [Base Video Player](https://github.com/changsanjiang/SJBaseVideoPlayer)
-
-___
-
-## Contact
-* Email: changsanjiang@gmail.com
-
-___
-
-## License
-SJVideoPlayer is available under the MIT license. See the LICENSE file for more info.
-
-___
 
 ## Example
 
