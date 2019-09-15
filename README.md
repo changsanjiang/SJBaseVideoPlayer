@@ -342,18 +342,17 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL specifyStartTi
 
 <h3 id="2.4">2.4 续播(进入下个页面时, 继续播放)</h3>
 
+<p>
+
+我们可能需要切换界面时, 希望视频能够在下一个界面无缝的进行播放.
+
+</p>
+
 ```Objective-C
 // otherAsset 即为上一个页面播放的Asset
 // 除了需要一个otherAsset, 其他方面同以上的示例一模一样
 _player.URLAsset = [SJVideoPlayerURLAsset.alloc initWithOtherAsset:otherAsset]; 
 ```
-
-<p>
-
-在播放时, 我们可能需要切换界面, 而希望视频能够在下一个界面无缝的进行播放. 针对此种情况 SJVideoPlayerURLAsset 提供了便利的初始化方法. 
-
-</p>
-
 
 <h3 id="2.5">2.5 销毁时的回调. 可在此做一些记录工作, 如播放记录</h3>
 
