@@ -38,8 +38,6 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 ... 等等, 更多设置, 请查看头文件. 相应功能均为懒加载, 用到时才会创建. 
 ```
 
-___
-
 ## Documents
 
 #### [1. 视图层次结构](#1)
@@ -58,7 +56,7 @@ ___
 
 <p>
 
-由于 UITableView 及 UICollectionView 的复用机制, 会导致播放器视图显示在错误的位置上, 通过指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示. 
+由于 UITableView 及 UICollectionView 的复用机制, 会导致播放器视图显示在错误的位置上, 为防止出现此种情况, 在创建资源时指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示. 
 
 </p>
 
@@ -73,12 +71,12 @@ ___
 
 <p>
 
-播放器 播放的资源是通过 SJVideoPlayerURLAsset 进行创建的. 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放.  
-
 ```Objective-C
 SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 _player.URLAsset = asset;
 ```
+
+播放资源是通过 SJVideoPlayerURLAsset 进行创建的. 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放.  
 
 </p>
 
