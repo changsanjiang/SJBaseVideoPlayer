@@ -62,24 +62,31 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 * [2.5 销毁时的回调. 可在此做一些记录工作, 如播放记录](#2.5)
 
 #### [3. 播放控制](#3)
-* [3.1 当前时间和时长](#3.1)
-* [3.2 时间改变时的回调](#3.2)
-* [3.3 播放结束后的回调](#3.3)
-* [3.4 资源准备状态](#3.4)
-* [3.5 播放控制状态](#3.5)
-* [3.6 播放等待的原因](#3.6)
-* [3.7 播放状态改变的回调](#3.7)
-* [3.8 是否自动播放 - 当资源初始化完成后](#3.8)
-* [3.9 刷新 ](#3.9)
-* [3.10 播放器的声音设置 & 静音](#3.10)
-* [3.11 播放](#3.11)
-* [3.12 暂停](#3.12)
-* [3.13 是否暂停 - 当App进入后台后](#3.13)
-* [3.14 停止](#3.14)
-* [3.15 重播](#3.15)
-* [3.16 跳转到指定的时间播放](#3.16)
-* [3.17 调速 & 速率改变时的回调](#3.17)
-* [3.18 接入别的视频 SDK, 自己动手撸一个 SJMediaPlaybackController, 替换作者原始实现](#3.18)
+* [3.1 播放](#3.1)
+* [3.2 暂停](#3.2)
+* [3.3 刷新 ](#3.3)
+* [3.4 重播](#3.4)
+* [3.5 停止](#3.5)
+* [3.6 静音](#3.6)
+* [3.7 调速](#3.7)
+* [3.8 报错](#3.8)
+* [3.9 跳转](#3.9)
+* [3.10 切换清晰度](#3.10)
+* [3.11 当前时间](#3.11)
+* [3.12 总时长](#3.12)
+* [3.13 缓冲时长](#3.13)
+* [3.14 是否已播放完毕](#3.14)
+* [3.15 是否调用过播放](#3.15)
+* [3.16 是否调用过重播](#3.16)
+* [3.17 设置新资源时, 是否自动播放](#3.17)
+* [3.18 进入后台, 是否暂停播放](#3.18)
+* [3.19 进入前台, 是否恢复播放](#3.19)
+* [3.20 跳转完成, 是否恢复播放](#3.20)
+* [3.21 资源准备状态](#3.21)
+* [3.22 播放控制状态](#3.22)
+* [3.23 播放等待的原因](#3.23)
+* [3.24 监听状态改变🔥](#3.24)
+* [3.25 接入别的视频 SDK, 自己动手撸一个 SJVideoPlayerPlaybackController, 替换作者原始实现](#3.25)
 
 #### [4. 控制层的显示和隐藏](#4)
 * [4.1 让控制层显示](#4.1)
@@ -445,38 +452,194 @@ ___
 正常来说实现了此协议的任何对象, 均可赋值给 player.playbackController 来替换原始实现.
 </p>
 
-<h3 id="3.1">3.1 当前时间和时长</h3>
+<h3 id="3.1">3.1 播放</h3>
 
 ```Objective-C
-/// 当前时间
-_player.currentTime
-
-/// 时长
-_player.duration
-
-/// 字符串化, 
-/// - 格式为 00:00(小于 1 小时) 或者 00:00:00 (大于 1 小时)
-_player.currentTimeStr
-_player.durationStr
+[_player play];
 ```
 
-<h3 id="3.2">3.2 时间改变时的回调</h3>
+<h3 id="3.2">3.2 暂停</h3>
 
 ```Objective-C
-_player.playbackObserver.currentTimeDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull player) {
-    /// ...
-};
+[_player pause];
 ```
 
-<h3 id="3.3">3.3 播放结束后的回调</h3>
+<h3 id="3.3">3.3 刷新</h3>
+
+<p>
+在播放一个资源时, 可能有一些意外情况导致播放失败(如网络环境差). 
+
+此时当用户点击刷新按钮, 我们需要对当前的资源(Asset)进行刷新. 
+
+SJBaseVideoPlayer提供了直接的方法去刷新, 不需要开发者再重复的去创建新的Asset.
+</p>
 
 ```Objective-C
-_player.playbackObserver.didPlayToEndTimeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull player) {
-    /// ...
-};
+[_player refresh];
 ```
 
-<h3 id="3.4">3.4 资源准备状态</h3>
+<h3 id="3.4">3.4 重播</h3>
+
+<p>
+从头开始重新播放
+</p>
+
+```Objective-C
+[_player replay];
+```
+
+<h3 id="3.5">3.5 停止</h3>
+
+<p>
+停止播放, 请注意: 当前资源将会被清空, 如需重播, 请重新设置新资源
+</p>
+
+```Objective-C
+[_player stop];
+```
+
+<h3 id="3.6">3.6 静音</h3>
+
+```Objective-C
+_player.muted = YES;
+```
+
+<h3 id="3.7">3.7 调速</h3>
+
+```Objective-C
+// 默认值为 1.0
+_player.rate = 1.0;
+```
+
+<h3 id="3.8">3.8 报错</h3>
+
+<p>
+
+当播放发生错误时, 可以通过它来获取错误信息
+
+</p>
+
+```Objective-C
+_player.error
+```
+
+<h3 id="3.9">3.9 跳转</h3>
+
+```Objective-C
+///
+/// 是否精确跳转, default value is NO.
+///
+@property (nonatomic) BOOL accurateSeeking;
+
+///
+/// 跳转到指定位置播放
+///
+- (void)seekToTime:(NSTimeInterval)secs completionHandler:(void (^ __nullable)(BOOL finished))completionHandler;
+- (void)seekToTime:(CMTime)time toleranceBefore:(CMTime)toleranceBefore toleranceAfter:(CMTime)toleranceAfter completionHandler:(void (^ __nullable)(BOOL finished))completionHandler;
+```
+
+<h3 id="3.10">3.10 切换清晰度</h3>
+
+```Objective-C
+///
+/// 切换清晰度
+///
+- (void)switchVideoDefinition:(SJVideoPlayerURLAsset *)URLAsset;
+
+///
+/// 当前清晰度切换的信息
+///
+@property (nonatomic, strong, readonly) SJVideoDefinitionSwitchingInfo *definitionSwitchingInfo;
+
+/// 以下为设置 SJVideoPlayer.definitionURLAssets, 将会在清晰度切换控制层中显示这些资源项. 
+
+SJVideoPlayerURLAsset *asset1 = [[SJVideoPlayerURLAsset alloc] initWithURL:VideoURL_Level4];
+asset1.definition_fullName = @"超清 1080P";
+asset1.definition_lastName = @"超清";
+
+SJVideoPlayerURLAsset *asset2 = [[SJVideoPlayerURLAsset alloc] initWithURL:VideoURL_Level3];
+asset2.definition_fullName = @"高清 720P";
+asset2.definition_lastName = @"AAAAAAA";
+
+SJVideoPlayerURLAsset *asset3 = [[SJVideoPlayerURLAsset alloc] initWithURL:VideoURL_Level2];
+asset3.definition_fullName = @"清晰 480P";
+asset3.definition_lastName = @"480P";
+_player.definitionURLAssets = @[asset1, asset2, asset3];
+
+// 先播放asset1. (asset2 和 asset3 将会在用户选择后进行切换)
+_player.URLAsset = asset1;
+```
+
+<h3 id="3.11">3.11 当前时间</h3>
+
+```Objective-C
+@property (nonatomic, readonly) NSTimeInterval currentTime;                         ///< 当前播放到的时间
+```
+
+<h3 id="3.12">3.12 总时长</h3>
+
+```Objective-C
+@property (nonatomic, readonly) NSTimeInterval duration;                            ///< 总时长
+```
+
+<h3 id="3.13">3.13 缓冲时长</h3>
+
+```Objective-C
+@property (nonatomic, readonly) NSTimeInterval playableDuration;                    ///< 缓冲到的时间
+```
+
+<h3 id="3.14">3.14 是否已播放完毕</h3>
+
+```Objective-C
+@property (nonatomic, readonly) BOOL isPlayedToEndTime;                             ///< 当前资源是否已播放结束
+```
+
+<h3 id="3.15">3.15 是否调用过播放</h3>
+
+```Objective-C
+@property (nonatomic, readonly) BOOL isPlayed;                                      ///< 是否播放过当前的资源
+```
+<h3 id="3.16">3.16 是否调用过重播</h3>
+
+```Objective-C
+@property (nonatomic, readonly) BOOL isReplayed;                                    ///< 是否重播过当前的资源
+```
+
+<h3 id="3.17">3.17 设置新资源时, 是否自动播放</h3>
+
+```Objective-C
+@property (nonatomic) BOOL autoplayWhenSetNewAsset;                    ///< 设置新的资源后, 是否自动调用播放. 默认为 YES
+```
+
+<h3 id="3.18">3.18 进入后台, 是否暂停播放</h3>
+
+<p>
+关于后台播放视频, 引用自: https://juejin.im/post/5a38e1a0f265da4327185a26
+
+当您想在后台播放视频时:
+
+1. 需要设置 videoPlayer.pauseWhenAppDidEnterBackground = NO; (该值默认为YES, 即App进入后台默认暂停).
+
+2. 前往 `TARGETS` -> `Capability` -> enable `Background Modes` -> select this mode `Audio, AirPlay, and Picture in Picture`
+</p>
+
+```Objective-C
+_player.pauseWhenAppDidEnterBackground = NO; // 默认值为 YES, 即进入后台后 暂停.
+```
+
+<h3 id="3.19">3.19 进入前台, 是否恢复播放</h3>
+
+```Objective-C
+@property (nonatomic) BOOL resumePlaybackWhenAppDidEnterForeground;    ///< 进入前台时, 是否恢复播放. 默认为 NO
+```
+
+<h3 id="3.20">3.20 跳转完成, 是否恢复播放</h3>
+
+```Objective-C
+@property (nonatomic) BOOL resumePlaybackWhenPlayerHasFinishedSeeking; ///< 当`seekToTime:`操作完成后, 是否恢复播放. 默认为 YES
+```
+
+<h3 id="3.21">3.21 资源准备状态</h3>
 
 <p>
 
@@ -513,7 +676,7 @@ typedef NS_ENUM(NSInteger, SJAssetStatus) {
 };
 ```
 
-<h3 id="3.5">3.5 播放控制状态</h3>
+<h3 id="3.22">3.22 播放控制状态</h3>
 
 <p>
 
@@ -549,7 +712,7 @@ typedef NS_ENUM(NSInteger, SJPlaybackTimeControlStatus) {
 };
 ```
 
-<h3 id="3.6">3.6 播放等待的原因</h3>
+<h3 id="3.23">3.23 播放等待的原因</h3>
 
 <p>
 
@@ -579,156 +742,27 @@ extern SJWaitingReason const SJWaitingWhileEvaluatingBufferingRateReason;
 extern SJWaitingReason const SJWaitingWithNoAssetToPlayReason;
 ```
 
-<h3 id="3.7">3.7 播放状态改变的回调</h3>
-
-<p>
-对播放状态的判断我添加了一个便利的分类 `SJBaseVideoPlayer (PlayStatus)`
-
-如需判断状态, 可导入头文件 `#import "SJBaseVideoPlayer+PlayStatus.h"` 使用. 
-</p>
+<h3 id="3.24">3.24 监听状态改变🔥</h3>
 
 ```Objective-C
-/// 播放状态改变的回调
-_player.playStatusDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
-
-};
-
-/// 对播放状态的判断我添加了一个便利的分类
-@interface SJBaseVideoPlayer (PlayStatus)
-
-- (NSString *)getPlayStatusStr:(SJVideoPlayerPlayStatus)status;
-
-- (BOOL)playStatus_isUnknown;
-
-- (BOOL)playStatus_isPrepare;
-
-- (BOOL)playStatus_isReadyToPlay;
-
-- (BOOL)playStatus_isPlaying;
-
-- (BOOL)playStatus_isPaused;
-
-- (BOOL)playStatus_isPaused_ReasonBuffering;
-
-- (BOOL)playStatus_isPaused_ReasonPause;
-
-- (BOOL)playStatus_isPaused_ReasonSeeking;
-
-- (BOOL)playStatus_isInactivity;
-
-- (BOOL)playStatus_isInactivity_ReasonPlayEnd;
-
-- (BOOL)playStatus_isInactivity_ReasonPlayFailed;
-
-@end
+///
+/// 观察者
+///
+///         可以如下设置block, 来监听某个状态的改变
+///         了解更多请前往头文件查看
+///         player.playbackObserver.currentTimeDidChangeExeBlock = ...;
+///         player.playbackObserver.durationDidChangeExeBlock = ...;
+///         player.playbackObserver.timeControlStatusDidChangeExeBlock = ...;
+///
+@property (nonatomic, strong, readonly) SJPlaybackObservation *playbackObserver;
 ```
 
-<h3 id="3.8">3.8 是否自动播放 - 当资源初始化完成后</h3>
-
-```Objective-C
-_player.autoPlayWhenPlayStatusIsReadyToPlay = YES;
-```
-
-<h3 id="3.9">3.9 刷新</h3>
-
-<p>
-在播放一个资源时, 可能有一些意外情况导致播放失败(如网络环境差). 
-
-此时当用户点击刷新按钮, 我们需要对当前的资源(Asset)进行刷新. 
-
-SJBaseVideoPlayer提供了直接的方法去刷新, 不需要开发者再重复的去创建新的Asset.
-</p>
-
-```Objective-C
-[_player refresh];
-```
-
-<h3 id="3.10">3.10 播放器的声音设置 & 静音</h3>
-
-```Objective-C
-/// 默认值为 1.0, 最小为 0.0
-_player.playerVolume = 1.0;
-
-/// 设置静音
-_player.mute = YES;
-```
-
-<h3 id="3.11">3.11 播放</h3>
-
-```Objective-C
-[_player play];
-```
-
-<h3 id="3.12">3.12 暂停</h3>
-
-```Objective-C
-[_player pause];
-```
-
-<h3 id="3.13">3.13 是否暂停 - 当App进入后台后</h3>
-
-<p>
-关于后台播放视频, 引用自: https://juejin.im/post/5a38e1a0f265da4327185a26
-
-当您想在后台播放视频时:
-
-1. 需要设置 videoPlayer.pauseWhenAppDidEnterBackground = NO; (该值默认为YES, 即App进入后台默认暂停).
-
-2. 前往 `TARGETS` -> `Capability` -> enable `Background Modes` -> select this mode `Audio, AirPlay, and Picture in Picture`
-</p>
-
-```Objective-C
-_player.pauseWhenAppDidEnterBackground = NO; // 默认值为 YES, 即进入后台后 暂停.
-```
-
-<h3 id="3.14">3.14 停止</h3>
-
-<p>
-注意, 调用此方法后, 当前的 asset 将会被清空. 也就是说, 调用 play等播放操作将会无效.
-</p>
-
-```Objective-C
-[_player stop];
-```
-
-<h3 id="3.15">3.15 重播</h3>
-
-<p>
-从头开始重新播放
-</p>
-
-```Objective-C
-[_player replay];
-```
-
-<h3 id="3.16">3.16 跳转到指定的时间播放</h3>
-
-```Objective-C
-NSTimeInterval secs = 20.0;
-[_player seekToTime:secs completionHandler:^(BOOL finished) {
-    // ....
-}];
-```
-
-<h3 id="3.17">3.17 调速 & 速率改变时的回调</h3>
-
-```Objective-C
-
-/// 默认值为 1.0
-_player.rate = 1.0;
-
-
-_player.rateDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull player) {
-    /// .. 
-}
-```
-
-<h3 id="3.18">3.18 接入别的视频 SDK, 自己动手撸一个 SJMediaPlaybackController, 替换作者原始实现</h3>
+<h3 id="3.25">3.25 接入别的视频 SDK, 自己动手撸一个 SJVideoPlayerPlaybackController, 替换作者原始实现</h3>
 
 <p>
 某些时候, 我们需要接入第三方的视频SDK, 但是又想使用 SJBaseVideoPlayer 封装的其他的功能. 
 
-这个时候, 我们可以自己动手, 将第三方的SDK封装一下, 实现 SJMediaPlaybackController 协议, 管理 SJBaseVideoPlayer 中的播放操作.
+这个时候, 我们可以自己动手, 将第三方的SDK封装一下, 实现 SJVideoPlayerPlaybackController 协议, 管理 SJBaseVideoPlayer 中的播放操作.
 
 示例:
 
