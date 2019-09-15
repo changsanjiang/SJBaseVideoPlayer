@@ -167,8 +167,11 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 
 #### [16. 滚动相关](#16)
 * [16.1 是否在 UICollectionView 或者 UITableView 中播放](#16.1)
-* [16.2 是否滚动显示](#16.2)
+* [16.2 是否已显示](#16.2)
 * [16.3 播放器视图将要滚动显示和消失的回调](#16.3)
+* [16.4 滚动出去后, 是否暂停](#16.4)
+* [16.5 滚动进入时, 是否恢复播放](#16.5)
+* [16.6 滚动出去后, 是否隐藏播放器视图](#16.6)
 
 #### [17. 自动播放 - 在 UICollectionView 或者 UITableView 中](#17)
 * [17.1 开启](#17.1)
@@ -1503,11 +1506,15 @@ completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage *imageGIF, 
 _player.isPlayOnScrollView
 ```
 
-<h3 id="16.2">16.2 是否滚动显示</h3>
+<h3 id="16.2">16.2 是否已显示</h3>
 
 ```Objective-C
-/// 是否滚动显示
-_player.isScrollAppeared
+///
+/// 播放器视图是否显示
+///
+/// Whether the player is appeared when playing on scrollView. Because scrollview may be scrolled.
+///
+@property (nonatomic, readonly) BOOL isScrollAppeared;
 ```
 
 <h3 id="16.3">16.3 播放器视图将要滚动显示和消失的回调</h3>
@@ -1515,6 +1522,39 @@ _player.isScrollAppeared
 ```Objective-C
 @property (nonatomic, copy, nullable) void(^playerViewWillAppearExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
 @property (nonatomic, copy, nullable) void(^playerViewWillDisappearExeBlock)(__kindof SJBaseVideoPlayer *videoPlayer);
+```
+
+<h3 id="16.4">16.4 滚动出去后, 是否暂停</h3>
+
+```Objective-C
+///
+/// 滚动出去后, 是否暂停. 默认为YES
+///
+/// - default value is YES.
+///
+@property (nonatomic) BOOL pauseWhenScrollDisappeared;
+```
+
+<h3 id="16.5">16.5 滚动进入时, 是否恢复播放</h3>
+
+```Objective-C
+///
+/// 滚动进入时, 是否恢复播放. 默认为YES
+///
+/// - default values is YES.
+///
+@property (nonatomic) BOOL resumePlaybackWhenScrollAppeared;
+```
+
+<h3 id="16.6">16.6 滚动出去后, 是否隐藏播放器视图</h3>
+
+```Objective-C
+///
+/// 滚动出去后, 是否隐藏播放器视图. 默认为YES
+///
+/// - default value is YES.
+///
+@property (nonatomic) BOOL hiddenViewWhenScrollDisappeared;
 ```
 
 <h2 id="17">17. 自动播放 - 在 UICollectionView 或者 UITableView 中</h2>
