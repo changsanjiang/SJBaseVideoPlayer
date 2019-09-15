@@ -86,6 +86,26 @@ ___
     * [1.4.2 UICollectionView 嵌套在 UITableViewHeaderView 中](#1.4.2)
     * [1.4.3 UICollectionView 嵌套在 UICollectionViewCell 中](#1.4.3)
 
+
+#### [2. URLAsset]
+
+<p>
+
+播放器 播放的资源是通过 SJVideoPlayerURLAsset 进行创建的. 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放.
+
+```Objective-C
+SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
+_player.URLAsset = asset;
+```
+
+</p>
+
+* [2.1 播放 URL](#2.1)
+* [2.2 播放 AVAsset 或其子类](#2.2)
+* [2.3 从指定的位置开始播放](#2.3)
+* [2.4 续播(进入下个页面时, 继续播放)](#2.4)
+* [2.5 销毁时的回调. 可在此时做一些记录工作, 如播放记录](#2.5)
+
 ___
 
 <h3 id="1.1">1.1 UIView</h3>  
