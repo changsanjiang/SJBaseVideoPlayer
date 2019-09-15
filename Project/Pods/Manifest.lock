@@ -1,56 +1,56 @@
 PODS:
   - Masonry (1.1.0)
   - Reachability (3.2)
-  - SJBaseVideoPlayer (2.7.1):
+  - SJBaseVideoPlayer (3.0.0):
     - Masonry
     - Reachability
-    - SJBaseVideoPlayer/Const (= 2.7.1)
-    - SJBaseVideoPlayer/Header (= 2.7.1)
-    - SJBaseVideoPlayer/Model (= 2.7.1)
-    - SJBaseVideoPlayer/SJAVMediaPlaybackController (= 2.7.1)
-    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (= 2.7.1)
-    - SJBaseVideoPlayer/Tool (= 2.7.1)
+    - SJBaseVideoPlayer/Const (= 3.0.0)
+    - SJBaseVideoPlayer/Header (= 3.0.0)
+    - SJBaseVideoPlayer/Model (= 3.0.0)
+    - SJBaseVideoPlayer/SJAVMediaPlaybackController (= 3.0.0)
+    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (= 3.0.0)
+    - SJBaseVideoPlayer/Tool (= 3.0.0)
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/Const (2.7.1):
-    - Masonry
-    - Reachability
-    - SJUIKit/ObserverHelper (>= 0.0.0.31)
-    - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/Header (2.7.1):
+  - SJBaseVideoPlayer/Const (3.0.0):
     - Masonry
     - Reachability
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/Model (2.7.1):
+  - SJBaseVideoPlayer/Header (3.0.0):
+    - Masonry
+    - Reachability
+    - SJUIKit/ObserverHelper (>= 0.0.0.31)
+    - SJUIKit/Queues (>= 0.0.0.31)
+  - SJBaseVideoPlayer/Model (3.0.0):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Header
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/SJAVMediaPlaybackController (2.7.1):
+  - SJBaseVideoPlayer/SJAVMediaPlaybackController (3.0.0):
     - Masonry
     - Reachability
-    - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (= 2.7.1)
+    - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (= 3.0.0)
     - SJBaseVideoPlayer/Tool
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (2.7.1):
+  - SJBaseVideoPlayer/SJAVMediaPlaybackController/Core (3.0.0):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Tool
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (2.7.1):
+  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager (3.0.0):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Const
     - SJBaseVideoPlayer/Header
-    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (= 2.7.1)
-    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (= 2.7.1)
+    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (= 3.0.0)
+    - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (= 3.0.0)
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (2.7.1):
+  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/Core (3.0.0):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Const
@@ -58,14 +58,14 @@ PODS:
     - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (2.7.1):
+  - SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader (3.0.0):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Const
     - SJBaseVideoPlayer/Header
     - SJUIKit/ObserverHelper (>= 0.0.0.31)
     - SJUIKit/Queues (>= 0.0.0.31)
-  - SJBaseVideoPlayer/Tool (2.7.1):
+  - SJBaseVideoPlayer/Tool (3.0.0):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Const
@@ -92,7 +92,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SJBaseVideoPlayer: 35fa3f846811f3ae44f71c292c8034cc669aeb17
+  SJBaseVideoPlayer: 50500bff7b81673c905057bc6c31f0afcc066f0f
   SJUIKit: 9fc7b17d7f421ca64304c42d1a9ae387bed35bb1
 
 PODFILE CHECKSUM: 8b9107f80673bb180537f670bf095c09a94ea1a5
