@@ -170,3 +170,50 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 
 SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
 ```
+
+<h3 id="1.4">1.4 嵌套时的视图层次</h3>
+
+<p>
+
+嵌套的情况下, 传递的参数比较多, 不过熟悉了前面的套路, 下面的这些也不成问题.  (会被复用的视图, 传 tag. 如果不会被复用, 则直接传视图)
+
+</p>
+
+<h3 id="1.4.1">1.4.1 UICollectionView 嵌套在 UITableViewCell 中</h3>
+
+```Objective-C
+--  UITableView
+    --  UITableViewCell
+        --  UITableViewCell.UICollectionView
+            --  UICollectionViewCell
+                --  Player.superview
+                    --  Player.view
+
+SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:tableViewCellAtIndexPath tableView:self.tableView];
+```
+
+<h3 id="1.4.2">1.4.2 UICollectionView 嵌套在 UITableViewHeaderView 中</h3>
+
+```Objective-C
+--  UITableView
+    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  
+        --  tableHeaderView.UICollectionView
+            --  UICollectionViewCell
+                --  Player.superview
+                    --  Player.view
+
+SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
+```
+
+<h3 id="1.4.3">1.4.3 UICollectionView 嵌套在 UICollectionViewCell 中</h3>
+
+```Objective-C
+--  UICollectionView
+    --  UICollectionViewCell
+        --  UICollectionViewCell.UICollectionView
+            --  UICollectionViewCell
+                --  Player.superview
+                    --  Player.view
+
+SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
+```
