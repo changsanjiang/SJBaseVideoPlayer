@@ -54,31 +54,12 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
     * [1.4.2 UICollectionView 嵌套在 UITableViewHeaderView 中](#1.4.2)
     * [1.4.3 UICollectionView 嵌套在 UICollectionViewCell 中](#1.4.3)
 
-<p>
-
-由于 UITableView 及 UICollectionView 的复用机制, 会导致播放器视图显示在错误的位置上, 为防止出现此种情况, 在创建资源时指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示. 
-
-</p>
-
-___
-
 #### [2. URLAsset](#2)
 * [2.1 播放 URL(本地文件或远程资源)](#2.1)
 * [2.2 播放 AVAsset 或其子类](#2.2)
 * [2.3 从指定的位置开始播放](#2.3)
 * [2.4 续播(进入下个页面时, 继续播放)](#2.4)
 * [2.5 销毁时的回调. 可在此做一些记录工作, 如播放记录](#2.5)
-
-<p>
-
-```Objective-C
-SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
-_player.URLAsset = asset;
-```
-
-播放资源是通过 SJVideoPlayerURLAsset 进行创建的. 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放.  
-
-</p>
 
 #### [3. 播放控制](#3)
 * [3.1 当前时间和时长](#3.1)
@@ -223,7 +204,7 @@ ___
 
 <p>
 
-在 UITableView 中播放时, 需指定视图层次, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.
+由于 UITableView 及 UICollectionView 的复用机制, 会导致播放器视图显示在错误的位置上, 为防止出现此种情况, 在创建资源时指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示. 
 
 </p>
 
