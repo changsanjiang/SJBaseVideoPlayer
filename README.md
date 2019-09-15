@@ -83,6 +83,12 @@ _player.URLAsset = asset;
 
 <h3 id="1.2.1">1.2.1 UITableViewCell</h3>
 
+<p>
+在 UITableViewCell 中播放时, 需指定 Cell 所处的 indexPath 以及播放器父视图的 tag. 
+
+在滑动时, 播放器内部将会通过 indexPath 来获取对应的 Cell, 并且通过父视图的 tag 来获取到位于 Cell 中的播放器父视图, 控制其隐藏或显示. 
+</p>
+
 ```Objective-C
 --  UITableView
     --  UITableViewCell
