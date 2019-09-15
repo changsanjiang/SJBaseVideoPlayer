@@ -831,6 +831,10 @@ _lookupResponder(UIView *view, Class cls) {
     return self.playbackController.playableDuration;
 }
 
+- (NSTimeInterval)durationWatched {
+    return self.playbackController.durationWatched;
+}
+
 - (NSString *)stringForSeconds:(NSInteger)secs {
     long min = 60;
     long hour = 60 * min;

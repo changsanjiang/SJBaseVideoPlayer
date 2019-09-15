@@ -111,26 +111,22 @@ NS_ASSUME_NONNULL_BEGIN
     
     __weak typeof(self) _self = self;
     sjkvo_observe(self, @"sj_assetStatus", ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            __strong typeof(_self) self = _self;
-            if ( !self ) return;
-            [self sj_postNotification:SJAVMediaPlayerAssetStatusDidChangeNotification];
-            
-            
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        [self sj_postNotification:SJAVMediaPlayerAssetStatusDidChangeNotification];
+        
+        
 #ifdef DEBUG
-            if ( self.sj_error ) {
-                NSLog(@"SJAVMediaPlayer: %d - %s - %@", (int)__LINE__, __func__, self.sj_error);
-            }
+        if ( self.sj_error ) {
+            NSLog(@"SJAVMediaPlayer: %d - %s - %@", (int)__LINE__, __func__, self.sj_error);
+        }
 #endif
-        });
     });
     
     sjkvo_observe(self, @"sj_timeControlStatus", ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            __strong typeof(_self) self = _self;
-            if ( !self ) return;
-            [self sj_postNotification:SJAVMediaPlayerTimeControlStatusDidChangeNotification];
-        });
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        [self sj_postNotification:SJAVMediaPlayerTimeControlStatusDidChangeNotification];
     });
     
     sjkvo_observe(self.currentItem, @"status", ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {

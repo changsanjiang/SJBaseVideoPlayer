@@ -66,7 +66,6 @@ typedef struct {
         self.sj_reasonForWaitingToPlay = SJWaitingWhileEvaluatingBufferingRateReason;
         self.sj_timeControlStatus = SJPlaybackTimeControlStatusWaitingToPlay;
         [super play];
-        [self _sjbase_toEvaluating];
     }
 }
 
@@ -89,7 +88,7 @@ typedef struct {
                 [self pause];
             }
         }
-        else {
+        else if ( self.sj_timeControlStatus != SJPlaybackTimeControlStatusPlaying ) {
             [self _sjbase_toEvaluating];
         }
     }
@@ -254,8 +253,8 @@ typedef struct {
 }
 
 - (void)_sjbase_toEvaluating {
-    SJWaitingReason _Nullable waitingReason = nil;
-    SJPlaybackTimeControlStatus timeControlStatus = SJPlaybackTimeControlStatusPaused;
+    SJWaitingReason _Nullable waitingReason = _sj_reasonForWaitingToPlay;
+    SJPlaybackTimeControlStatus timeControlStatus = _sj_timeControlStatus;
     
     if ( self.currentItem.status == AVPlayerItemStatusReadyToPlay && (self.currentItem.isPlaybackBufferFull || self.currentItem.isPlaybackLikelyToKeepUp) ) {
         waitingReason = nil;
@@ -270,6 +269,8 @@ typedef struct {
         self.sj_reasonForWaitingToPlay = waitingReason;
         self.sj_timeControlStatus = timeControlStatus;
     }
+    
+    if ( self.rate == 0 ) [super play];
 }
 
 - (void)_sjbase_refreshPlayerStatus {

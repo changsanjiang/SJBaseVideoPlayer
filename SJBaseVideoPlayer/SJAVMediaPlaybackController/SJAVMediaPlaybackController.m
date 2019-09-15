@@ -91,7 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
     return _player.sj_reasonForWaitingToPlay;
 }
 - (NSTimeInterval)currentTime {
-    return CMTimeGetSeconds(_player.currentTime);
+    return _player ? CMTimeGetSeconds(_player.currentTime) : 0;
 }
 - (NSTimeInterval)duration {
     return _player.sj_playbackInfo.duration;
