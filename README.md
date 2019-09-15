@@ -58,9 +58,7 @@ _player.fastForwardViewController.enabled = YES;
 // 开启小浮窗模式
 _player.floatSmallViewController.enabled = YES;
 
-.....
-....
-...
+... 等等, 更多设置, 请查看头文件. 相应功能均为懒加载, 用到时才会创建. 
 ```
 
 ___
