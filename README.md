@@ -41,7 +41,7 @@ ___
 #### [1. 视图层次结构](#1)
 
 <p>
-为防止 Cell 复用, 通过指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.  以下为目前支持的视图层次:
+为防止 UITableView 及 UICollectionView 的复用机制, 导致播放器视图显示在错误的位置上, 通过指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.  以下为目前支持的视图层次:
 </p>
 
 * [1.1 UIView](#1.1)
@@ -130,4 +130,33 @@ UIView *playerSuperview = self.tableView.tableFooterView;
 // 也可以设置子视图
 // playerSuperview = self.tableView.tableFooterView.coverImageView;
 SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:playerSuperview tableView:self.tableView];
+```
+
+<h3 id="1.2.4">1.2.4 UITableViewHeaderFooterView</h3>
+
+```Objective-C
+--  UITableView
+    --  UITableViewHeaderFooterView 
+        --  Player.superview
+            --  Player.view            
+
+/// isHeader: 当在header中播放时, 传YES, 在footer时, 传NO.
+SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPlayerSuperviewTag:sectionHeaderView.coverImageView.tag inSection:section isHeader:YES tableView:self.tableView];
+```
+
+<h3 id="1.3">1.3 UICollectionView</h3>
+
+<p>
+在 UICollectionView 中播放时, 同 [UITableView](#1.2) 中一样, 需指定视图层次, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.
+</p>
+
+<h3 id="1.3.1">1.3.1 UICollectionViewCell</h3>
+
+```Objective-C
+--  UICollectionView
+    --  UICollectionViewCell
+        --  Player.superview
+            --  Player.view
+
+SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
 ```
