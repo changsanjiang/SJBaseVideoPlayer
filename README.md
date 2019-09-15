@@ -183,7 +183,7 @@ ___
 ## 以下为详细介绍: 
 
 
-<h3 id="1.1">1.1 UIView</h3>  
+<h2 id="1.1">1.1 UIView</h3>  
 
 ```Objective-C
 _player = [SJVideoPlayer player];
@@ -203,7 +203,7 @@ _player.URLAsset = asset;
 
 ___
 
-<h3 id="1.2">1.2 UITableView 中的层次结构</h3>
+<h2 id="1.2">1.2 UITableView 中的层次结构</h3>
 
 <p>
 
@@ -291,7 +291,7 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 ___
 
 
-<h3 id="1.3">1.3 UICollectionView 中的层次结构</h3>
+<h2 id="1.3">1.3 UICollectionView 中的层次结构</h3>
 
 <p>
 
@@ -316,7 +316,7 @@ SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSup
 ___
 
 
-<h3 id="1.4">1.4 嵌套时的视图层次</h3>
+<h2 id="1.4">1.4 嵌套时的视图层次</h3>
 
 <p>
 
@@ -375,7 +375,7 @@ SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCe
 ___
 
 
-<h3 id="2">2. URLAsset</h3>
+<h2 id="2">2. URLAsset</h3>
 
 <p>
 
