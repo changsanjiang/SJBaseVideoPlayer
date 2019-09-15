@@ -47,8 +47,8 @@ ___
 * [1.1 UIView](#1.1)
 * [1.2 UITableView](#1.2)
     * [1.2.1 UITableViewCell](#1.2.1)
-    * [1.2.2 UITableViewHeaderView](#1.2.2)
-    * [1.2.3 UITableViewFooterView](#1.2.3)
+    * [1.2.2 UITableView.tableHeaderView](#1.2.2)
+    * [1.2.3 UITableView.tableFooterView](#1.2.3)
     * [1.2.4 UITableViewHeaderFooterView](#1.2.4)
 * [1.3 UICollectionView](#1.3)
     * [1.3.1 UICollectionViewCell](#1.3.1)
@@ -102,4 +102,32 @@ UIView *playerSuperview = cell.coverImageView;
 SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSuperviewTag:playerSuperview.tag atIndexPath:indexPath tableView:self.tableView];
 
 _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
+```
+
+<h3 id="1.2.2">1.2.2 UITableView.tableHeaderView</h3>
+
+```Objective-C
+--  UITableView
+    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  
+        --  Player.superview
+            --  Player.view
+
+UIView *playerSuperview = self.tableView.tableHeaderView;
+// 也可以设置子视图
+// playerSuperview = self.tableView.tableHeaderView.coverImageView;
+SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:playerSuperview tableView:self.tableView];
+```
+
+<h3 id="1.2.3">1.2.3 UITableView.tableFooterView</h3>
+
+```Objective-C
+--  UITableView
+    --  UITableView.tableHeaderView 或者 UITableView.tableFooterView  
+        --  Player.superview
+            --  Player.view
+
+UIView *playerSuperview = self.tableView.tableFooterView;
+// 也可以设置子视图
+// playerSuperview = self.tableView.tableFooterView.coverImageView;
+SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:playerSuperview tableView:self.tableView];
 ```
