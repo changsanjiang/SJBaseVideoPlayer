@@ -79,6 +79,8 @@ SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 _player.URLAsset = asset;
 ```
 
+___
+
 <h3 id="1.2">1.2 UITableView</h3>
 
 <p>
@@ -86,6 +88,9 @@ _player.URLAsset = asset;
 在 UITableView 中播放时, 需指定视图层次, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.
 
 </p>
+
+___
+
 
 <h3 id="1.2.1">1.2.1 UITableViewCell</h3>
 
@@ -112,6 +117,9 @@ SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSupervie
 _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
 ```
 
+___
+
+
 <h3 id="1.2.2">1.2.2 UITableView.tableHeaderView</h3>
 
 ```Objective-C
@@ -125,6 +133,9 @@ UIView *playerSuperview = self.tableView.tableHeaderView;
 // playerSuperview = self.tableView.tableHeaderView.coverImageView;
 SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:playerSuperview tableView:self.tableView];
 ```
+
+___
+
 
 <h3 id="1.2.3">1.2.3 UITableView.tableFooterView</h3>
 
@@ -140,6 +151,9 @@ UIView *playerSuperview = self.tableView.tableFooterView;
 SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSuperview:playerSuperview tableView:self.tableView];
 ```
 
+___
+
+
 <h3 id="1.2.4">1.2.4 UITableViewHeaderFooterView</h3>
 
 ```Objective-C
@@ -152,6 +166,9 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderViewPlayModelWithPlayerSu
 SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPlayerSuperviewTag:sectionHeaderView.coverImageView.tag inSection:section isHeader:YES tableView:self.tableView];
 ```
 
+___
+
+
 <h3 id="1.3">1.3 UICollectionView</h3>
 
 <p>
@@ -159,6 +176,9 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 在 UICollectionView 中播放时, 同 [UITableView](#1.2) 中一样, 需指定视图层次, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.
 
 </p>
+
+___
+
 
 <h3 id="1.3.1">1.3.1 UICollectionViewCell</h3>
 
@@ -171,6 +191,9 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:self.collectionView];
 ```
 
+___
+
+
 <h3 id="1.4">1.4 嵌套时的视图层次</h3>
 
 <p>
@@ -178,6 +201,9 @@ SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSup
 嵌套的情况下, 传递的参数比较多, 不过熟悉了前面的套路, 下面的这些也不成问题.  (会被复用的视图, 传 tag. 如果不会被复用, 则直接传视图)
 
 </p>
+
+___
+
 
 <h3 id="1.4.1">1.4.1 UICollectionView 嵌套在 UITableViewCell 中</h3>
 
@@ -192,6 +218,9 @@ SJPlayModel *playModel = [SJPlayModel UICollectionViewCellPlayModelWithPlayerSup
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:tableViewCell.collectionView.tag collectionViewAtIndexPath:tableViewCellAtIndexPath tableView:self.tableView];
 ```
 
+___
+
+
 <h3 id="1.4.2">1.4.2 UICollectionView 嵌套在 UITableViewHeaderView 中</h3>
 
 ```Objective-C
@@ -205,6 +234,9 @@ SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewCellPla
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderViewPlayModelWithPlayerSuperviewTag:cell.coverImageView.tag atIndexPath:indexPath collectionView:tableHeaderView.collectionView tableView:self.tableView];
 ```
 
+___
+
+
 <h3 id="1.4.3">1.4.3 UICollectionView 嵌套在 UICollectionViewCell 中</h3>
 
 ```Objective-C
@@ -217,3 +249,6 @@ SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUITableViewHeaderV
 
 SJPlayModel *playModel = [SJPlayModel UICollectionViewNestedInUICollectionViewCellPlayModelWithPlayerSuperviewTag:collectionViewCell.coverImageView.tag atIndexPath:collectionViewCellAtIndexPath collectionViewTag:rootCollectionViewCell.collectionView.tag collectionViewAtIndexPath:collectionViewAtIndexPath rootCollectionView:self.collectionView];
 ```
+
+___
+
