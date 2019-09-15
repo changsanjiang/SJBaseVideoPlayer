@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/SJAVMediaPlaybackController/SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h
+../../../../../SJBaseVideoPlayer/Model/SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h

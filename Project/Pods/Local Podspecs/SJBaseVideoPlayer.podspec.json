@@ -1,6 +1,6 @@
 {
   "name": "SJBaseVideoPlayer",
-  "version": "1.8.2",
+  "version": "2.7.1",
   "summary": "video player.",
   "description": "https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md",
   "homepage": "https://github.com/changsanjiang/SJBaseVideoPlayer",
@@ -12,11 +12,11 @@
     "SanJiang": "changsanjiang@gmail.com"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "9.0"
   },
   "source": {
-    "git": "https://gitee.com/changsanjiang/SJBaseVideoPlayer.git",
-    "tag": "v1.8.2"
+    "git": "https://github.com/changsanjiang/SJBaseVideoPlayer.git",
+    "tag": "v2.7.1"
   },
   "frameworks": [
     "UIKit",
@@ -27,8 +27,11 @@
     "Masonry": [
 
     ],
-    "SJObserverHelper": [
-
+    "SJUIKit/ObserverHelper": [
+      ">= 0.0.0.31"
+    ],
+    "SJUIKit/Queues": [
+      ">= 0.0.0.31"
     ],
     "Reachability": [
 
@@ -41,6 +44,10 @@
       "source_files": "SJBaseVideoPlayer/Header/*.{h}"
     },
     {
+      "name": "Const",
+      "source_files": "SJBaseVideoPlayer/Const/*.{h,m}"
+    },
+    {
       "name": "Tool",
       "source_files": "SJBaseVideoPlayer/Tool/*.{h,m}",
       "dependencies": {
@@ -48,6 +55,9 @@
 
         ],
         "SJBaseVideoPlayer/Model": [
+
+        ],
+        "SJBaseVideoPlayer/Const": [
 
         ]
       }
@@ -77,20 +87,15 @@
       ]
     },
     {
-      "name": "SJPrompt",
-      "source_files": "SJBaseVideoPlayer/SJPrompt/*.{h,m}"
-    },
-    {
-      "name": "SJRotationManager",
-      "source_files": "SJBaseVideoPlayer/SJRotationManager/*.{h,m}",
+      "name": "SJDeviceVolumeAndBrightnessManager",
       "dependencies": {
         "SJBaseVideoPlayer/Header": [
 
+        ],
+        "SJBaseVideoPlayer/Const": [
+
         ]
-      }
-    },
-    {
-      "name": "SJDeviceVolumeAndBrightnessManager",
+      },
       "source_files": "SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/*.{h,m}",
       "subspecs": [
         {

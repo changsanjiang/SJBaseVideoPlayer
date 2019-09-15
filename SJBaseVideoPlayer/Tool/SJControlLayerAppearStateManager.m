@@ -6,8 +6,8 @@
 //
 
 #import "SJControlLayerAppearStateManager.h"
-#if __has_include(<SJObserverHelper/NSObject+SJObserverHelper.h>)
-#import <SJObserverHelper/NSObject+SJObserverHelper.h>
+#if __has_include(<SJUIKit/NSObject+SJObserverHelper.h>)
+#import <SJUIKit/NSObject+SJObserverHelper.h>
 #else
 #import "NSObject+SJObserverHelper.h"
 #endif
@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)observeValueForKeyPath:(NSString *_Nullable)keyPath ofObject:(id _Nullable)object change:(NSDictionary<NSKeyValueChangeKey,id> *_Nullable)change context:(void *_Nullable)context {
+
     if ( _appearStateDidChangeExeBlock )
         _appearStateDidChangeExeBlock(object);
 }
@@ -42,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 @implementation SJControlLayerAppearStateManager
 @synthesize disabled = _disabled;
 @synthesize isAppeared = _isAppeared;
-@synthesize canDisappearAutomatically = _canDisappearAutomatically;
+@synthesize canAutomaticallyDisappear = _canAutomaticallyDisappear;
 
 - (instancetype)init {
     self = [super init];
@@ -52,8 +53,12 @@ NS_ASSUME_NONNULL_BEGIN
     _timer.exeBlock = ^(SJTimerControl * _Nonnull control) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( self.canDisappearAutomatically ) {
-            if ( !self.canDisappearAutomatically(self) )
+        if ( self.isDisabled ) {
+            [control clear];
+            return;
+        }
+        if ( self.canAutomaticallyDisappear ) {
+            if ( !self.canAutomaticallyDisappear(self) )
                 return;
         }
         [self needDisappear];
@@ -81,23 +86,22 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)needAppear {
-    [_timer start];
+    [self _start];
     self.isAppeared = YES;
 }
 
 - (void)needDisappear {
-    [_timer clear];
+    [self _clear];
     self.isAppeared = NO;
 }
 
 - (void)resume {
-    if ( _isAppeared )
-        [_timer start];
+    if ( _isAppeared ) [self _start];
 }
 
 - (void)keepAppearState {
     [self needAppear];
-    [_timer clear];
+    [self _clear];
 }
 
 - (void)keepDisappearState {
@@ -111,15 +115,20 @@ NS_ASSUME_NONNULL_BEGIN
         return;
     _disabled = disabled;
 
-    if ( disabled ) [_timer clear];
-    else if ( _isAppeared ) [_timer start];
+    if ( disabled )
+        [self _clear];
+    else if ( _isAppeared )
+        [self _start];
 }
 
-- (void)setIsAppeared:(BOOL)isAppeared {
-    if ( isAppeared ==  _isAppeared )
+- (void)_start {
+    if ( _disabled )
         return;
+    [_timer start];
+}
 
-    _isAppeared = isAppeared;
+- (void)_clear {
+    [_timer clear];
 }
 @end
 NS_ASSUME_NONNULL_END

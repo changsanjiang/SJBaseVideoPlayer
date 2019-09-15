@@ -1,0 +1,1 @@
+../../../../../SJBaseVideoPlayer/Header/SJPlayerGestureControlDefines.h

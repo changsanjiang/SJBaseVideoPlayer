@@ -6,11 +6,6 @@ target 'Project' do
   # use_frameworks!
 
   # Pods for Project
-  pod 'SJUIFactory'
-  pod 'Masonry'
-  pod 'SJBorderLineView'
-  pod 'SJObserverHelper'
-  pod 'Reachability'
   
   pod 'SJBaseVideoPlayer', :path => '../../SJBaseVideoPlayer'
 end

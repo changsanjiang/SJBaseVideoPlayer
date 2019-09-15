@@ -14,11 +14,8 @@
 		77826BE6203E7427009D5F2C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 77826BE4203E7427009D5F2C /* LaunchScreen.storyboard */; };
 		77826BE9203E7427009D5F2C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BE8203E7427009D5F2C /* main.m */; };
 		77826C10203E74AC009D5F2C /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 77826C0F203E74AC009D5F2C /* Podfile */; };
-		77826C12203E75E9009D5F2C /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 77826C11203E753E009D5F2C /* sample.mp4 */; };
-		77826C14203E7773009D5F2C /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 77826C13203E7773009D5F2C /* placeholder.png */; };
 		77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */; };
 		77826C18203FAB8B009D5F2C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 77826C17203FAB8B009D5F2C /* README.md */; };
-		77EE06922047A20D00EA5A92 /* SJBaseVideoPlayer.png in Resources */ = {isa = PBXBuildFile; fileRef = 77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */; };
 		C72090F66CE012968A1699AF /* libPods-Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3783465EF81E7A5838D5F3FF /* libPods-Project.a */; };
 /* End PBXBuildFile section */
 
@@ -36,12 +33,9 @@
 		77826BE7203E7427009D5F2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		77826BE8203E7427009D5F2C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		77826C0F203E74AC009D5F2C /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		77826C11203E753E009D5F2C /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
-		77826C13203E7773009D5F2C /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
 		77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = SJBaseVideoPlayer.podspec; path = ../SJBaseVideoPlayer.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		77826C17203FAB8B009D5F2C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		77DE8360EA219A9C5A02BA5F /* Pods-Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.debug.xcconfig"; sourceTree = "<group>"; };
-		77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = SJBaseVideoPlayer.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +56,6 @@
 				77826C0F203E74AC009D5F2C /* Podfile */,
 				77826C17203FAB8B009D5F2C /* README.md */,
 				77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */,
-				77EE06912047A20D00EA5A92 /* SJBaseVideoPlayer.png */,
 				77826BD8203E7427009D5F2C /* Project */,
 				77826BD7203E7427009D5F2C /* Products */,
 				FFBBA4CDD7038BE2A325A590 /* Pods */,
@@ -86,9 +79,7 @@
 				77826BDC203E7427009D5F2C /* ViewController.h */,
 				77826BDD203E7427009D5F2C /* ViewController.m */,
 				77826BDF203E7427009D5F2C /* Main.storyboard */,
-				77826C13203E7773009D5F2C /* placeholder.png */,
 				77826BE2203E7427009D5F2C /* Assets.xcassets */,
-				77826C11203E753E009D5F2C /* sample.mp4 */,
 				77826BE4203E7427009D5F2C /* LaunchScreen.storyboard */,
 				77826BE7203E7427009D5F2C /* Info.plist */,
 				77826BE8203E7427009D5F2C /* main.m */,
@@ -180,13 +171,10 @@
 			files = (
 				77826BE6203E7427009D5F2C /* LaunchScreen.storyboard in Resources */,
 				77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */,
-				77EE06922047A20D00EA5A92 /* SJBaseVideoPlayer.png in Resources */,
-				77826C14203E7773009D5F2C /* placeholder.png in Resources */,
 				77826BE3203E7427009D5F2C /* Assets.xcassets in Resources */,
 				77826C10203E74AC009D5F2C /* Podfile in Resources */,
 				77826BE1203E7427009D5F2C /* Main.storyboard in Resources */,
 				77826C18203FAB8B009D5F2C /* README.md in Resources */,
-				77826C12203E75E9009D5F2C /* sample.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,15 +204,11 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Project/Pods-Project-resources.sh",
 				"${PODS_ROOT}/../../SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader/SJDeviceVolumeAndBrightnessManager.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SJDeviceVolumeAndBrightnessManager.bundle",
 			);
@@ -382,14 +366,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = DB5B5F2RH5;
+				DEVELOPMENT_TEAM = U5A7L7SMNP;
 				INFOPLIST_FILE = Project/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.SanJiang.Project;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "ae73dc69-dfb3-498f-914b-b86d97fd9950";
-				PROVISIONING_PROFILE_SPECIFIER = SanJiangDevelopment;
+				PROVISIONING_PROFILE_SPECIFIER = WildcardProfile;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
