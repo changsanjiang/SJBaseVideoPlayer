@@ -99,7 +99,7 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 #### [5. 设备亮度和音量](#5)
 * [5.1 调整设备亮度](#5.1)
 * [5.2 调整设备声音](#5.2)
-* [5.3 亮度 & 声音改变后的回调](#5.3)
+* [5.3 监听状态改变🔥](#5.3)
 * [5.4 禁止播放器设置](#5.4)
 * [5.5 自己动手撸一个 SJDeviceVolumeAndBrightnessManager, 替换作者原始实现](#5.5)
 
@@ -111,7 +111,7 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 * [6.5 是否全屏](#6.5)
 * [6.6 是否正在旋转](#6.6)
 * [6.7 当前旋转的方向 ](#6.7)
-* [6.8 旋转开始和结束的回调](#6.8) 
+* [6.8 监听状态改变🔥](#6.8) 
 * [6.9 自己动手撸一个 SJRotationManager, 替换作者原始实现](#6.9)
 
 #### [7. 直接全屏而不旋转](#7)
@@ -870,22 +870,24 @@ ___
 <h3 id="5.1">5.1 调整设备亮度</h2>
 
 ```Objective-C
-_player.deviceBrightness = 1.0;
+// 0 到 1
+_player.deviceVolumeAndBrightnessManager.brightness = 1.0;
 ```
 
 <h3 id="5.2">5.2 调整设备声音</h2>
 
 ```Objective-C
-_player.deviceVolume = 1.0;
+// 0 到 1
+_player.deviceVolumeAndBrightnessManager.volume = 1.0;
 ```
 
-<h3 id="5.3">5.3 亮度 & 声音改变后的回调</h2>
+<h3 id="5.3">5.3 监听状态改变🔥</h2>
 
 ```Objective-C
-_observer = [_player.deviceVolumeAndBrightnessManager getObserver];
-
-observer.volumeDidChangeExeBlock = ...;
-observer.brightnessDidChangeExeBlock = ...;
+///
+/// 观察者
+///
+@property (nonatomic, strong, readonly) id<SJDeviceVolumeAndBrightnessManagerObserver> deviceVolumeAndBrightnessObserver;
 ```
 
 <h3 id="5.4">5.4 禁止播放器设置</h2>
@@ -932,23 +934,23 @@ ___
 
 ```Objective-C
 /// 设置自动旋转支持的方向
-_player.supportedOrientation = SJAutoRotateSupportedOrientation_LandscapeLeft | SJAutoRotateSupportedOrientation_LandscapeRight;
+_player.supportedOrientations = SJOrientationMaskLandscapeLeft | SJOrientationMaskLandscapeRight;
 
 
 /**
  自动旋转支持的方向
  
- - SJAutoRotateSupportedOrientation_Portrait:       竖屏
- - SJAutoRotateSupportedOrientation_LandscapeLeft:  支持全屏, Home键在右侧
- - SJAutoRotateSupportedOrientation_LandscapeRight: 支持全屏, Home键在左侧
- - SJAutoRotateSupportedOrientation_All:            全部方向
+ - SJOrientationMaskPortrait:       竖屏
+ - SJOrientationMaskLandscapeLeft:  支持全屏, Home键在右侧
+ - SJOrientationMaskLandscapeRight: 支持全屏, Home键在左侧
+ - SJOrientationMaskAll:            全部方向
  */
-typedef NS_ENUM(NSUInteger, SJAutoRotateSupportedOrientation) {
-    SJAutoRotateSupportedOrientation_Portrait = 1 << 0,
-    SJAutoRotateSupportedOrientation_LandscapeLeft = 1 << 1,  
-    SJAutoRotateSupportedOrientation_LandscapeRight = 1 << 2, 
-    SJAutoRotateSupportedOrientation_All = SJAutoRotateSupportedOrientation_Portrait | SJAutoRotateSupportedOrientation_LandscapeLeft | SJAutoRotateSupportedOrientation_LandscapeRight,
-};
+typedef enum : NSUInteger {
+    SJOrientationMaskPortrait = 1 << SJOrientation_Portrait,
+    SJOrientationMaskLandscapeLeft = 1 << SJOrientation_LandscapeLeft,
+    SJOrientationMaskLandscapeRight = 1 << SJOrientation_LandscapeRight,
+    SJOrientationMaskAll = SJOrientationMaskPortrait | SJOrientationMaskLandscapeLeft | SJOrientationMaskLandscapeRight,
+} SJOrientationMask;
 ```
 
 <h3 id ="6.3">6.3 禁止自动旋转</h3>
@@ -961,7 +963,7 @@ typedef NS_ENUM(NSUInteger, SJAutoRotateSupportedOrientation) {
 </p>
 
 ```Objective-C
-_player.disableAutoRotation = YES;
+_player.rotationManager.disabledAutorotation = YES;
 ```
 
 <h3 id ="6.4">6.4 主动调用旋转</h3>
@@ -986,33 +988,32 @@ _player.disableAutoRotation = YES;
 
 ```Objective-C
 /// 如果为YES, 表示全屏
-_player.isFullScreen
+@property (nonatomic, readonly) BOOL isFullScreen;                              ///< 是否已全屏
 ```
 
 <h3 id ="6.6">6.6 是否正在旋转</h3>
 
 ```Objective-C
 /// 如果为YES, 表示正在旋转中
-_player.isTransitioning
+@property (nonatomic, readonly) BOOL isTransitioning;
 ```
 
 <h3 id ="6.7">6.7 当前旋转的方向</h3>
 
 ```Objective-C
-_player.orientation
+_player.rotationManager.currentOrientation
 ```
 
-<h3 id ="6.8">6.8 旋转开始和结束的回调</h3>
+<h3 id ="6.8">6.8 监听状态改变🔥</h3>
 
 ```Objective-C
-_observer = [self.rotationManager getObserver];
-_observer.rotationDidStartExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
-    /// ...
-};
-    
-_observer.rotationDidEndExeBlock = ^(id<SJRotationManagerProtocol>  _Nonnull mgr) {
-    /// ...
-};
+///
+/// 观察者
+///
+///         当需要监听旋转时, 可以设置`player.rotationObserver.rotationDidStartExeBlock = ...;`
+///         了解更多请前往头文件查看
+///
+@property (nonatomic, strong, readonly) id<SJRotationManagerObserver> rotationObserver;
 ```
 
 <h3 id ="6.9">6.9 自己动手撸一个 SJRotationManager, 替换作者原始实现</h3>
