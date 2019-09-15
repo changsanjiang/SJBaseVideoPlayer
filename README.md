@@ -93,10 +93,8 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 * [4.2 让控制层隐藏](#4.2)
 * [4.3 控制层是否显示中](#4.3)
 * [4.4 是否在暂停时保持控制层显示](#4.4)
-* [4.5 是否自动显示控制层 - 资源初始化完成后](#4.5)
-* [4.6 控制层显示状态改变的回调](#4.6)
-* [4.7 禁止管理控制层的显示和隐藏](#4.7)
-* [4.8 自己动手撸一个 SJControlLayerAppearManager, 替换作者原始实现](#4.8)
+* [4.5 监听状态改变🔥](#4.5)
+* [4.6 自己动手撸一个 SJControlLayerAppearManager, 替换作者原始实现](#4.6)
 
 #### [5. 设备亮度和音量](#5)
 * [5.1 调整设备亮度](#5.1)
@@ -791,6 +789,11 @@ controlLayerAppearManager 内部存在一个定时器, 当控制层显示时, �
 <p>
 当控制层需要显示时, 可以调用下面方法. 
 
+
+```Objective-C
+[_player controlLayerNeedAppear];
+```
+
 此方法将会回调控制层的代理方法:
 
  "- (void)controlLayerNeedAppear:(__kindof SJBaseVideoPlayer *)videoPlayer;"
@@ -798,14 +801,14 @@ controlLayerAppearManager 内部存在一个定时器, 当控制层显示时, �
  代理将会对当前的控制层进行显示处理.
 </p>
 
-```Objective-C
-[_player controlLayerNeedAppear];
-```
-
 <h3 id="4.2">4.2 让控制层隐藏</h3>
 
 <p>
 当控制层需要隐藏时, 可以调用下面方法. 
+
+```Objective-C
+[_player controlLayerNeedDisappear];
+```
 
 此方法将会回调控制层的代理方法:
 
@@ -814,48 +817,39 @@ controlLayerAppearManager 内部存在一个定时器, 当控制层显示时, �
 代理将会对当前的控制层进行隐藏处理.
 </p>
 
-```Objective-C
-[_player controlLayerNeedDisappear];
-```
 
 <h3 id="4.3">4.3 控制层是否显示中</h3>
 
 ```Objective-C
-/// 是否显示, YES为显示, NO为隐藏
-_player.controlLayerIsAppeared
+///
+/// 控制层的显示状态(是否已显示)
+///
+@property (nonatomic, getter=isControlLayerAppeared) BOOL controlLayerAppeared;
 ```
 
 <h3 id="4.4">4.4 是否在暂停时保持控制层显示</h3>
 
 ```Objective-C
-/// 默认为 NO, 即不保持显示
-_player.pausedToKeepAppearState = YES;
+///
+/// 暂停的时候是否保持控制层显示
+///
+///         default value is NO
+///
+@property (nonatomic) BOOL pausedToKeepAppearState;
 ```
 
-<h3 id="4.5">4.5 是否自动显示控制层 - 资源初始化完成后</h3>
+<h3 id="4.5">4.5 监听状态改变🔥</h3>
 
 ```Objective-C
-/// 默认为 NO, 即不显示
-_player.controlLayerAutoAppearWhenAssetInitialized = YES;
+///
+/// 观察者
+///
+///         当需要监听控制层的显示和隐藏时, 可以设置`player.controlLayerAppearObserver.appearStateDidChangeExeBlock = ...;`
+///
+@property (nonatomic, strong, readonly) id<SJControlLayerAppearManagerObserver> controlLayerAppearObserver;
 ```
 
-<h3 id="4.6">4.6 控制层显示状态改变的回调</h3>
-
-```Objective-C
-@property (nonatomic, copy, nullable) void(^controlLayerAppearStateDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player, BOOL state);
-```
-
-<h3 id="4.7">4.7 禁止管理控制层的显示和隐藏</h3>
-
-<p>
-有时候, 我们可能不需要对控制层的显示和隐藏进行管理.  这个时候可以设置如下属性, 来禁止管理类的操作.
-</p>
-
-```Objective-C
-@property (nonatomic) BOOL disabledControlLayerAppearManager; // default value is NO.
-```
-
-<h3 id="4.8">4.8 自己动手撸一个 SJControlLayerAppearManager, 替换作者原始实现</h3>
+<h3 id="4.6">4.6 自己动手撸一个 SJControlLayerAppearManager, 替换作者原始实现</h3>
 
 <p>
 同样的, 协议 "SJControlLayerAppearManager" 定义了一系列的操作, 只要实现了这些协议方法的对象, 就可以管理控制层的显示和隐藏.
@@ -1414,11 +1408,11 @@ ___
     if ( _tmpHiddenStatusBar ) return YES;      // 临时隐藏
     if ( self.lockedScreen ) return YES;        // 锁屏时, 不显示
     if ( self.rotationManager.isTransitioning ) { // 旋转时, 不显示
-        if ( !self.disabledControlLayerAppearManager && self.controlLayerIsAppeared ) return NO;
+        if ( !self.disabledControlLayerAppearManager && self.isControlLayerAppeared ) return NO;
         return YES;
     }
     // 全屏播放时, 使状态栏根据控制层显示或隐藏
-    if ( self.isFullScreen ) return !self.controlLayerIsAppeared;
+    if ( self.isFullScreen ) return !self.isControlLayerAppeared;
     return NO;
 }
 ```
