@@ -109,13 +109,11 @@ _player.URLAsset = asset;
 
 ___
 
+
+## 以下为详细介绍: 
+
+
 <h3 id="1.1">1.1 UIView</h3>  
-
-<p>
-
-在普通视图中播放时, 不需要指定视图层次, 直接创建资源进行播放即可. 代码如下: 
-
-</p>
 
 ```Objective-C
 _player = [SJVideoPlayer player];
@@ -126,6 +124,12 @@ _player.view.frame = ...;
 SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 _player.URLAsset = asset;
 ```
+
+<p>
+
+在普通视图中播放时, 不需要指定视图层次, 直接创建资源进行播放即可.  
+
+</p>
 
 ___
 
@@ -142,14 +146,6 @@ ___
 
 <h3 id="1.2.1">1.2.1 UITableViewCell</h3>
 
-<p>
-
-在 UITableViewCell 中播放时, 需指定 Cell 所处的 indexPath 以及播放器父视图的 tag. 
-
-在滑动时, 管理类将会通过这两个参数控制播放器父视图的显示与隐藏.
-
-</p>
-
 ```Objective-C
 --  UITableView
     --  UITableViewCell
@@ -164,6 +160,14 @@ SJPlayModel *playModel = [SJPlayModel UITableViewCellPlayModelWithPlayerSupervie
 
 _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL playModel:playModel];
 ```
+
+<p>
+
+在 UITableViewCell 中播放时, 需指定 Cell 所处的 indexPath 以及播放器父视图的 tag. 
+
+在滑动时, 管理类将会通过这两个参数控制播放器父视图的显示与隐藏.
+
+</p>
 
 ___
 
@@ -338,17 +342,17 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL specifyStartTi
 
 <h3 id="2.4">2.4 续播(进入下个页面时, 继续播放)</h3>
 
-<p>
-
-在播放时, 我们可能需要切换界面, 而希望视频能够在下一个界面无缝的进行播放. 针对此种情况 SJVideoPlayerURLAsset 提供了便利的初始化方法. 代码如下: 
-
-</p>
-
 ```Objective-C
 // otherAsset 即为上一个页面播放的Asset
 // 除了需要一个otherAsset, 其他方面同以上的示例一模一样
 _player.URLAsset = [SJVideoPlayerURLAsset.alloc initWithOtherAsset:otherAsset]; 
 ```
+
+<p>
+
+在播放时, 我们可能需要切换界面, 而希望视频能够在下一个界面无缝的进行播放. 针对此种情况 SJVideoPlayerURLAsset 提供了便利的初始化方法. 
+
+</p>
 
 
 * [2.5 销毁时的回调. 可在此做一些记录工作, 如播放记录](#2.5)
