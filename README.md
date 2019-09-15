@@ -41,7 +41,9 @@ ___
 #### [1. 视图层次结构](#1)
 
 <p>
+
 为防止 UITableView 及 UICollectionView 的复用机制, 导致播放器视图显示在错误的位置上, 通过指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.  以下为目前支持的视图层次:
+
 </p>
 
 * [1.1 UIView](#1.1)
@@ -62,7 +64,9 @@ ___
 <h3 id="1.1">1.1 UIView</h3>  
 
 <p>
+
 在普通视图中播放时, 不需要指定视图层次, 直接创建资源进行播放即可. 代码如下: 
+
 </p>
 
 ```Objective-C
@@ -78,15 +82,19 @@ _player.URLAsset = asset;
 <h3 id="1.2">1.2 UITableView</h3>
 
 <p>
+
 在 UITableView 中播放时, 需指定视图层次, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.
+
 </p>
 
 <h3 id="1.2.1">1.2.1 UITableViewCell</h3>
 
 <p>
+
 在 UITableViewCell 中播放时, 需指定 Cell 所处的 indexPath 以及播放器父视图的 tag. 
 
 在滑动时, 管理类将会通过这两个参数控制播放器父视图的显示与隐藏.
+
 </p>
 
 ```Objective-C
@@ -147,7 +155,9 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 <h3 id="1.3">1.3 UICollectionView</h3>
 
 <p>
+
 在 UICollectionView 中播放时, 同 [UITableView](#1.2) 中一样, 需指定视图层次, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.
+
 </p>
 
 <h3 id="1.3.1">1.3.1 UICollectionViewCell</h3>
