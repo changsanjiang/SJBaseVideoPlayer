@@ -36,6 +36,35 @@ SJVideoPlayer is available under the MIT license. See the LICENSE file for more 
 
 ___
 
+## Example
+
+```Objective-C
+_player = [SJVideoPlayer player];
+_player.view.frame = CGRectMake(0, 0, 200, 200);
+[self.view addSubview:_player.view];
+
+// 设置资源进行播放
+_player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
+
+// 修改自动旋转支持的方向
+_player.rotationManager.autorotationSupportedOrientations = SJOrientationMaskLandscapeLeft | SJOrientationMaskPortrait;
+
+// 修改支持的手势类型
+_player.gestureControl.supportedGestureTypes = SJPlayerGestureTypeMask_SingleTap | SJPlayerGestureTypeMask_DoubleTap;
+
+// 开启左右边缘双击快进快退
+_player.fastForwardViewController.enabled = YES;
+
+// 开启小浮窗模式
+_player.floatSmallViewController.enabled = YES;
+
+.....
+....
+...
+```
+
+___
+
 ## Documents
 
 #### [1. 视图层次结构](#1)
