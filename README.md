@@ -116,18 +116,18 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 
 #### [7. 直接全屏而不旋转](#7)
 * [7.1 全屏和恢复](#7.1)
-* [7.2 开始和结束的回调](#7.2)
+* [7.2 监听状态改变🔥](#7.2)
 * [7.3 是否是全屏](#7.3)
 * [7.4 自己动手撸一个 SJFitOnScreenManager, 替换作者原始实现](#7.4)
 
 #### [8. 镜像翻转](#8)
 * [8.1 翻转和恢复](#8.1)
-* [8.2 开始和结束的回调](#8.2)
+* [8.2 监听状态改变🔥](#8.2)
 * [8.3  自己动手撸一个 SJFlipTransitionManager, 替换作者原始实现](#8.3)
 
 #### [9. 网络状态](#9)
 * [9.1 当前的网络状态](#9.1)
-* [9.2 网络状态改变的回调](#9.2)
+* [9.2 监听状态改变🔥](#9.2)
 * [9.3 自己动手撸一个 SJReachability, 替换作者原始实现](#9.3)
 
 #### [10. 手势](#10)
@@ -137,7 +137,6 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 * [10.4 捏合手势](#10.4)
 * [10.5 禁止某些手势](#10.5)
 * [10.6 自定义某个手势的处理](#10.6)
-* [10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现](#10.7)
 
 #### [11. 占位图](#11)
 * [11.1 设置本地占位图](#11.1)
@@ -1040,7 +1039,7 @@ _player.fitOnScreen = YES;
 }];
 ```
 
-<h3 id="7.2">7.2 开始和结束的回调</h3>
+<h3 id="7.2">7.2 监听状态改变🔥</h3>
 
 ```Objective-C
 @property (nonatomic, copy, nullable) void(^fitOnScreenWillBeginExeBlock)(__kindof SJBaseVideoPlayer *player);
@@ -1089,11 +1088,18 @@ _player.flipTransition
 }];
 ```
 
-<h3 id="8.2">8.2 开始和结束的回调</h3>
+<h3 id="8.2">8.2 监听状态改变🔥</h3>
 
 ```Objective-C
-@property (nonatomic, copy, nullable) void(^flipTransitionDidStartExeBlock)(__kindof SJBaseVideoPlayer *player);
-@property (nonatomic, copy, nullable) void(^flipTransitionDidStopExeBlock)(__kindof SJBaseVideoPlayer *player);
+///
+/// 观察者
+///
+///         可以如下设置block, 来监听某个状态的改变
+///
+///         player.flipTransitionObserver.flipTransitionDidStartExeBlock = ...;
+///         player.flipTransitionObserver.flipTransitionDidStopExeBlock = ...;
+///
+@property (nonatomic, strong, readonly) id<SJFlipTransitionManagerObserver> flipTransitionObserver;
 ```
 
 <h3 id="8.3">8.3  自己动手撸一个 SJFlipTransitionManager, 替换作者原始实现</h3>
@@ -1118,10 +1124,13 @@ ___
 @property (nonatomic, readonly) SJNetworkStatus networkStatus;
 ```
 
-<h3 id="9.1">9.2 网络状态改变的回调</h3>
+<h3 id="9.1">9.2 监听状态改变🔥</h3>
 
 ```Objective-C
-@property (nonatomic, copy, nullable) void(^networkStatusDidChangeExeBlock)(__kindof SJBaseVideoPlayer *player);
+///
+/// 观察者
+///
+@property (nonatomic, strong, readonly) id<SJReachabilityObserver> reachabilityObserver;
 ```
 
 <h3 id="9.1">9.3 自己动手撸一个 SJReachability, 替换作者原始实现</h3>
@@ -1233,12 +1242,6 @@ _player.gestureControl.singleTapHandler = ^(id<SJPlayerGestureControl>  _Nonnull
     /// .....你的处理
 };
 ```
-
-<h3 id="10.7">10.7 自己动手撸一个 SJPlayerGestureControl, 替换作者原始实现</h3>
-
-<p>
-该部分管理类的协议定义在 SJPlayerGestureControlProtocol 中, 实现该协议的任何对象, 均可赋值给播放器, 替换原始实现.
-</p>
 
 ___
 
