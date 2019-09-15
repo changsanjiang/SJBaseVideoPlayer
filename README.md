@@ -68,21 +68,21 @@ ___
 #### [1. 视图层次结构](#1)
 
 * [1.1 UIView](#1.1)
-* [1.2 UITableView](#1.2)
+* [1.2 UITableView 中的层次结构](#1.2)
     * [1.2.1 UITableViewCell](#1.2.1)
     * [1.2.2 UITableView.tableHeaderView](#1.2.2)
     * [1.2.3 UITableView.tableFooterView](#1.2.3)
     * [1.2.4 UITableViewHeaderFooterView](#1.2.4)
-* [1.3 UICollectionView](#1.3)
+* [1.3 UICollectionView 中的层次结构](#1.3)
     * [1.3.1 UICollectionViewCell](#1.3.1)
-* [1.4  嵌套时的视图层次](#1.4)
+* [1.4  嵌套时的层次结构](#1.4)
     * [1.4.1 UICollectionView 嵌套在 UITableViewCell 中](#1.4.1)
     * [1.4.2 UICollectionView 嵌套在 UITableViewHeaderView 中](#1.4.2)
     * [1.4.3 UICollectionView 嵌套在 UICollectionViewCell 中](#1.4.3)
 
 <p>
 
-为防止 UITableView 及 UICollectionView 的复用机制, 导致播放器视图显示在错误的位置上, 通过指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示. 
+由于 UITableView 及 UICollectionView 的复用机制, 会导致播放器视图显示在错误的位置上, 通过指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示. 
 
 </p>
 
@@ -98,7 +98,7 @@ ___
 
 <p>
 
-播放器 播放的资源是通过 SJVideoPlayerURLAsset 进行创建的. 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放. 代码如下: 
+播放器 播放的资源是通过 SJVideoPlayerURLAsset 进行创建的. 默认情况下, 创建了 SJVideoPlayerURLAsset , 赋值给播放器后即可播放.  
 
 ```Objective-C
 SJVideoPlayerURLAsset *asset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
@@ -133,7 +133,7 @@ _player.URLAsset = asset;
 
 ___
 
-<h3 id="1.2">1.2 UITableView</h3>
+<h3 id="1.2">1.2 UITableView 中的层次结构</h3>
 
 <p>
 
@@ -221,7 +221,7 @@ SJPlayModel *playModel = [SJPlayModel UITableViewHeaderFooterViewPlayModelWithPl
 ___
 
 
-<h3 id="1.3">1.3 UICollectionView</h3>
+<h3 id="1.3">1.3 UICollectionView 中的层次结构</h3>
 
 <p>
 
@@ -355,4 +355,16 @@ _player.URLAsset = [SJVideoPlayerURLAsset.alloc initWithOtherAsset:otherAsset];
 </p>
 
 
-* [2.5 销毁时的回调. 可在此做一些记录工作, 如播放记录](#2.5)
+<h3 id="2.5">2.5 销毁时的回调. 可在此做一些记录工作, 如播放记录</h3>
+
+```Objective-C
+// 每个资源dealloc时的回调
+_player.assetDeallocExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
+    // .....
+};
+```
+
+当资源销毁时, 播放器将会回调该 block. 
+
+___
+
