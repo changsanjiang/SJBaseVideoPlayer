@@ -535,12 +535,12 @@ _lookupResponder(UIView *view, Class cls) {
             switch ( direction ) {
                     /// 水平
                 case SJPanGestureMovingDirection_H: {
-                    NSTimeInterval totalTime = self.duration;
+                    NSTimeInterval duration = self.duration;
                     NSTimeInterval beforeOffsetTime = self.controlInfo->pan.offsetTime;
                     CGFloat tlt = translate.x;
                     CGFloat add = tlt / 667 * self.duration;
                     CGFloat offsetTime = beforeOffsetTime + add;
-                    if ( offsetTime > totalTime ) offsetTime = totalTime;
+                    if ( offsetTime > duration ) offsetTime = duration;
                     else if ( offsetTime < 0 ) offsetTime = 0;
                     self.controlInfo->pan.offsetTime = offsetTime;
                 }

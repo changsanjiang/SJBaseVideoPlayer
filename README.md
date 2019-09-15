@@ -84,9 +84,9 @@ _player.URLAsset = asset;
 * [3.1 当前时间和时长](#3.1)
 * [3.2 时间改变时的回调](#3.2)
 * [3.3 播放结束后的回调](#3.3)
-* [3.4 播放状态 - 未知/准备/准备就绪/播放中/暂停的/不活跃的](#3.4)
-* [3.5 暂停的原因 - 缓冲/跳转/暂停](#3.5)
-* [3.6 不活跃的原因 - 加载失败/播放完毕](#3.6)
+* [3.4 资源准备状态](#3.4)
+* [3.5 播放控制状态](#3.5)
+* [3.6 播放等待的原因](#3.6)
 * [3.7 播放状态改变的回调](#3.7)
 * [3.8 是否自动播放 - 当资源初始化完成后](#3.8)
 * [3.9 刷新 ](#3.9)
@@ -471,18 +471,18 @@ ___
 _player.currentTime
 
 /// 时长
-_player.totalTime
+_player.duration
 
 /// 字符串化, 
 /// - 格式为 00:00(小于 1 小时) 或者 00:00:00 (大于 1 小时)
 _player.currentTimeStr
-_player.totalTimeStr
+_player.durationStr
 ```
 
 <h3 id="3.2">3.2 时间改变时的回调</h3>
 
 ```Objective-C
-_player.playTimeDidChangeExeBlok = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
+_player.playbackObserver.currentTimeDidChangeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull player) {
     /// ...
 };
 ```
@@ -490,81 +490,112 @@ _player.playTimeDidChangeExeBlok = ^(__kindof SJBaseVideoPlayer * _Nonnull video
 <h3 id="3.3">3.3 播放结束后的回调</h3>
 
 ```Objective-C
-_player.playDidToEndExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull videoPlayer) {
+_player.playbackObserver.didPlayToEndTimeExeBlock = ^(__kindof SJBaseVideoPlayer * _Nonnull player) {
     /// ...
 };
 ```
 
-<h3 id="3.4">3.4 播放状态 - 未知/准备/准备就绪/播放中/暂停的/不活跃的</h3>
+<h3 id="3.4">3.4 资源准备状态</h3>
 
 <p>
-播放状态有两个状态需要注意一下, 分别是 暂停和不活跃状态
 
-当状态为暂停时, 目前有3种可能: 
+资源准备(或初始化)的状态
 
-- 正在缓冲
-- 主动暂停
-- 正在跳转
+         当未设置资源时, 此时 player.assetStatus = .unknown
+         当设置新资源时, 此时 player.assetStatus = .preparing
+         当准备好播放时, 此时 player.assetStatus = .readyToPlay
+         当初始化失败时, 此时 player.assetStatus = .failed
+         
+</p>
 
-当状态为不活跃时, 目前有2种可能:
+```Objective-C
+typedef NS_ENUM(NSInteger, SJAssetStatus) {
+    ///
+    /// 未知状态
+    ///
+    SJAssetStatusUnknown,
+    
+    ///
+    /// 准备中
+    ///
+    SJAssetStatusPreparing,
+    
+    ///
+    /// 当前资源可随时进行播放(播放控制请查看`timeControlStatus`)
+    ///
+    SJAssetStatusReadyToPlay,
+    
+    ///
+    /// 发生错误
+    ///
+    SJAssetStatusFailed
+};
+```
 
-- 播放完毕
-- 播放失败
+<h3 id="3.5">3.5 播放控制状态</h3>
+
+<p>
+
+ 暂停或播放的控制状态
+
+         当调用了暂停时, 此时 player.timeControlStatus = .paused
+         
+         当调用了播放时, 此时 将可能处于以下两种状态中的任意一个:
+                         - player.timeControlStatus = .playing
+                             正在播放中.
+
+                         - player.timeControlStatus = .waitingToPlay
+                             等待播放, 等待的原因请查看 player.reasonForWaitingToPlay
 
 </p>
 
 ```Objective-C
-/**
- 当前播放的状态
-
- - SJVideoPlayerPlayStatusUnknown:      未播放任何资源时的状态
- - SJVideoPlayerPlayStatusPrepare:      准备播放一个资源
- - SJVideoPlayerPlayStatusReadyToPlay:  准备就绪, 可以播放
- - SJVideoPlayerPlayStatusPlaying:      播放中
- - SJVideoPlayerPlayStatusPaused:       暂停状态, 请通过`SJVideoPlayerPausedReason`, 查看暂停原因
- - SJVideoPlayerPlayStatusInactivity:   不活跃状态, 请通过`SJVideoPlayerInactivityReason`, 查看暂停原因
- */
-typedef NS_ENUM(NSUInteger, SJVideoPlayerPlayStatus) {
-    SJVideoPlayerPlayStatusUnknown,
-    SJVideoPlayerPlayStatusPrepare,
-    SJVideoPlayerPlayStatusReadyToPlay,
-    SJVideoPlayerPlayStatusPlaying,
-    SJVideoPlayerPlayStatusPaused,
-    SJVideoPlayerPlayStatusInactivity,
+typedef NS_ENUM(NSInteger, SJPlaybackTimeControlStatus) {
+    ///
+    /// 暂停状态(已调用暂停或未执行任何操作的状态)
+    ///
+    SJPlaybackTimeControlStatusPaused,
+    
+    ///
+    /// 播放状态(已调用播放), 当前正在缓冲或正在评估能否播放. 可以通过`reasonForWaitingToPlay`来获取原因, UI层可以根据原因来控制loading视图的状态.
+    ///
+    SJPlaybackTimeControlStatusWaitingToPlay,
+    
+    ///
+    /// 播放状态(已调用播放), 当前播放器正在播放
+    ///
+    SJPlaybackTimeControlStatusPlaying
 };
 ```
 
-<h3 id="3.5">3.5 暂停的原因 - 缓冲/跳转/暂停</h3>
+<h3 id="3.6">3.6 播放等待的原因</h3>
+
+<p>
+
+ 当调用了播放, 播放器未能播放处于等待状态时的原因
+
+         等待原因有以下3种状态:
+             1.未设置资源, 此时设置资源后, 当`player.assetStatus = .readyToPlay`, 播放器将自动进行播放.
+             2.可能是由于缓冲不足, 播放器在等待缓存足够时自动恢复播放, 此时可以显示loading视图.
+             3.可能是正在评估缓冲中, 这个过程会进行的很快, 不需要显示loading视图.
+
+</p>
 
 ```Objective-C
-/**
- 暂停的理由
+///
+/// 缓冲中, UI层建议显示loading视图 
+///
+extern SJWaitingReason const SJWaitingToMinimizeStallsReason;
 
- - SJVideoPlayerPausedReasonBuffering:   正在缓冲
- - SJVideoPlayerPausedReasonPause:       被暂停
- - SJVideoPlayerPausedReasonSeeking:     正在跳转(调用seekToTime:时)
- */
-typedef NS_ENUM(NSUInteger, SJVideoPlayerPausedReason) {
-    SJVideoPlayerPausedReasonBuffering,
-    SJVideoPlayerPausedReasonPause,
-    SJVideoPlayerPausedReasonSeeking,
-};
-```
+///
+/// 正在评估能否播放, 处于此状态时, 不建议UI层显示loading视图
+///
+extern SJWaitingReason const SJWaitingWhileEvaluatingBufferingRateReason;
 
-<h3 id="3.6">3.6 不活跃的原因 - 加载失败/播放完毕</h3>
-
-```Objective-C
-/**
- 不活跃的原因
- 
- - SJVideoPlayerInactivityReasonPlayEnd:    播放完毕
- - SJVideoPlayerInactivityReasonPlayFailed: 播放失败
- */
-typedef NS_ENUM(NSUInteger, SJVideoPlayerInactivityReason) {
-    SJVideoPlayerInactivityReasonPlayEnd,
-    SJVideoPlayerInactivityReasonPlayFailed,
-};
-
+///
+/// 未设置资源
+///
+extern SJWaitingReason const SJWaitingWithNoAssetToPlayReason;
 ```
 
 <h3 id="3.7">3.7 播放状态改变的回调</h3>
