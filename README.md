@@ -344,7 +344,7 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL specifyStartTi
 
 <p>
 
-我们可能需要切换界面时, 希望视频能够在下一个界面无缝的进行播放.
+我们可能需要切换界面时, 希望视频能够在下一个界面无缝的进行播放. 使用如下方法, 传入正在播放的资源, 将新的资源赋值给播放器播放即可. 
 
 </p>
 
