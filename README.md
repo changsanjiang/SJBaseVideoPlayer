@@ -135,7 +135,7 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 * [10.2 双击手势](#10.2)
 * [10.3 移动手势](#10.3)
 * [10.4 捏合手势](#10.4)
-* [10.5 禁止某些手势](#10.5)
+* [10.5 设置支持的手势](#10.5)
 * [10.6 自定义某个手势的处理](#10.6)
 
 #### [11. 占位图](#11)
@@ -144,7 +144,7 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 * [11.3 是否隐藏占位图 - 播放器准备好显示时](#11.3)
 
 #### [12. 显示提示文本](#12)
-* [12.1 显示文本及持续时间 - (NSString or NSAttributedString)](#12.1)
+* [12.1 显示管理类](#12.1)
 * [12.2 配置提示文本](#12.2)
 
 #### [13. 一些固定代码](#13)
@@ -159,7 +159,6 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 #### [14. 截屏](#14)
 * [14.1 当前时间截图](#14.1)
 * [14.2 指定时间截图](#14.2)
-* [14.3 生成预览视图, 大约20张](#14.3)
 
 #### [15. 导出视频或GIF](#15)
 * [15.1 导出视频](#15.1)
@@ -1213,22 +1212,24 @@ _gestureControl.pinchHandler = ^(id<SJPlayerGestureControl>  _Nonnull control, C
 };
 ```
 
-<h3 id="10.5">10.5 禁止某些手势</h3>
-
-<p>
-当需要禁止某个手势时, 可以像如下设置:
-</p>
+<h3 id="10.5">10.5 设置支持的手势</h3>
 
 ```Objective-C
-/// 此处为禁止单击和双击手势
-_player.disabledGestures = SJPlayerGestureType_SingleTap | SJPlayerGestureType_DoubleTap;  
+_player.gestureControl.supportedGestureTypes = SJPlayerGestureTypeMask_All
 
 typedef enum : NSUInteger {
-    SJPlayerGestureType_SingleTap,
-    SJPlayerGestureType_DoubleTap,
-    SJPlayerGestureType_Pan,
-    SJPlayerGestureType_Pinch,
-} SJPlayerGestureType;
+    SJPlayerGestureTypeMask_None,
+    SJPlayerGestureTypeMask_SingleTap = 1 << 0,
+    SJPlayerGestureTypeMask_DoubleTap = 1 << 1,
+    SJPlayerGestureTypeMask_Pan_H = 1 << 2, // 水平方向
+    SJPlayerGestureTypeMask_Pan_V = 1 << 3, // 垂直方向
+    SJPlayerGestureTypeMask_Pinch = 1 << 4,
+    SJPlayerGestureTypeMask_Pan = SJPlayerGestureTypeMask_Pan_H | SJPlayerGestureTypeMask_Pan_V,
+    SJPlayerGestureTypeMask_All = SJPlayerGestureTypeMask_SingleTap |
+                                   SJPlayerGestureTypeMask_DoubleTap |
+                                   SJPlayerGestureTypeMask_Pan |
+                                   SJPlayerGestureTypeMask_Pinch,
+} SJPlayerGestureTypeMask;
 ```
 
 <h3 id="10.6">10.6 自定义某个手势的处理</h3>
@@ -1254,13 +1255,13 @@ ___
 <h3 id="11.1">11.1 设置本地占位图</h3>
 
 ```Objective-C
-_player.placeholderImageView.image = [UIImage imageNamed:@"..."];
+_player.presentView.placeholderImageView.image = [UIImage imageNamed:@"..."];
 ```
 
 <h3 id="11.2">11.2 设置网络占位图</h3>
 
 ```Objective-C
-[_player.placeholderImageView sd_setImageWithURL:URL placeholderImage:img];
+[_player.presentView.placeholderImageView sd_setImageWithURL:URL placeholderImage:img];
 ```
 
 <h3 id="11.3">11.3 是否隐藏占位图 - 播放器准备好显示时</h3>
@@ -1276,58 +1277,32 @@ ___
 <h2 id="12">12. 显示提示文本</h2>
 
 <p>
-目前提示文本支持 NSString 以及 NSAttributedString. 
+目前仅支持 NSAttributedString. 
 </p>
 
-<h3 id="12.1">12.1 显示文本及持续时间 - (NSString or NSAttributedString)</h3>
+<h3 id="12.1">12.1 显示管理类</h3>
 
 ```Objective-C
-/// duration 如果为 -1, 则会一直显示 
-- (void)showTitle:(NSString *)title duration:(NSTimeInterval)duration;
+///
+/// 中心弹出文本提示
+///
+///         了解更多请前往协议头文件查看
+///
+@property (nonatomic, strong, null_resettable) id<SJPromptProtocol> prompt;
 
-- (void)showTitle:(NSString *)title duration:(NSTimeInterval)duration hiddenExeBlock:(void(^__nullable)(__kindof SJBaseVideoPlayer *player))hiddenExeBlock;
-
-- (void)showAttributedString:(NSAttributedString *)attributedString duration:(NSTimeInterval)duration;
-
-- (void)showAttributedString:(NSAttributedString *)attributedString duration:(NSTimeInterval)duration hiddenExeBlock:(void(^__nullable)(__kindof SJBaseVideoPlayer *player))hiddenExeBlock;
-
-/// 隐藏
-- (void)hiddenTitle;
+///
+/// 右下角弹出提示
+///
+///         了解更多请前往协议头文件查看
+///
+@property (nonatomic, strong, null_resettable) id<SJPopPromptControllerProtocol> popPromptController;
 ```
 
 <h3 id="12.1">12.2 配置提示文本</h3>
 
 ```Objective-C
-
-/// Update
-_player.prompt.update(^(SJPromptConfig * _Nonnull config) {
-    config.font = [UIFont systemFontOfSize:12];
-});
-
-/// 所有属性如下: 
-@interface SJPromptConfig : NSObject
-
-/// default is UIEdgeInsetsMake( 8, 8, 8, 8 ).
-@property (nonatomic, assign) UIEdgeInsets insets;
-
-/// default is 8.
-@property (nonatomic, assign) CGFloat cornerRadius;
-
-/// default is black.
-@property (nonatomic, strong) UIColor *backgroundColor;
-
-/// default is systemFont( 14 ).
-@property (nonatomic, assign) UIFont *font;
-
-/// default is white.
-@property (nonatomic, strong) UIColor *fontColor;
-
-/// default is ( superview.width * 0.6 ).
-@property (nonatomic, assign) CGFloat maxWidth;
-
-- (void)reset;
-
-@end
+_player.prompt.backgroundColor = ...;
+_player.prompt.contentInset = ...;
 ```
 
 ___
@@ -1479,55 +1454,27 @@ UIImage *img = [_player screenshot];
                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage * __nullable image, NSError *__nullable error))block;
 ```
 
-<h3 id="14.1">14.3 生成预览视图, 大约20张</h3>
-
-```Objective-C
-/// 可以通过 _player.playbackController.presentationSize 来获取当前视频宽高
-/// itemSize 应该尽可能的小一点, 这样处理的效率会更快
-- (void)generatedPreviewImagesWithMaxItemSize:(CGSize)itemSize
-                                   completion:(void(^)(__kindof SJBaseVideoPlayer *player, NSArray<id<SJVideoPlayerPreviewInfo>> *__nullable images, NSError *__nullable error))block;
-```
-
 <h2 id="15">15. 导出视频或GIF</h2>
 
 <h3 id="15.1">15.1 导出视频</h3>
 
 ```Objective-C
-/**
- export session.
- 
- @param beginTime           开始的位置, 单位是秒
- @param endTime             结束的位置, 单位是秒
- @param presetName            default is `AVAssetExportPresetMediumQuality`.
- @param progressBlock       progressBlock
- @param completion            completion
- @param failure               failure
- */
 - (void)exportWithBeginTime:(NSTimeInterval)beginTime
-                    endTime:(NSTimeInterval)endTime
-                 presetName:(nullable NSString *)presetName
-                   progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
-                 completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSURL *fileURL, UIImage *thumbnailImage))completion
-                    failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure;
+  duration:(NSTimeInterval)duration
+presetName:(nullable NSString *)presetName
+  progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
+completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSURL *fileURL, UIImage *thumbnailImage))completion
+   failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure;
 ```
 
 <h3 id="15.2">15.2 导出GIF</h3>
 
 ```Objective-C
-/**
-生成GIF
-
-@param beginTime 开始的位置, 单位是秒
-@param duration  时长
-@param progressBlock 进度回调
-@param completion 完成的回调
-@param failure 失败的回调
-*/
 - (void)generateGIFWithBeginTime:(NSTimeInterval)beginTime
-                        duration:(NSTimeInterval)duration
-                        progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
-                      completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage *imageGIF, UIImage *thumbnailImage, NSURL *filePath))completion
-                         failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure;
+  duration:(NSTimeInterval)duration
+  progress:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, float progress))progressBlock
+completion:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, UIImage *imageGIF, UIImage *thumbnailImage, NSURL *filePath))completion
+   failure:(void(^)(__kindof SJBaseVideoPlayer *videoPlayer, NSError *error))failure;
 ```
 
 <h3 id="15.3">15.3 取消操作</h3>
