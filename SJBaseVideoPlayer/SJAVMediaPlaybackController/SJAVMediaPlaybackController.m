@@ -99,6 +99,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSTimeInterval)playableDuration {
     return _player.sj_playbackInfo.playableDuration;
 }
+- (NSTimeInterval)durationWatched {
+    NSTimeInterval time = 0;
+    for ( AVPlayerItemAccessLogEvent *event in self.player.currentItem.accessLog.events) {
+        if ( event.durationWatched <= 0 ) continue;
+        time += event.durationWatched;
+    }
+    return time;
+}
 - (CGSize)presentationSize {
     return _player.sj_playbackInfo.presentationSize;
 }

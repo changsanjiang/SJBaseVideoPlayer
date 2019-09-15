@@ -10,19 +10,8 @@
 #import "SJBaseVideoPlayer.h"
 #import <Masonry.h>
 
-@implementation UIViewController (RotationControl)
-
-- (BOOL)shouldAutorotate {
-    return NO;
-}
-
-@end
-
-
 @interface ViewController ()
-
 @property (nonatomic, strong) SJBaseVideoPlayer *player;
-
 @end
 
 @implementation ViewController
@@ -52,9 +41,6 @@
     
 //    [_player rotation];
     
-    _player.assetStatus
-    
-    
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -73,7 +59,7 @@
 }
 
 - (IBAction)playVideo:(id)sender {
-    _player.assetURL = [[NSBundle mainBundle] URLForResource:@"sample" withExtension:@"mp4"];
+    _player.assetURL = [NSURL URLWithString:@"https://dh2.v.netease.com/2017/cg/fxtpty.mp4"];
 }
 - (IBAction)play:(id)sender {
     [_player play];

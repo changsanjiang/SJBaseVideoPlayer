@@ -86,7 +86,8 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL];
 * [3.22 播放控制状态](#3.22)
 * [3.23 播放等待的原因](#3.23)
 * [3.24 监听状态改变🔥](#3.24)
-* [3.25 接入别的视频 SDK, 自己动手撸一个 SJVideoPlayerPlaybackController, 替换作者原始实现](#3.25)
+* [3.25 已观看的时长(当前资源)](#3.25)
+* [3.26 接入别的视频 SDK, 自己动手撸一个 SJVideoPlayerPlaybackController, 替换作者原始实现](#3.26)
 
 #### [4. 控制层的显示和隐藏](#4)
 * [4.1 让控制层显示](#4.1)
@@ -756,7 +757,13 @@ extern SJWaitingReason const SJWaitingWithNoAssetToPlayReason;
 @property (nonatomic, strong, readonly) SJPlaybackObservation *playbackObserver;
 ```
 
-<h3 id="3.25">3.25 接入别的视频 SDK, 自己动手撸一个 SJVideoPlayerPlaybackController, 替换作者原始实现</h3>
+<h3 id="3.25">3.25 已观看的时长(当前资源)</h3>
+
+```Objective-C
+@property (nonatomic, readonly) NSTimeInterval durationWatched;                     ///< 已观看的时长(当前资源)
+```
+
+<h3 id="3.26">3.26 接入别的视频 SDK, 自己动手撸一个 SJVideoPlayerPlaybackController, 替换作者原始实现</h3>
 
 <p>
 某些时候, 我们需要接入第三方的视频SDK, 但是又想使用 SJBaseVideoPlayer 封装的其他的功能. 

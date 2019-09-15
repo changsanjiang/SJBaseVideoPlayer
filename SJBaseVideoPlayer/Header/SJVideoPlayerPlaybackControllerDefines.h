@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSTimeInterval currentTime;
 @property (nonatomic, readonly) NSTimeInterval duration;
 @property (nonatomic, readonly) NSTimeInterval playableDuration;
+@property (nonatomic, readonly) NSTimeInterval durationWatched; // 已观看的时长
 @property (nonatomic, readonly) CGSize presentationSize;
 @property (nonatomic, readonly, getter=isReadyForDisplay) BOOL readyForDisplay;
 

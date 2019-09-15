@@ -6,28 +6,12 @@
 //  Copyright © 2018年 SanJiang. All rights reserved.
 //
 //  GitHub:     https://github.com/changsanjiang/SJBaseVideoPlayer
+//  GitHub:     https://github.com/changsanjiang/SJVideoPlayer
 //
-//  Contact:    changsanjiang@gmail.com
+//  Email:      changsanjiang@gmail.com
 //
-
-/**
- ------------------------
- *  PlayControl
- *  Network
- *  Prompt
- *  Time
- *  GestureControl
- *  ControlLayer
- *  Rotation
- *  Screenshot
- *  Export
- *  ScrollView
- *  ControlLayerProtocol
- -------------------------
- */
 
 #import <UIKit/UIKit.h>
-#import "SJPrompt.h"
 #import "SJFitOnScreenManagerDefines.h"
 #import "SJRotationManagerDefines.h"
 #import "SJVideoPlayerControlLayerProtocol.h"
@@ -227,7 +211,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSTimeInterval currentTime;                         ///< 当前播放到的时间
 @property (nonatomic, readonly) NSTimeInterval duration;                            ///< 总时长
 @property (nonatomic, readonly) NSTimeInterval playableDuration;                    ///< 缓冲到的时间
-
+@property (nonatomic, readonly) NSTimeInterval durationWatched;                     ///< 已观看的时长(当前资源)
 @property (nonatomic, readonly) BOOL isPlayedToEndTime;                             ///< 当前资源是否已播放结束
 @property (nonatomic, readonly) BOOL isPlayed;                                      ///< 是否播放过当前的资源
 @property (nonatomic, readonly) BOOL isReplayed;                                    ///< 是否重播过当前的资源

@@ -36,7 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 @implementation SJVideoPlayerURLAsset
 @synthesize mediaURL = _mediaURL; 
 
-- (instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel {
+- (nullable instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel {
+    if ( !URL ) return nil;
     self = [super init];
     if ( !self ) return nil;
     _mediaURL = URL;
@@ -44,16 +45,17 @@ NS_ASSUME_NONNULL_BEGIN
     _playModel = playModel?:[SJPlayModel new];
     return self;
 }
-- (instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime {
+- (nullable instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime {
     return [self initWithURL:URL specifyStartTime:specifyStartTime playModel:[SJPlayModel new]];
 }
-- (instancetype)initWithURL:(NSURL *)URL playModel:(__kindof SJPlayModel *)playModel {
+- (nullable instancetype)initWithURL:(NSURL *)URL playModel:(__kindof SJPlayModel *)playModel {
     return [self initWithURL:URL specifyStartTime:0 playModel:playModel];
 }
-- (instancetype)initWithURL:(NSURL *)URL {
+- (nullable instancetype)initWithURL:(NSURL *)URL {
     return [self initWithURL:URL specifyStartTime:0];
 }
-- (instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherAsset playModel:(nullable __kindof SJPlayModel *)playModel {
+- (nullable instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherAsset playModel:(nullable __kindof SJPlayModel *)playModel {
+    if ( !otherAsset ) return nil;
     self = [super init];
     if ( !self ) return nil;
     SJVideoPlayerURLAsset *curr = otherAsset;

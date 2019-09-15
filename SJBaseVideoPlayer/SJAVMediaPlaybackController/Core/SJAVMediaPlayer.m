@@ -208,7 +208,7 @@ NS_ASSUME_NONNULL_BEGIN
                 [self sj_playImmediatelyAtRate:self.sj_rate];
             }
             
-#ifdef DEBUG
+#ifdef SJDEBUG
             printf("SJAVMediaPlayer: 缓冲中...  进度: \t %ld \t %ld \n", (long)bufferedMilli, (long)maxMilli);
 #endif
         }

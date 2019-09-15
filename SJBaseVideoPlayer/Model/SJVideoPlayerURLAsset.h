@@ -15,13 +15,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SJVideoPlayerURLAsset : NSObject<SJMediaModelProtocol>
-- (instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel;
-- (instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime;
-- (instancetype)initWithURL:(NSURL *)URL playModel:(__kindof SJPlayModel *)playModel;
-- (instancetype)initWithURL:(NSURL *)URL;
+- (nullable instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel;
+- (nullable instancetype)initWithURL:(NSURL *)URL specifyStartTime:(NSTimeInterval)specifyStartTime;
+- (nullable instancetype)initWithURL:(NSURL *)URL playModel:(__kindof SJPlayModel *)playModel;
+- (nullable instancetype)initWithURL:(NSURL *)URL;
 
 @property (nonatomic, strong, readonly, nullable) SJVideoPlayerURLAsset *originAsset;
-- (instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherAsset playModel:(nullable __kindof SJPlayModel *)playModel;
+- (nullable instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherAsset playModel:(nullable __kindof SJPlayModel *)playModel;
 
 @property (nonatomic) NSTimeInterval specifyStartTime;
 

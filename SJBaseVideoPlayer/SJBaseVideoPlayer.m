@@ -5,10 +5,6 @@
 //  Created by BlueDancer on 2018/2/2.
 //  Copyright © 2018年 SanJiang. All rights reserved.
 //
-//  GitHub:     https://github.com/changsanjiang/SJBaseVideoPlayer
-//
-//  Contact:    changsanjiang@gmail.com
-//
 
 #import "SJBaseVideoPlayer.h"
 #import <objc/message.h>
@@ -31,6 +27,7 @@
 #import "SJEdgeFastForwardViewController.h"
 #import "SJVideoDefinitionSwitchingInfo+Private.h"
 #import "SJPopPromptController.h"
+#import "SJPrompt.h"
 #import "SJBaseVideoPlayerConst.h"
 #import "SJBaseVideoPlayer+TestLog.h"
 
