@@ -27,7 +27,8 @@ $ pod update --no-repo-update   (不要用 pod install 了, 用这个命令安�
 ___
 
 ## Contact
-* Email: changsanjiang@gmail.com 
+* Email: changsanjiang@gmail.com
+
 ___
 
 ## License
@@ -163,7 +164,11 @@ ___
 
 ## Documents
 
-#### [1. 视图层次](#1)
+#### [1. 支持的视图层次结构](#1)
+
+<p>
+为防止 Cell 复用, 通过指定视图层次结构, 使得播放器能够定位具体的父视图, 依此来控制隐藏与显示.  以下为目前支持的视图层次:
+</p>
 
 * [1.1 UIView](#1.1)
 * [1.2 UITableView](#1.2)
@@ -177,3 +182,12 @@ ___
     * [1.4.1 UICollectionView 嵌套在 UITableViewCell 中](#1.4.1)
     * [1.4.2 UICollectionView 嵌套在 UITableViewHeaderView 中](#1.4.2)
     * [1.4.3 UICollectionView 嵌套在 UICollectionViewCell 中](#1.4.3)
+
+
+___
+
+<h3 id="1.1">1.1 UIView</h3>  
+
+<p>
+在普通视图中播放时, 直接创建PlayModel即可.
+</p>
