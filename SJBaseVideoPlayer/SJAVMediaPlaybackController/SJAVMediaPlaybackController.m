@@ -384,6 +384,9 @@ NS_ASSUME_NONNULL_BEGIN
         [self pause];
     }
     else {
+        if ( self.timeControlStatus == SJPlaybackTimeControlStatusPlaying ) {
+            [self play];
+        }
         [self.mainPresenter removeAllPresenters];
     }
 }

@@ -286,7 +286,7 @@ NS_ASSUME_NONNULL_BEGIN
             if ( _movingDirection == SJPanGestureMovingDirection_H && ![self _isSupporedGestureType:SJPlayerGestureTypeMask_Pan_H] )
                 return NO;
             
-            if ( _movingDirection == SJPanGestureMovingDirection_V && ![self _isSupporedGestureType:SJPlayerGestureTypeMask_Pan_H] )
+            if ( _movingDirection == SJPanGestureMovingDirection_V && ![self _isSupporedGestureType:SJPlayerGestureTypeMask_Pan_V] )
                 return NO;
         }
             break;
