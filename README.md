@@ -1634,5 +1634,5 @@ ___
 ## 赞助
 如果对您有所帮助，欢迎您的赞赏
 
-<img src="https://github.com/changsanjiang/SJBaseVideoPlayer/tree/master/Project/Project/imgs/thanks_zfb.JPG">
-<img src="https://github.com/changsanjiang/SJBaseVideoPlayer/tree/master/Project/Project/imgs/thanks_wechat.JPG">
+<img src="https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/Project/Project/imgs/thanks_zfb.JPG?raw=true">
+<img src="https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/Project/Project/imgs/thanks_wechat.JPG?raw=true">
