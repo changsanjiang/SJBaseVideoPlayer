@@ -1139,6 +1139,9 @@ _lookupResponder(UIView *view, Class cls) {
 }
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller timeControlStatusDidChange:(SJPlaybackTimeControlStatus)status {
+    
+    BOOL isBuffering = controller.reasonForWaitingToPlay == SJWaitingToMinimizeStallsReason;
+    isBuffering ? [self.reachability startRefresh] : [self.reachability stopRefresh];
         
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerPlaybackStatusDidChange:)] ) {
         [self.controlLayerDelegate videoPlayerPlaybackStatusDidChange:self];

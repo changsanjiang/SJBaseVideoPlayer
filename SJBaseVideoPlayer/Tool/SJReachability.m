@@ -220,6 +220,14 @@ static Reachability *_reachability;
 - (void)_initializeSpeedObserver {
     _networkSpeedObserver = [[__DJNetworkSpeedObserver alloc] init];
 }
+
+- (void)startRefresh {
+    [_networkSpeedObserver start];
+}
+
+- (void)stopRefresh {
+    [_networkSpeedObserver stop];
+}
 @end
 
 @implementation SJReachabilityObserver {
