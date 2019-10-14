@@ -195,6 +195,11 @@ static Reachability *_reachability;
 - (void)stopRefresh {
     [_networkSpeedObserver stop];
 }
+
+- (void)setNetworkStatus:(SJNetworkStatus)networkStatus {
+    _networkStatus = networkStatus;
+    [NSNotificationCenter.defaultCenter postNotificationName:SJReachabilityNetworkStatusDidChangeNotification object:self];
+}
 @end
 
 @implementation SJReachabilityObserver {
