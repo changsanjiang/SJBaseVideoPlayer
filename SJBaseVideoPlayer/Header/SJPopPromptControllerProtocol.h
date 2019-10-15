@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)showCustomView:(UIView *)view;
 - (void)showCustomView:(UIView *)view duration:(NSTimeInterval)duration;
+- (BOOL)isShowingWithCustomView:(UIView *)view;
 
 - (void)clear;
 @property (nonatomic) CGFloat leftMargin; ///< default value is 16

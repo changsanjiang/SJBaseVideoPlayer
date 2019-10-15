@@ -112,6 +112,14 @@ NS_ASSUME_NONNULL_BEGIN
     [self _show:view duration:duration];
 }
 
+- (BOOL)isShowingWithCustomView:(UIView *)view {
+    for ( _SJPopItemContainerView *containerView in self.subviews ) {
+        if ( containerView.customView == view )
+            return YES;
+    }
+    return NO;
+}
+
 - (void)clear {
     [self _removeAllSubviews];
 }
@@ -123,6 +131,7 @@ NS_ASSUME_NONNULL_BEGIN
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(duration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
+        if ( !_view ) return ;
         [self _removeSubview:_view];
     });
 }
