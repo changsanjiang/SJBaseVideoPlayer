@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/SJAVMediaPlaybackController/Core/SJAVBasePlayer.h
+../../../../../SJBaseVideoPlayer/AVPlayer/Core/SJAVBasePlayer.h

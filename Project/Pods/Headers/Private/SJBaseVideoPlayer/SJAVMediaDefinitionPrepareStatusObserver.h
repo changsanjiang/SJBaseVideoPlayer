@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/SJAVMediaPlaybackController/Core/SJAVMediaDefinitionPrepareStatusObserver.h
+../../../../../SJBaseVideoPlayer/AVPlayer/Core/SJAVMediaDefinitionPrepareStatusObserver.h

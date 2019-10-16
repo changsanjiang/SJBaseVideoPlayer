@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SJBaseVideoPlayer'
-  s.version      = '3.0.3'
+  s.version      = '3.0.4'
   s.summary      = 'video player.'
   s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
   s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -16,6 +16,8 @@ Pod::Spec.new do |s|
   s.dependency 'Reachability'
 
   s.source_files = 'SJBaseVideoPlayer/*.{h,m}'
+
+  s.default_subspecs = 'Header', 'Const', 'Tool', 'Model', 'SJDeviceVolumeAndBrightnessManager', 'AVPlayer'
 
   s.subspec 'Header' do |ss|
       ss.source_files = 'SJBaseVideoPlayer/Header/*.{h}'
@@ -37,14 +39,6 @@ Pod::Spec.new do |s|
       ss.dependency 'SJBaseVideoPlayer/Header'
   end
 
-  s.subspec 'SJAVMediaPlaybackController' do |ss|
-      ss.source_files = 'SJBaseVideoPlayer/SJAVMediaPlaybackController/*.{h,m}'
-      ss.subspec 'Core' do |sss|
-          sss.source_files = 'SJBaseVideoPlayer/SJAVMediaPlaybackController/Core/*.{h,m}'
-      end
-      ss.dependency 'SJBaseVideoPlayer/Tool'
-  end
-
   s.subspec 'SJDeviceVolumeAndBrightnessManager' do |ss|
       ss.dependency 'SJBaseVideoPlayer/Header'
       ss.dependency 'SJBaseVideoPlayer/Const'
@@ -58,5 +52,22 @@ Pod::Spec.new do |s|
         sss.source_files = 'SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader/*.{h,m}'
         sss.resources = 'SJBaseVideoPlayer/SJDeviceVolumeAndBrightnessManager/ResourceLoader/SJDeviceVolumeAndBrightnessManager.bundle'
       end
+  end
+  
+  s.subspec 'AVPlayer' do |ss|
+      ss.source_files = 'SJBaseVideoPlayer/AVPlayer/*.{h,m}'
+      ss.subspec 'Core' do |sss|
+          sss.source_files = 'SJBaseVideoPlayer/AVPlayer/Core/*.{h,m}'
+      end
+      ss.dependency 'SJBaseVideoPlayer/Tool'
+  end
+  
+  s.subspec 'IJKPlayer' do |ss|
+    ss.source_files = 'SJBaseVideoPlayer/IJKPlayer/*.{h,m}'
+    ss.subspec 'Core' do |sss|
+        sss.source_files = 'SJBaseVideoPlayer/IJKPlayer/Core/*.{h,m}'
+    end
+    ss.dependency 'SJBaseVideoPlayer/Tool'
+    ss.dependency 'ijkplayerssl'
   end
 end

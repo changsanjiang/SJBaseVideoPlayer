@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/SJAVMediaPlaybackController/Core/AVAsset+SJAVMediaExport.h
+../../../../../SJBaseVideoPlayer/AVPlayer/Core/AVAsset+SJAVMediaExport.h
