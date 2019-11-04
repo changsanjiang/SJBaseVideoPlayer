@@ -6,8 +6,6 @@
 //  Copyright © 2019 changsanjiang. All rights reserved.
 //
 
-#if __has_include(<IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>)
-
 #import "SJIJKMediaPlayerDefinitionPrepareStatusObserver.h"
 #import "SJIJKMediaPlayer.h"
 
@@ -32,5 +30,3 @@ NS_ASSUME_NONNULL_BEGIN
 }
 @end
 NS_ASSUME_NONNULL_END
-
-#endif

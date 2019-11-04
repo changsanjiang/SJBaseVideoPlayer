@@ -6,8 +6,6 @@
 //  Copyright © 2019 changsanjiang. All rights reserved.
 //
 
-#if __has_include(<IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>)
-
 #import <Foundation/Foundation.h>
 #import <IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>
 #import "SJVideoPlayerPlaybackControllerDefines.h"
@@ -56,5 +54,3 @@ typedef struct {
 + (instancetype)new NS_UNAVAILABLE;
 @end
 NS_ASSUME_NONNULL_END
-
-#endif

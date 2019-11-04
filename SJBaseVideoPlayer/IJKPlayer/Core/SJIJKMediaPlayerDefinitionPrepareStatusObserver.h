@@ -6,8 +6,6 @@
 //  Copyright © 2019 changsanjiang. All rights reserved.
 //
 
-#if __has_include(<IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>)
-
 #import <Foundation/Foundation.h>
 @class SJIJKMediaPlayer;
 
@@ -19,5 +17,3 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) void(^statusDidChangeExeBlock)(SJIJKMediaPlayerDefinitionPrepareStatusObserver *obs);
 @end
 NS_ASSUME_NONNULL_END
-
-#endif

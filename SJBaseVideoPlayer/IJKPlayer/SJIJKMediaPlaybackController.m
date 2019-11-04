@@ -6,8 +6,6 @@
 //  Copyright © 2019 changsanjiang. All rights reserved.
 //
 
-#if __has_include(<IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>)
-
 #import "SJIJKMediaPlaybackController.h"
 #import "SJIJKMediaPlayer.h"
 #import "SJIJKMediaPlayerDefinitionPrepareStatusObserver.h"
@@ -22,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @implementation SJIJKMediaPlaybackController
 @synthesize pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
 @synthesize periodicTimeInterval = _periodicTimeInterval;
+@synthesize minBufferedDuration = _minBufferedDuration;
 @synthesize delegate = _delegate;
 @synthesize volume = _volume;
 @synthesize rate = _rate;
@@ -385,5 +384,3 @@ NS_ASSUME_NONNULL_BEGIN
 }
 @end
 NS_ASSUME_NONNULL_END
-
-#endif

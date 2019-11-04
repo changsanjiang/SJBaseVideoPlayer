@@ -6,8 +6,6 @@
 //  Copyright © 2019 changsanjiang. All rights reserved.
 //
 
-#if __has_include(<IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>)
-
 #import <Foundation/Foundation.h>
 #import "SJVideoPlayerPlaybackControllerDefines.h"
 @class IJKFFOptions;
@@ -17,5 +15,3 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, null_resettable) IJKFFOptions *options;
 @end
 NS_ASSUME_NONNULL_END
-
-#endif
