@@ -1184,7 +1184,7 @@ _lookupResponder(UIView *view, Class cls) {
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller presentationSizeDidChange:(CGSize)presentationSize {
     if ( _autoManageViewToFitOnScreenOrRotation && !self.isFullScreen && !self.isFitOnScreen ) {
-        self.useFitOnScreenAndDisableRotation = presentationSize.width < presentationSize.height;
+        _useFitOnScreenAndDisableRotation = presentationSize.width < presentationSize.height;
     }
 
     if ( self.presentationSizeDidChangeExeBlock )
