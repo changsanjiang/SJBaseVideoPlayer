@@ -137,7 +137,6 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
 }
 
 - (void)replay {
-    _isPlayedToEndTime = NO;
     _isReplayed = YES;
     __weak typeof(self) _self = self;
     [self seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
@@ -266,6 +265,7 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
 }
 
 - (void)_willSeeking:(CMTime)time {
+    _isPlayedToEndTime = NO;
     _seekingInfo.time = time;
     _seekingInfo.isSeeking = YES;
 }
@@ -305,12 +305,16 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
         self.duration = self.player.duration * 1.0 / 1000;
     }
     
-    
     if ( status == SJAssetStatusFailed )
         return;
     
-    if ( self.playerStatus == AVPStatusCompletion ) {
+    if ( self.eventType == AVPEventSeekEnd && self.seekingInfo.isSeeking ) {
+        [self _didEndSeeking:YES];
+    }
+    else if ( self.playerStatus == AVPStatusCompletion ) {
         self.isPlayedToEndTime = YES;
+        self.reasonForWaitingToPlay = nil;
+        self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
         return;
     }
     
@@ -334,10 +338,6 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
             self.reasonForWaitingToPlay = reason;
             self.timeControlStatus = status;
         }
-    }
-    
-    if ( self.eventType == AVPEventSeekEnd && self.seekingInfo.isSeeking ) {
-        [self _didEndSeeking:YES];
     }
 }
 
