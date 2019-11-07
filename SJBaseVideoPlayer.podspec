@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SJBaseVideoPlayer'
-  s.version      = '3.0.7'
+  s.version      = '3.0.8'
   s.summary      = 'video player.'
   s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
   s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -69,5 +69,14 @@ Pod::Spec.new do |s|
     end
     ss.dependency 'SJBaseVideoPlayer/AVPlayer'
     ss.dependency 'ijkplayerssl'
+  end
+  
+  s.subspec 'AliPlayer' do |ss|
+    ss.source_files = 'SJBaseVideoPlayer/AliPlayer/*.{h,m}'
+    ss.subspec 'Core' do |sss|
+        sss.source_files = 'SJBaseVideoPlayer/AliPlayer/Core/*.{h,m}'
+    end
+    ss.dependency 'SJBaseVideoPlayer/AVPlayer'
+    ss.dependency 'AliPlayerSDK_iOS'
   end
 end

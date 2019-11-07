@@ -122,6 +122,8 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
 }
 
 - (void)play {
+    _isPlayed = YES;
+    
     if ( _finishedInfo.isFinished ) {
         [self replay];
     }
