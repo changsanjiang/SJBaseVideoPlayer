@@ -160,14 +160,16 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
     
     [self _willSeeking:time];
     _seekCompletionHandler = completionHandler;
+    NSTimeInterval secs = CMTimeGetSeconds(time);
+    if ( ceil(secs) == ceil(self.duration) ) secs = secs * 0.98;
     if ( _finishedInfo.isFinished ) {
         [self play];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.05 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            self.currentPlaybackTime = CMTimeGetSeconds(time);
+            self.currentPlaybackTime = secs;
         });
     }
     else {
-        self.currentPlaybackTime = CMTimeGetSeconds(time);
+        self.currentPlaybackTime = secs;
     }
 }
 
@@ -302,15 +304,7 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
         }
         return;
     }
-    
-    // resume playback
-    if ( self.assetStatus == SJAssetStatusReadyToPlay ) {
-        if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused &&
-             self.playbackState == IJKMPMoviePlaybackStatePaused ) {
-            [super play];
-        }
-    }
-    
+
     // update timeControl status
     if ( self.timeControlStatus == SJPlaybackTimeControlStatusWaitingToPlay ) {
         SJPlaybackTimeControlStatus status = self.timeControlStatus;
@@ -327,6 +321,14 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
         if ( status != self.timeControlStatus || reason != self.reasonForWaitingToPlay ) {
             self.reasonForWaitingToPlay = reason;
             self.timeControlStatus = status;
+        }
+    }
+    
+    // resume playback
+    if ( self.assetStatus == SJAssetStatusReadyToPlay ) {
+        if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused &&
+             self.playbackState == IJKMPMoviePlaybackStatePaused ) {
+            [super play];
         }
     }
 }
