@@ -1,12 +1,12 @@
 Pod::Spec.new do |s|
   s.name         = 'SJBaseVideoPlayer'
-  s.version      = '3.0.9'
+  s.version      = '3.1.0'
   s.summary      = 'video player.'
   s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
   s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
   s.license      = { :type => 'MIT', :file => 'LICENSE.md' }
   s.author       = { 'SanJiang' => 'changsanjiang@gmail.com' }
-  s.platform     = :ios, '9.0'
+  s.platform     = :ios, '8.0'
   s.source       = { :git => 'https://github.com/changsanjiang/SJBaseVideoPlayer.git', :tag => "v#{s.version}" }
   s.frameworks  = "UIKit", "AVFoundation"
   s.requires_arc = true
@@ -78,5 +78,14 @@ Pod::Spec.new do |s|
     end
     ss.dependency 'SJBaseVideoPlayer/AVPlayer'
     ss.dependency 'AliPlayerSDK_iOS'
+  end
+  
+  s.subspec 'AliVodPlayer' do |ss|
+      ss.source_files = 'SJBaseVideoPlayer/AliVodPlayer/*.{h,m}'
+      ss.subspec 'Core' do |sss|
+          sss.source_files = 'SJBaseVideoPlayer/AliVodPlayer/Core/*.{h,m}'
+      end
+      ss.dependency 'SJBaseVideoPlayer/AVPlayer'
+      ss.dependency 'AliyunPlayer_iOS/AliyunVodPlayerSDK'
   end
 end

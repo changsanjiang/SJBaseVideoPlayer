@@ -306,7 +306,7 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
     }
 
     // update timeControl status
-    if ( self.timeControlStatus == SJPlaybackTimeControlStatusWaitingToPlay ) {
+    if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) {
         SJPlaybackTimeControlStatus status = self.timeControlStatus;
         SJWaitingReason _Nullable  reason = self.reasonForWaitingToPlay;
         if ( self.loadState & IJKMPMovieLoadStateStalled ) {
@@ -425,6 +425,11 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
 #endif
     
     [self _postNotification:SJIJKMediaPlayerTimeControlStatusDidChangeNotification];
+}
+
+- (NSTimeInterval)currentPlaybackTime {
+    BOOL isFinished = self.finishedInfo.isFinished && self.finishedInfo.reason == IJKMPMovieFinishReasonPlaybackEnded;
+    return isFinished ? self.duration : [super currentPlaybackTime];
 }
 @end
 

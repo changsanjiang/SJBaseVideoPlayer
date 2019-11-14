@@ -322,7 +322,7 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
         self.readyForDisplay = YES;
     }
     
-    if ( self.timeControlStatus == SJPlaybackTimeControlStatusWaitingToPlay ) {
+    if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) {
         SJPlaybackTimeControlStatus status = self.timeControlStatus;
         SJWaitingReason _Nullable reason = self.reasonForWaitingToPlay;
         if ( self.eventType == AVPEventLoadingStart ) {
