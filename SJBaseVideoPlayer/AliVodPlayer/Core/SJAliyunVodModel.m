@@ -9,6 +9,14 @@
 #import "SJAliyunVodModel.h"
 
 @implementation SJAliyunVodModel
+- (instancetype)init {
+    self = [super init];
+    if ( self ) {
+        _maxSize = 500;
+        _maxDuration = 300;
+    }
+    return self;
+}
 @end
 
 

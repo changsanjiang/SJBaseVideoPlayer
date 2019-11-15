@@ -10,6 +10,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJAliyunVodModel : NSObject
+@property (nonatomic, copy, nullable) NSString *saveDir;
+@property (nonatomic) int64_t maxSize; ///< default value is 500
+@property (nonatomic) int maxDuration; ///< default value is 300
 @end
 
 @interface SJAliyunVodURLModel : SJAliyunVodModel

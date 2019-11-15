@@ -119,6 +119,9 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
 
         _player = AliyunVodPlayer.alloc.init;
         _player.delegate = self;
+        if ( media.saveDir.length != 0 ) {
+            [_player setPlayingCache:YES saveDir:media.saveDir maxSize:media.maxSize maxDuration:media.maxDuration];
+        }
         
         if ( [media isKindOfClass:SJAliyunVodURLModel.class] ) {
             SJAliyunVodURLModel *urlMedia = media;
