@@ -814,8 +814,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///         make.font([UIFont boldSystemFontOfSize:16]);
 ///         make.textColor(UIColor.whiteColor);
 ///         make.stroke(^(id<SJUTStroke>  _Nonnull make) {
-///         make.color = UIColor.blackColor;
-///         make.width = -1;
+///             make.color = UIColor.blackColor;
+///             make.width = -1;
 ///         });
 ///     }]];
 ///

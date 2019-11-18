@@ -172,6 +172,7 @@ _lookupResponder(UIView *view, Class cls) {
     id<SJFloatSmallViewControllerObserverProtocol> _Nullable _floatSmallViewControllerObesrver;
     
     id<SJSubtitlesPromptController> _Nullable _subtitlesPromptController;
+    id<SJBarrageQueueController> _Nullable _barrageQueueController;
 }
 
 + (instancetype)player {
@@ -1605,7 +1606,6 @@ _lookupResponder(UIView *view, Class cls) {
 @implementation SJBaseVideoPlayer (FitOnScreen)
 - (void)setUseFitOnScreenAndDisableRotation:(BOOL)useFitOnScreenAndDisableRotation {
     _useFitOnScreenAndDisableRotation = useFitOnScreenAndDisableRotation;
-    if ( useFitOnScreenAndDisableRotation ) _autoManageViewToFitOnScreenOrRotation = NO;
 }
 - (BOOL)useFitOnScreenAndDisableRotation {
     return _useFitOnScreenAndDisableRotation;
@@ -2164,9 +2164,10 @@ _lookupResponder(UIView *view, Class cls) {
 
 @implementation SJBaseVideoPlayer (Barrages)
 - (void)setBarrageQueueController:(nullable id<SJBarrageQueueController>)barrageQueueController {
-    id<SJBarrageQueueController> controller = objc_getAssociatedObject(self, _cmd);
-    if ( controller != nil ) [controller.view removeFromSuperview];
-    objc_setAssociatedObject(self, @selector(barrageQueueController), barrageQueueController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if ( _barrageQueueController != nil )
+        [_barrageQueueController.view removeFromSuperview];
+    
+    _barrageQueueController = barrageQueueController;
     if ( barrageQueueController != nil ) {
         [self.presentView insertSubview:barrageQueueController.view aboveSubview:self.presentView.placeholderImageView];
         [barrageQueueController.view mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -2175,7 +2176,7 @@ _lookupResponder(UIView *view, Class cls) {
     }
 }
 - (id<SJBarrageQueueController>)barrageQueueController {
-    id<SJBarrageQueueController> controller = objc_getAssociatedObject(self, _cmd);
+    id<SJBarrageQueueController> controller = _barrageQueueController;
     if ( controller == nil ) {
         controller = [SJBarrageQueueController.alloc initWithLines:4];
         [self setBarrageQueueController:controller];
