@@ -7,14 +7,14 @@
 //
 
 #import "SJIJKMediaPlaybackController.h"
+#import "SJIJKMediaPlayerDefinitionLoader.h"
 #import "SJIJKMediaPlayer.h"
-#import "SJIJKMediaPlayerDefinitionPrepareStatusObserver.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJIJKMediaPlaybackController ()
+@interface SJIJKMediaPlaybackController ()<SJIJKMediaPlayerDefinitionLoaderDataSource>
 @property (nonatomic, strong, nullable) SJIJKMediaPlayer *player;
 @property (nonatomic, strong, nullable) id periodicTimeObserver;
-@property (nonatomic, strong, nullable) SJIJKMediaPlayerDefinitionPrepareStatusObserver *definitionPrepareStatusObserver;
+@property (nonatomic, strong, nullable) SJIJKMediaPlayerDefinitionLoader *definitionLoader;
 @end
 
 @implementation SJIJKMediaPlaybackController
@@ -84,6 +84,8 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)stop {
+    [_definitionLoader cancel];
+    _definitionLoader = nil;
     [self _removePeriodicTimeObserver];
     self.player = nil;
 }
@@ -91,67 +93,44 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)switchVideoDefinition:(nonnull id<SJMediaModelProtocol>)media {
     if ( !media ) return;
     
+    // clean
+    if ( _definitionLoader != nil ) {
+        [_definitionLoader cancel];
+        _definitionLoader = nil;
+    }
+    
+    // reset status
+    [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusUnknown];
+    
     // begin
     [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusSwitching];
 
     // prepare
-    SJIJKMediaPlayer *player = [SJIJKMediaPlayer.alloc initWithURL:media.mediaURL specifyStartTime:0 options:self.options];
-    player.shouldAutoplay = YES;
-    player.muted = YES;
-    player.view.frame = self.playerView.bounds;
-    player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.playerView insertSubview:player.view atIndex:0];
-    
-    _definitionPrepareStatusObserver = [SJIJKMediaPlayerDefinitionPrepareStatusObserver.alloc initWithPlayer:player];
     __weak typeof(self) _self = self;
-    _definitionPrepareStatusObserver.statusDidChangeExeBlock = ^(SJIJKMediaPlayerDefinitionPrepareStatusObserver * _Nonnull obs) {
+    _definitionLoader = [SJIJKMediaPlayerDefinitionLoader.alloc initWithURL:media.mediaURL options:self.options dataSource:self completionHandler:^(SJIJKMediaPlayerDefinitionLoader * _Nonnull loader) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        // end
-        switch ( obs.player.assetStatus ) {
-            case SJAssetStatusUnknown:
-            case SJAssetStatusPreparing: break;
-            case SJAssetStatusReadyToPlay: {
-                [obs.player play];
-                if ( obs.player.isReadyForDisplay && obs.player.seekingInfo.isSeeking == NO ) {
-                    [obs.player seekToTime:self.player ? CMTimeMakeWithSeconds(self.currentTime, NSEC_PER_SEC) : kCMTimeZero completionHandler:^(BOOL finished) {
-                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                            __strong typeof(_self) self = _self;
-                            if ( !self ) return;
-                            SJDefinitionSwitchStatus status = finished ? SJDefinitionSwitchStatusFinished : SJDefinitionSwitchStatusFailed;
-                            [self _definitionSwitchingStatusDidChange:media status:status];
-                        });
-                    }];
-                }
-            }
-                break;
-            case SJAssetStatusFailed: {
-                [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFailed];
-            }
-                break;
+        self.definitionLoader = nil;
+        SJIJKMediaPlayer *_Nullable player = loader.player;
+        if ( player == nil ) {
+            [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFailed];
         }
-
-    };
+        else {
+            id<SJMediaModelProtocol> newMedia = media;
+            self.media = newMedia;
+            
+            SJIJKMediaPlayer *oldPlayer = self.player;
+            SJIJKMediaPlayer *newPlayer = player;
+            self.player = newPlayer;
+            [oldPlayer pause];
+            [newPlayer play];
+            [newPlayer report];
+            [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFinished];
+        }
+    }];
 }
 
 - (void)_definitionSwitchingStatusDidChange:(id<SJMediaModelProtocol>)media status:(SJDefinitionSwitchStatus)status {
-    if ( status == SJDefinitionSwitchStatusFailed ) {
-        _definitionPrepareStatusObserver = nil;
-    }
-    else if ( status == SJDefinitionSwitchStatusFinished ) {
-        id<SJMediaModelProtocol> newMedia = media;
-        _media = newMedia;
-        
-        SJIJKMediaPlayer *oldPlayer = _player;
-        SJIJKMediaPlayer *newPlayer = _definitionPrepareStatusObserver.player;
-        _definitionPrepareStatusObserver = nil;
-        
-        [newPlayer play];
-        self.player = newPlayer;
-        [oldPlayer pause];
-        [newPlayer report];
-    }
-
     if ( [self.delegate respondsToSelector:@selector(playbackController:switchingDefinitionStatusDidChange:media:)] ) {
         [self.delegate playbackController:self switchingDefinitionStatusDidChange:status media:media];
     }
@@ -159,7 +138,9 @@ NS_ASSUME_NONNULL_BEGIN
 #ifdef DEBUG
     char *str = nil;
     switch ( status ) {
-        case SJDefinitionSwitchStatusUnknown: break;
+        case SJDefinitionSwitchStatusUnknown:
+            str = "Unknown";
+            break;
         case SJDefinitionSwitchStatusSwitching:
             str = "Switching";
             break;
@@ -174,7 +155,9 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 }
 
-
+- (UIView *)superview {
+    return self.playerView;
+}
 
 - (SJAssetStatus)assetStatus {
     return _player.assetStatus;
@@ -281,6 +264,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)setPlayer:(nullable SJIJKMediaPlayer *)player {
+    [_player.view removeFromSuperview];
     _player = player;
     if ( player != nil ) {
         player.videoGravity = self.videoGravity;

@@ -180,7 +180,7 @@ _lookupResponder(UIView *view, Class cls) {
 }
 
 + (NSString *)version {
-    return @"v3.1.1";
+    return @"v3.1.2";
 }
 
 - (void)setVideoGravity:(SJVideoGravity)videoGravity {
@@ -767,7 +767,6 @@ _lookupResponder(UIView *view, Class cls) {
 
 - (void)switchVideoDefinition:(SJVideoPlayerURLAsset *)URLAsset {
     self.definitionSwitchingInfo.switchingAsset = URLAsset;
-    self.definitionSwitchingInfo.status = SJDefinitionSwitchStatusSwitching;
     [self.playbackController switchVideoDefinition:URLAsset];
 }
 
@@ -1356,7 +1355,7 @@ _lookupResponder(UIView *view, Class cls) {
 
 #pragma mark -
 
-@implementation SJBaseVideoPlayer (ViewController)
+@implementation SJBaseVideoPlayer (Life)
 /// You should call it when view did appear
 - (void)vc_viewDidAppear {
     _controlInfo->viewController.isDisappeared = NO;

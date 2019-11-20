@@ -8,13 +8,13 @@
 
 #import "SJAliMediaPlaybackController.h"
 #import "SJAliMediaPlayer.h"
-#import "SJAliMediaPlayerDefinitionPrepareStatusObserver.h"
+#import "SJAliMediaPlayerDefinitionLoader.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJAliMediaPlaybackController ()
+@interface SJAliMediaPlaybackController ()<SJAliMediaPlayerDefinitionLoaderDataSource>
 @property (nonatomic, strong, nullable) SJAliMediaPlayer *player;
 @property (nonatomic, strong, nullable) id periodicTimeObserver;
-@property (nonatomic, strong, nullable) SJAliMediaPlayerDefinitionPrepareStatusObserver *definitionPrepareStatusObserver;
+@property (nonatomic, strong, nullable) SJAliMediaPlayerDefinitionLoader *definitionLoader;
 @end
 
 @implementation SJAliMediaPlaybackController
@@ -85,6 +85,8 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)stop {
+    [_definitionLoader cancel];
+    _definitionLoader = nil;
     [self _removePeriodicTimeObserver];
     self.player = nil;
 }
@@ -92,68 +94,44 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)switchVideoDefinition:(SJVideoPlayerURLAsset *)media {
     if ( !media ) return;
     
+    // clean
+    if ( _definitionLoader != nil ) {
+        [_definitionLoader cancel];
+        _definitionLoader = nil;
+    }
+    
+    // reset status
+    [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusUnknown];
+    
     // begin
     [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusSwitching];
 
     // prepare
-    SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:media.source specifyStartTime:media.specifyStartTime];
-    player.shouldAutoplay = YES;
-    player.seekMode = AVP_SEEKMODE_ACCURATE;
-    player.muted = YES;
-    player.view.frame = self.playerView.bounds;
-    player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.playerView insertSubview:player.view atIndex:0];
-    
-    _definitionPrepareStatusObserver = [SJAliMediaPlayerDefinitionPrepareStatusObserver.alloc initWithPlayer:player];
     __weak typeof(self) _self = self;
-    _definitionPrepareStatusObserver.statusDidChangeExeBlock = ^(SJAliMediaPlayerDefinitionPrepareStatusObserver * _Nonnull obs) {
+    _definitionLoader = [SJAliMediaPlayerDefinitionLoader.alloc initWithSource:media.source dataSource:self completionHandler:^(SJAliMediaPlayerDefinitionLoader * _Nonnull loader) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        // end
-        switch ( obs.player.assetStatus ) {
-            case SJAssetStatusUnknown:
-            case SJAssetStatusPreparing: break;
-            case SJAssetStatusReadyToPlay: {
-                [obs.player play];
-                if ( obs.player.isReadyForDisplay && obs.player.seekingInfo.isSeeking == NO ) {
-                    [obs.player seekToTime:self.player ? CMTimeMakeWithSeconds(self.currentTime, NSEC_PER_SEC) : kCMTimeZero completionHandler:^(BOOL finished) {
-                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                            __strong typeof(_self) self = _self;
-                            if ( !self ) return;
-                            SJDefinitionSwitchStatus status = finished ? SJDefinitionSwitchStatusFinished : SJDefinitionSwitchStatusFailed;
-                            [self _definitionSwitchingStatusDidChange:media status:status];
-                        });
-                    }];
-                }
-            }
-                break;
-            case SJAssetStatusFailed: {
-                [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFailed];
-            }
-                break;
+        self.definitionLoader = nil;
+        SJAliMediaPlayer *_Nullable player = loader.player;
+        if ( player == nil ) {
+            [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFailed];
         }
-
-    };
+        else {
+            SJVideoPlayerURLAsset *newMedia = media;
+            self.media = newMedia;
+            
+            SJAliMediaPlayer *oldPlayer = self.player;
+            SJAliMediaPlayer *newPlayer = player;
+            self.player = newPlayer;
+            [oldPlayer pause];
+            [newPlayer play];
+            [newPlayer report];
+            [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFinished];
+        }
+    }];
 }
 
-- (void)_definitionSwitchingStatusDidChange:(SJVideoPlayerURLAsset *)media status:(SJDefinitionSwitchStatus)status {
-    if ( status == SJDefinitionSwitchStatusFailed ) {
-        _definitionPrepareStatusObserver = nil;
-    }
-    else if ( status == SJDefinitionSwitchStatusFinished ) {
-        SJVideoPlayerURLAsset *newMedia = media;
-        _media = newMedia;
-        
-        SJAliMediaPlayer *oldPlayer = _player;
-        SJAliMediaPlayer *newPlayer = _definitionPrepareStatusObserver.player;
-        _definitionPrepareStatusObserver = nil;
-        
-        [newPlayer play];
-        self.player = newPlayer;
-        [oldPlayer pause];
-        [newPlayer report];
-    }
-
+- (void)_definitionSwitchingStatusDidChange:(id<SJMediaModelProtocol>)media status:(SJDefinitionSwitchStatus)status {
     if ( [self.delegate respondsToSelector:@selector(playbackController:switchingDefinitionStatusDidChange:media:)] ) {
         [self.delegate playbackController:self switchingDefinitionStatusDidChange:status media:media];
     }
@@ -161,7 +139,9 @@ NS_ASSUME_NONNULL_BEGIN
 #ifdef DEBUG
     char *str = nil;
     switch ( status ) {
-        case SJDefinitionSwitchStatusUnknown: break;
+        case SJDefinitionSwitchStatusUnknown:
+            str = "Unknown";
+            break;
         case SJDefinitionSwitchStatusSwitching:
             str = "Switching";
             break;
@@ -172,11 +152,13 @@ NS_ASSUME_NONNULL_BEGIN
             str = "Failed";
             break;
     }
-    printf("SJIJKMediaPlaybackController<%p>.switchStatus = %s\n", self, str);
+    printf("SJAliMediaPlaybackController<%p>.switchStatus = %s\n", self, str);
 #endif
 }
 
-
+- (UIView *)superview {
+    return self.playerView;
+}
 
 - (SJAssetStatus)assetStatus {
     return _player.assetStatus;

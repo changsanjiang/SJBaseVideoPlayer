@@ -8,13 +8,13 @@
 
 #import "SJAliyunVodPlaybackController.h"
 #import "SJAliyunVodPlayer.h"
-#import "SJAliyunVodPlayerDefinitionPrepareStatusObserver.h"
+#import "SJAliyunVodPlayerDefinitionLoader.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJAliyunVodPlaybackController ()
+@interface SJAliyunVodPlaybackController ()<SJAliyunVodPlayerDefinitionLoaderDataSource>
 @property (nonatomic, strong, nullable) SJAliyunVodPlayer *player;
 @property (nonatomic, strong, nullable) id periodicTimeObserver;
-@property (nonatomic, strong, nullable) SJAliyunVodPlayerDefinitionPrepareStatusObserver *definitionPrepareStatusObserver;
+@property (nonatomic, strong, nullable) SJAliyunVodPlayerDefinitionLoader *definitionLoader;
 @end
 
 @implementation SJAliyunVodPlaybackController
@@ -84,97 +84,12 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)stop {
+    [_definitionLoader cancel];
+    _definitionLoader = nil;
+    
     [self _removePeriodicTimeObserver];
     self.player = nil;
 }
-
-- (void)switchVideoDefinition:(SJVideoPlayerURLAsset *)media {
-    if ( !media ) return;
-    
-    // begin
-    [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusSwitching];
-
-    // prepare
-    SJAliyunVodPlayer *player = [SJAliyunVodPlayer.alloc initWithMedia:media.aliyunMedia specifyStartTime:media.specifyStartTime];
-    player.shouldAutoplay = YES;
-    player.muted = YES;
-    player.view.frame = self.playerView.bounds;
-    player.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.playerView insertSubview:player.view atIndex:0];
-    
-    _definitionPrepareStatusObserver = [SJAliyunVodPlayerDefinitionPrepareStatusObserver.alloc initWithPlayer:player];
-    __weak typeof(self) _self = self;
-    _definitionPrepareStatusObserver.statusDidChangeExeBlock = ^(SJAliyunVodPlayerDefinitionPrepareStatusObserver * _Nonnull obs) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        // end
-        switch ( obs.player.assetStatus ) {
-            case SJAssetStatusUnknown:
-            case SJAssetStatusPreparing: break;
-            case SJAssetStatusReadyToPlay: {
-                [obs.player play];
-                if ( obs.player.isReadyForDisplay && obs.player.seekingInfo.isSeeking == NO ) {
-                    [obs.player seekToTime:self.player ? CMTimeMakeWithSeconds(self.currentTime, NSEC_PER_SEC) : kCMTimeZero completionHandler:^(BOOL finished) {
-                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                            __strong typeof(_self) self = _self;
-                            if ( !self ) return;
-                            SJDefinitionSwitchStatus status = finished ? SJDefinitionSwitchStatusFinished : SJDefinitionSwitchStatusFailed;
-                            [self _definitionSwitchingStatusDidChange:media status:status];
-                        });
-                    }];
-                }
-            }
-                break;
-            case SJAssetStatusFailed: {
-                [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFailed];
-            }
-                break;
-        }
-
-    };
-}
-
-- (void)_definitionSwitchingStatusDidChange:(SJVideoPlayerURLAsset *)media status:(SJDefinitionSwitchStatus)status {
-    if ( status == SJDefinitionSwitchStatusFailed ) {
-        _definitionPrepareStatusObserver = nil;
-    }
-    else if ( status == SJDefinitionSwitchStatusFinished ) {
-        SJVideoPlayerURLAsset *newMedia = media;
-        _media = newMedia;
-        
-        SJAliyunVodPlayer *oldPlayer = _player;
-        SJAliyunVodPlayer *newPlayer = _definitionPrepareStatusObserver.player;
-        _definitionPrepareStatusObserver = nil;
-        
-        [newPlayer play];
-        self.player = newPlayer;
-        [oldPlayer pause];
-        [newPlayer report];
-    }
-
-    if ( [self.delegate respondsToSelector:@selector(playbackController:switchingDefinitionStatusDidChange:media:)] ) {
-        [self.delegate playbackController:self switchingDefinitionStatusDidChange:status media:media];
-    }
-
-#ifdef DEBUG
-    char *str = nil;
-    switch ( status ) {
-        case SJDefinitionSwitchStatusUnknown: break;
-        case SJDefinitionSwitchStatusSwitching:
-            str = "Switching";
-            break;
-        case SJDefinitionSwitchStatusFinished:
-            str = "Finished";
-            break;
-        case SJDefinitionSwitchStatusFailed:
-            str = "Failed";
-            break;
-    }
-    printf("SJIJKMediaPlaybackController<%p>.switchStatus = %s\n", self, str);
-#endif
-}
-
-
 
 - (SJAssetStatus)assetStatus {
     return _player.assetStatus;
@@ -292,6 +207,74 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
+- (void)switchVideoDefinition:(SJVideoPlayerURLAsset *)media {
+    if ( !media ) return;
+    
+    // clean
+    if ( _definitionLoader != nil ) {
+        [_definitionLoader cancel];
+        _definitionLoader = nil;
+    }
+    
+    // reset status
+    [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusUnknown];
+    
+    // begin
+    [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusSwitching];
+
+    // prepare
+    __weak typeof(self) _self = self;
+    _definitionLoader = [SJAliyunVodPlayerDefinitionLoader.alloc initWithMedia:media.aliyunMedia dataSource:self completionHandler:^(SJAliyunVodPlayerDefinitionLoader * _Nonnull loader) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        self.definitionLoader = nil;
+        SJAliyunVodPlayer *_Nullable player = loader.player;
+        if ( player == nil ) {
+            [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFailed];
+        }
+        else {
+            SJVideoPlayerURLAsset *newMedia = media;
+            self.media = newMedia;
+            
+            SJAliyunVodPlayer *oldPlayer = self.player;
+            SJAliyunVodPlayer *newPlayer = player;
+            self.player = newPlayer;
+            [oldPlayer pause];
+            [newPlayer play];
+            [newPlayer report];
+            [self _definitionSwitchingStatusDidChange:media status:SJDefinitionSwitchStatusFinished];
+        }
+    }];
+}
+
+- (void)_definitionSwitchingStatusDidChange:(id<SJMediaModelProtocol>)media status:(SJDefinitionSwitchStatus)status {
+    if ( [self.delegate respondsToSelector:@selector(playbackController:switchingDefinitionStatusDidChange:media:)] ) {
+        [self.delegate playbackController:self switchingDefinitionStatusDidChange:status media:media];
+    }
+
+#ifdef DEBUG
+    char *str = nil;
+    switch ( status ) {
+        case SJDefinitionSwitchStatusUnknown:
+            str = "Unknown";
+            break;
+        case SJDefinitionSwitchStatusSwitching:
+            str = "Switching";
+            break;
+        case SJDefinitionSwitchStatusFinished:
+            str = "Finished";
+            break;
+        case SJDefinitionSwitchStatusFailed:
+            str = "Failed";
+            break;
+    }
+    printf("SJAliyunVodPlaybackController<%p>.switchStatus = %s\n", self, str);
+#endif
+}
+
+- (UIView *)superview {
+    return self.playerView;
+}
 #pragma mark -
 
 - (void)_addPeriodicTimeObserver {

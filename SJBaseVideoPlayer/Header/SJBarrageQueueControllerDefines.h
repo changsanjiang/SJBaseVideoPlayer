@@ -21,6 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 是否禁用
 ///
+///     禁用后, 将无法添加弹幕
+///
 @property (nonatomic, getter=isDisabled) BOOL disabled;
 
 ///

@@ -58,7 +58,11 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_playbackStateDidChange:) name:IJKMPMoviePlayerPlaybackStateDidChangeNotification object:self];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_loadStateDidChange:) name:IJKMPMoviePlayerLoadStateDidChangeNotification object:self];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_naturalSizeAvailable:) name:IJKMPMovieNaturalSizeAvailableNotification object:self];
+        
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_didSeekComplete:) name:IJKMPMoviePlayerDidSeekCompleteNotification object:self];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_seekRenderingStart:) name:IJKMPMoviePlayerSeekAudioStartNotification object:self];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_seekRenderingStart:) name:IJKMPMoviePlayerSeekVideoStartNotification object:self];
+        
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_audioSessionInterruption:) name:AVAudioSessionInterruptionNotification object:nil];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_audioSessionRouteChange:) name:AVAudioSessionRouteChangeNotification object:nil];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_firstVideoFrameRendered:) name:IJKMPMoviePlayerFirstVideoFrameRenderedNotification object:nil];
@@ -247,7 +251,18 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
 }
 
 - (void)_didSeekComplete:(NSNotification *)note {
-    [self _didEndSeeking:note.userInfo[IJKMPMoviePlayerDidSeekCompleteErrorKey] != nil];
+    if ( [note.userInfo[IJKMPMoviePlayerDidSeekCompleteErrorKey] boolValue] ) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self _didEndSeeking:NO];
+        });
+    }
+}
+
+- (void)_seekRenderingStart:(NSNotification *)note {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self _didEndSeeking:YES];
+    });
+
 }
  
 - (void)_audioSessionInterruption:(NSNotification *)note {
@@ -364,10 +379,12 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
 }
 
 - (void)_didEndSeeking:(BOOL)finished {
-    _seekingInfo.time = kCMTimeZero;
-    _seekingInfo.isSeeking = NO;
-    if ( _seekCompletionHandler != nil ) _seekCompletionHandler(finished);
-    _seekCompletionHandler = nil;
+    if ( _seekingInfo.isSeeking ) {
+        _seekingInfo.time = kCMTimeZero;
+        _seekingInfo.isSeeking = NO;
+        if ( _seekCompletionHandler != nil ) _seekCompletionHandler(finished);
+        _seekCompletionHandler = nil;
+    }
 }
 
 - (void)_mediaReadyForDisplay {
