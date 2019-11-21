@@ -114,6 +114,7 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
     _seekCompletionHandler = completionHandler;
     [self _willSeeking:time];
     [_player seekToTime:CMTimeGetSeconds(time) * 1000 seekMode:_seekMode];
+    [self play];
 }
 
 - (void)play {
@@ -194,6 +195,13 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
     
     dispatch_async(dispatch_get_main_queue(), ^{
         self.eventType = eventType;
+        [self _toEvaluating];
+    });
+}
+
+- (void)onError:(AliPlayer*)player errorModel:(AVPErrorModel *)errorModel {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.playerStatus = AVPStatusError;
         [self _toEvaluating];
     });
 }
@@ -434,12 +442,17 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
     }
 }
 
+@synthesize currentTime = _currentTime;
 - (void)setCurrentTime:(NSTimeInterval)currentTime {
     _currentTime = currentTime;
     for ( SJAliTimeObserverItem *item in _observerItems ) {
         if ( item.currentTimeDidChangeExeBlock != nil )
             item.currentTimeDidChangeExeBlock(currentTime);
     }
+}
+
+- (NSTimeInterval)currentTime {
+    return _seekingInfo.isSeeking ? CMTimeGetSeconds(_seekingInfo.time) : _currentTime;
 }
 
 - (void)setPlayableDuration:(NSTimeInterval)playableDuration {

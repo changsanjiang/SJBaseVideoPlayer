@@ -66,6 +66,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)refresh {
     self.player = nil;
     [self prepareToPlay];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self play];
+    });
 }
 
 - (void)replay {

@@ -174,6 +174,7 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
     }
     else {
         self.currentPlaybackTime = secs;
+        [self play];
     }
 }
 

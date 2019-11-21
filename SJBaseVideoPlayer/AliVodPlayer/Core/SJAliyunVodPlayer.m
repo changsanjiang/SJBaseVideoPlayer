@@ -175,12 +175,11 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
     }
     else {
         [_player seekToTime:CMTimeGetSeconds(time)];
+        [self play];
     }
 }
 
 - (void)play {
-    _isPlayed = YES;
-    
     if ( _isPlayedToEndTime ) {
         [self replay];
     }
@@ -188,8 +187,10 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
         self.reasonForWaitingToPlay = SJWaitingWhileEvaluatingBufferingRateReason;
         self.timeControlStatus = SJPlaybackTimeControlStatusWaitingToPlay;
 
-        [_player start];
+        _isPlayed ? [_player resume] : [_player start];
     }
+    
+    _isPlayed = YES;
 }
 - (void)pause {
     self.reasonForWaitingToPlay = nil;
@@ -489,6 +490,7 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
     }
 }
 
+@synthesize currentTime = _currentTime;
 - (void)setCurrentTime:(NSTimeInterval)currentTime {
     if ( currentTime != _currentTime ) {
         _currentTime = currentTime;
@@ -497,6 +499,9 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
                 item.currentTimeDidChangeExeBlock(currentTime);
         }
     }
+}
+- (NSTimeInterval)currentTime {
+    return _seekingInfo.isSeeking ? CMTimeGetSeconds(_seekingInfo.time) : _currentTime;
 }
 
 - (void)setPlayableDuration:(NSTimeInterval)playableDuration {
