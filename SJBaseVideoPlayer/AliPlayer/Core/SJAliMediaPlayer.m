@@ -71,6 +71,7 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
         _videoGravity = AVLayerVideoGravityResizeAspect;
         _pauseWhenAppDidEnterBackground = YES;
         _seekMode = AVP_SEEKMODE_INACCURATE;
+        _needSeekToSpecifyStartTime = time != 0;
         
         if      ( [source isKindOfClass:AVPUrlSource.class] ) {
             [_player setUrlSource:source];

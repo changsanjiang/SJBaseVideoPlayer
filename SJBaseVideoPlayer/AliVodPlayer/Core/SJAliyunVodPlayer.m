@@ -109,6 +109,8 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
         _player.delegate = self;
         _videoGravity = AVLayerVideoGravityResizeAspect;
         _pauseWhenAppDidEnterBackground = YES;
+        _needSeekToSpecifyStartTime = time != 0;
+        
         __weak typeof(self) _self = self;
         _timer = [SJAliRefreshTimer.alloc initWithUsingBlock:^{
             __strong typeof(_self) self = _self;

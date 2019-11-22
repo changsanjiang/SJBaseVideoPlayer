@@ -389,6 +389,9 @@ NS_ASSUME_NONNULL_BEGIN
         if ( self.pauseWhenAppDidEnterBackground == NO ) {
             self.presentController.keyPresentView.player = nil;
         }
+        else if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) {
+            [self pause];
+        }
     };
 }
 
