@@ -8,10 +8,6 @@
 #import "SJAVBasePlayer.h"
 
 NS_ASSUME_NONNULL_BEGIN
-SJWaitingReason const SJWaitingToMinimizeStallsReason = @"AVPlayerWaitingToMinimizeStallsReason";
-SJWaitingReason const SJWaitingWhileEvaluatingBufferingRateReason = @"AVPlayerWaitingWhileEvaluatingBufferingRateReason";
-SJWaitingReason const SJWaitingWithNoAssetToPlayReason = @"AVPlayerWaitingWithNoItemToPlayReason";
-
 @interface SJAVBasePlayer ()
 @property (nonatomic, nullable) SJWaitingReason sj_reasonForWaitingToPlay;
 @property (nonatomic) SJPlaybackTimeControlStatus sj_timeControlStatus;

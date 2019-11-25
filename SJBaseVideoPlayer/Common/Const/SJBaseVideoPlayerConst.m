@@ -6,6 +6,7 @@
 //
 
 #import "SJBaseVideoPlayerConst.h"
+#import "SJVideoPlayerPlayStatusDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -78,4 +79,7 @@ NSNotificationName const SJVideoPlayerVolumeDidChangeNotification = @"SJVideoPla
 NSNotificationName const SJVideoPlayerRateDidChangeNotification = @"SJVideoPlayerRateDidChangeNotification";
 
 
+SJWaitingReason const SJWaitingToMinimizeStallsReason = @"AVPlayerWaitingToMinimizeStallsReason";
+SJWaitingReason const SJWaitingWhileEvaluatingBufferingRateReason = @"AVPlayerWaitingWhileEvaluatingBufferingRateReason";
+SJWaitingReason const SJWaitingWithNoAssetToPlayReason = @"AVPlayerWaitingWithNoItemToPlayReason";
 NS_ASSUME_NONNULL_END
