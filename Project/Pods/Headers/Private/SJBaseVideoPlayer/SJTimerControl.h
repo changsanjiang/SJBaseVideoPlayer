@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Tool/SJTimerControl.h
+../../../../../SJBaseVideoPlayer/Common/Utils/SJTimerControl.h

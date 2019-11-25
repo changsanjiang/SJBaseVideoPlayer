@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Header/SJEdgeFastForwardViewControllerDefines.h
+../../../../../SJBaseVideoPlayer/Common/Interfaces/SJEdgeFastForwardViewControllerDefines.h

@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Model/SJVideoPlayerURLAsset.h
+../../../../../SJBaseVideoPlayer/Common/Implements/SJVideoPlayerURLAsset.h

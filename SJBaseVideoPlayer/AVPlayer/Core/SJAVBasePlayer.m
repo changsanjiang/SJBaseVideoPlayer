@@ -64,6 +64,12 @@ static NSString *kTimeControlStatus = @"timeControlStatus";
     return observer;
 }
 
+- (id)addBoundaryTimeObserverForTimes:(NSArray<NSValue *> *)times queue:(nullable dispatch_queue_t)queue usingBlock:(void (^)(void))block {
+    id observer = [super addBoundaryTimeObserverForTimes:times queue:queue usingBlock:block];
+    [self.sj_periodicTimeObservers addObject:observer];
+    return observer;
+}
+
 - (void)removeTimeObserver:(id)observer {
     if ( [_sj_periodicTimeObservers containsObject:observer] ) {
         [_sj_periodicTimeObservers removeObject:observer];

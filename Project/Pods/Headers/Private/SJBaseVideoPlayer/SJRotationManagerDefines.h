@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Header/SJRotationManagerDefines.h
+../../../../../SJBaseVideoPlayer/Common/Interfaces/SJRotationManagerDefines.h

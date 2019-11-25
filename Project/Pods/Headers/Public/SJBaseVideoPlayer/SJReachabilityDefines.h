@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Header/SJReachabilityDefines.h
+../../../../../SJBaseVideoPlayer/Common/Interfaces/SJReachabilityDefines.h

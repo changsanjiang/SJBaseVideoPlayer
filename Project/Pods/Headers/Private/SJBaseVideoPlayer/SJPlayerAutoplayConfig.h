@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Model/SJPlayerAutoplayConfig.h
+../../../../../SJBaseVideoPlayer/Common/Implements/SJPlayerAutoplayConfig.h

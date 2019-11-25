@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Tool/NSTimer+SJAssetAdd.h
+../../../../../SJBaseVideoPlayer/Common/Foundation/NSTimer+SJAssetAdd.h

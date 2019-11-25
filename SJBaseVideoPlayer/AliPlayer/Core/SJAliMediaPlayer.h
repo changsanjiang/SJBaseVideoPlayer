@@ -11,7 +11,6 @@
 #import <AliyunPlayer/AVPDef.h>
 
 #import "SJVideoPlayerPlaybackControllerDefines.h"
-#import "SJAVMediaPlayer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 extern NSNotificationName const SJAliMediaPlayerAssetStatusDidChangeNotification;

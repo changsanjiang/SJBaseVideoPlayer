@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Header/SJVideoPlayerPresentViewDefines.h
+../../../../../SJBaseVideoPlayer/Common/Interfaces/SJVideoPlayerPresentViewDefines.h

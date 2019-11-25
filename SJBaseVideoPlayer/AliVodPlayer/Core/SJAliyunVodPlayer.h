@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "SJVideoPlayerPlaybackControllerDefines.h"
-#import "SJAVMediaPlayer.h"
 #import "SJAliyunVodModel.h"
 
 NS_ASSUME_NONNULL_BEGIN

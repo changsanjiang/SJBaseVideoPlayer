@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Header/SJControlLayerAppearManagerDefines.h
+../../../../../SJBaseVideoPlayer/Common/Interfaces/SJControlLayerAppearManagerDefines.h

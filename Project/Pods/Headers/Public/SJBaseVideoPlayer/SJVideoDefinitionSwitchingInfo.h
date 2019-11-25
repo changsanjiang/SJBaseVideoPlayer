@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Tool/SJVideoDefinitionSwitchingInfo.h
+../../../../../SJBaseVideoPlayer/Common/Implements/SJVideoDefinitionSwitchingInfo.h

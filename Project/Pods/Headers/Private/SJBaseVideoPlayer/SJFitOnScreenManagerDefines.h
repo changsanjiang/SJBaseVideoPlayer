@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Header/SJFitOnScreenManagerDefines.h
+../../../../../SJBaseVideoPlayer/Common/Interfaces/SJFitOnScreenManagerDefines.h

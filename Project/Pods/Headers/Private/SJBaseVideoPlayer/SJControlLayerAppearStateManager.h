@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Tool/SJControlLayerAppearStateManager.h
+../../../../../SJBaseVideoPlayer/Common/Implements/SJControlLayerAppearStateManager.h
