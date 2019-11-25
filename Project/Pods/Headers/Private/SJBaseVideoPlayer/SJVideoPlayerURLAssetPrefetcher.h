@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Common/Implements/SJVideoPlayerURLAssetPrefetcher.h
+../../../../../SJBaseVideoPlayer/AVPlayer/Core/SJVideoPlayerURLAssetPrefetcher.h
