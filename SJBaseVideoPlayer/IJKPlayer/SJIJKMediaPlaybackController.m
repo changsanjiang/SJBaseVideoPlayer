@@ -43,6 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 #ifdef DEBUG
     NSLog(@"%d - %s", (int)__LINE__, __func__);
 #endif
+    [self stop];
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
@@ -56,6 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)prepareToPlay {
     dispatch_async(dispatch_get_main_queue(), ^{
+        [self stop];
         if ( self.media.mediaURL != nil ) {
             self.player = [SJIJKMediaPlayer.alloc initWithURL:self.media.mediaURL specifyStartTime:self.media.specifyStartTime options:self.options];
         }
@@ -90,6 +92,8 @@ NS_ASSUME_NONNULL_BEGIN
     [_definitionLoader cancel];
     _definitionLoader = nil;
     [self _removePeriodicTimeObserver];
+    [self.player stop];
+    [self.player shutdown];
     self.player = nil;
 }
 

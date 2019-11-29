@@ -149,7 +149,7 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
 
 - (void)dealloc {
     [NSNotificationCenter.defaultCenter removeObserver:self];
-    [_player stop];
+    [_player releasePlayer];
     [_timer stop];
 }
 
