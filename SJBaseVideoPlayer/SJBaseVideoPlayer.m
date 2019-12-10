@@ -1170,6 +1170,10 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)mediaDidPlayToEndForPlaybackController:(id<SJVideoPlayerPlaybackController>)controller {
+    if ( _floatSmallViewController.isAppeared && self.autoDisappearFloatSmallView ) {
+        [_floatSmallViewController dismissFloatView];
+    }
+    
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerPlaybackStatusDidChange:)] ) {
         [self.controlLayerDelegate videoPlayerPlaybackStatusDidChange:self];
     }
