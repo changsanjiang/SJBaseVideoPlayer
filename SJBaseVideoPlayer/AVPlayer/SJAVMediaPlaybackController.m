@@ -180,7 +180,7 @@ NS_ASSUME_NONNULL_BEGIN
     });
 }
 - (void)refresh {
-    if ( self.player.sj_playbackInfo.isPlayed )
+    if ( self.player.sj_playbackInfo.isPlayed && self.currentTime != 0 )
         self.media.specifyStartTime = self.currentTime;
     [self _stop];
     [SJAVMediaPlayerLoader clearPlayerForMedia:self.media];

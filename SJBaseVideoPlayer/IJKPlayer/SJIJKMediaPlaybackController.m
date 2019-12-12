@@ -65,6 +65,8 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)refresh {
+    if ( self.player.isPlayed && self.currentTime != 0 )
+        self.media.specifyStartTime = self.currentTime;
     self.player = nil;
     [self prepareToPlay];
     dispatch_async(dispatch_get_main_queue(), ^{

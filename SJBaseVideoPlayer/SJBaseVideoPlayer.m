@@ -1933,16 +1933,14 @@ typedef struct _SJPlayerControlInfo {
 }
 - (id<SJFloatSmallViewController>)floatSmallViewController {
     if ( _floatSmallViewController == nil ) {
-        _floatSmallViewController = [[SJFloatSmallViewController alloc] init];
-
         __weak typeof(self) _self = self;
-        _floatSmallViewController.floatViewShouldAppear = ^BOOL(id<SJFloatSmallViewController>  _Nonnull controller) {
+        SJFloatSmallViewController *controller = SJFloatSmallViewController.alloc.init;
+        controller.floatViewShouldAppear = ^BOOL(id<SJFloatSmallViewController>  _Nonnull controller) {
             __strong typeof(_self) self = _self;
             if ( !self ) return NO;
             return self.timeControlStatus != SJPlaybackTimeControlStatusPaused && self.assetStatus != SJAssetStatusUnknown;
         };
-        
-        [self _resetFloatSmallViewControllerObserver:_floatSmallViewController];
+        [self setFloatSmallViewController:controller];
     }
     return _floatSmallViewController;
 }
