@@ -16,6 +16,7 @@ NSNotificationName const SJAliyunVodPlayerTimeControlStatusDidChangeNotification
 NSNotificationName const SJAliyunVodPlayerPresentationSizeDidChangeNotification = @"SJAliyunVodPlayerPresentationSizeDidChangeNotification";
 NSNotificationName const SJAliyunVodPlayerDidPlayToEndTimeNotification = @"SJAliyunVodPlayerDidPlayToEndTimeNotification";
 NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliyunVodPlayerReadyForDisplayNotification";
+NSNotificationName const SJAliyunVodPlayerDidReplayNotification = @"SJAliyunVodPlayerDidReplayNotification";
 
 @interface SJAliyunVodPlayerTimeObserverItem : NSObject
 - (instancetype)initWithCurrentTimeDidChangeExeBlock:(void (^)(NSTimeInterval time))block
@@ -208,6 +209,7 @@ NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification = @"SJAliy
     self.timeControlStatus = SJPlaybackTimeControlStatusWaitingToPlay;
     
     [_player replay];
+    [self _postNotification:SJAliyunVodPlayerDidReplayNotification];
 }
 - (void)report {
     [self _postNotification:SJAliyunVodPlayerAssetStatusDidChangeNotification];

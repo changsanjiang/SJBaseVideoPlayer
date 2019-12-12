@@ -18,6 +18,7 @@ extern NSNotificationName const SJAliMediaPlayerTimeControlStatusDidChangeNotifi
 extern NSNotificationName const SJAliMediaPlayerPresentationSizeDidChangeNotification;
 extern NSNotificationName const SJAliMediaPlayerDidPlayToEndTimeNotification;
 extern NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification;
+extern NSNotificationName const SJAliMediaPlayerDidReplayNotification;
 
 @interface SJAliMediaPlayer : NSObject
 - (instancetype)initWithSource:(__kindof AVPSource *)source specifyStartTime:(NSTimeInterval)time;

@@ -1220,6 +1220,10 @@ typedef struct _SJPlayerControlInfo {
     
     [self _postNotification:SJVideoPlayerDefinitionSwitchStatusDidChangeNotification];
 }
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller didReplay:(id<SJMediaModelProtocol>)media {
+    [self _postNotification:SJVideoPlayerDidReplayNotification];
+}
 @end
 
 

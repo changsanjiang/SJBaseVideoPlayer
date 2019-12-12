@@ -16,6 +16,7 @@ extern NSNotificationName const SJIJKMediaPlayerTimeControlStatusDidChangeNotifi
 extern NSNotificationName const SJIJKMediaPlayerPresentationSizeDidChangeNotification;
 extern NSNotificationName const SJIJKMediaPlayerDidPlayToEndTimeNotification;
 extern NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification;
+extern NSNotificationName const SJIJKMediaPlayerDidReplayNotification;
 
 typedef struct {
     BOOL isFinished;

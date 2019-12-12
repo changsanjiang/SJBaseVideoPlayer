@@ -137,31 +137,6 @@ NS_ASSUME_NONNULL_BEGIN
     }];
 }
 
-- (void)_definitionSwitchingStatusDidChange:(id<SJMediaModelProtocol>)media status:(SJDefinitionSwitchStatus)status {
-    if ( [self.delegate respondsToSelector:@selector(playbackController:switchingDefinitionStatusDidChange:media:)] ) {
-        [self.delegate playbackController:self switchingDefinitionStatusDidChange:status media:media];
-    }
-
-#ifdef DEBUG
-    char *str = nil;
-    switch ( status ) {
-        case SJDefinitionSwitchStatusUnknown:
-            str = "Unknown";
-            break;
-        case SJDefinitionSwitchStatusSwitching:
-            str = "Switching";
-            break;
-        case SJDefinitionSwitchStatusFinished:
-            str = "Finished";
-            break;
-        case SJDefinitionSwitchStatusFailed:
-            str = "Failed";
-            break;
-    }
-    printf("SJIJKMediaPlaybackController<%p>.switchStatus = %s\n", self, str);
-#endif
-}
-
 - (UIView *)superview {
     return self.playerView;
 }
@@ -231,6 +206,13 @@ NS_ASSUME_NONNULL_BEGIN
     return _player.presentationSize;
 }
 
+@synthesize options = _options;
+- (IJKFFOptions *)options {
+    if ( _options == nil ) {
+        _options = IJKFFOptions.optionsByDefault;
+    }
+    return _options;
+}
 #pragma mark -
 
 @synthesize videoGravity = _videoGravity;
@@ -318,12 +300,38 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
+- (void)_definitionSwitchingStatusDidChange:(id<SJMediaModelProtocol>)media status:(SJDefinitionSwitchStatus)status {
+    if ( [self.delegate respondsToSelector:@selector(playbackController:switchingDefinitionStatusDidChange:media:)] ) {
+        [self.delegate playbackController:self switchingDefinitionStatusDidChange:status media:media];
+    }
+
+#ifdef DEBUG
+    char *str = nil;
+    switch ( status ) {
+        case SJDefinitionSwitchStatusUnknown:
+            str = "Unknown";
+            break;
+        case SJDefinitionSwitchStatusSwitching:
+            str = "Switching";
+            break;
+        case SJDefinitionSwitchStatusFinished:
+            str = "Finished";
+            break;
+        case SJDefinitionSwitchStatusFailed:
+            str = "Failed";
+            break;
+    }
+    printf("SJIJKMediaPlaybackController<%p>.switchStatus = %s\n", self, str);
+#endif
+}
+
 - (void)_initObservations {
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerAssetStatusDidChange:) name:SJIJKMediaPlayerAssetStatusDidChangeNotification object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerTimeControlStatusDidChange:) name:SJIJKMediaPlayerTimeControlStatusDidChangeNotification object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerDidPlayToEndTime:) name:SJIJKMediaPlayerDidPlayToEndTimeNotification object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerPresentationSizeDidChange:) name:SJIJKMediaPlayerPresentationSizeDidChangeNotification object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerReadyForDisplay:) name:SJIJKMediaPlayerReadyForDisplayNotification object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerDidReplay:) name:SJIJKMediaPlayerDidReplayNotification object:nil];
 }
 
 - (void)playerAssetStatusDidChange:(NSNotification *)note {
@@ -366,12 +374,13 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
-@synthesize options = _options;
-- (IJKFFOptions *)options {
-    if ( _options == nil ) {
-        _options = IJKFFOptions.optionsByDefault;
+- (void)playerDidReplay:(NSNotification *)note {
+    if ( self.player == note.object ) {
+        if ( [self.delegate respondsToSelector:@selector(playbackController:didReplay:)] ) {
+            [self.delegate playbackController:self didReplay:self.media];
+        }
     }
-    return _options;
 }
+
 @end
 NS_ASSUME_NONNULL_END

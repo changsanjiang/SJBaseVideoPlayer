@@ -14,6 +14,7 @@ NSNotificationName const SJIJKMediaPlayerTimeControlStatusDidChangeNotification 
 NSNotificationName const SJIJKMediaPlayerPresentationSizeDidChangeNotification = @"SJIJKMediaPlayerPresentationSizeDidChangeNotification";
 NSNotificationName const SJIJKMediaPlayerDidPlayToEndTimeNotification = @"SJIJKMediaPlayerDidPlayToEndTimeNotification";
 NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMediaPlayerReadyForDisplayNotification";
+NSNotificationName const SJIJKMediaPlayerDidReplayNotification = @"SJIJKMediaPlayerDidReplayNotification";
 
 @interface SJIJKPeriodicTimeObserver : NSObject
 - (instancetype)initWithInterval:(NSTimeInterval)interval player:(__weak SJIJKMediaPlayer *)player currentTimeDidChangeExeBlock:(nonnull void (^)(NSTimeInterval))currentTimeDidChangeExeBlock playableDurationDidChangeExeBlock:(nonnull void (^)(NSTimeInterval))playableDurationDidChangeExeBlock durationDidChangeExeBlock:(nonnull void (^)(NSTimeInterval))durationDidChangeExeBlock;
@@ -116,6 +117,8 @@ NSNotificationName const SJIJKMediaPlayerReadyForDisplayNotification = @"SJIJKMe
         if ( !self ) return;
         if ( self.playbackState != IJKMPMoviePlaybackStatePlaying )
             [self play];
+        
+        [self _postNotification:SJIJKMediaPlayerDidReplayNotification];
     }];
 }
 

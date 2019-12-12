@@ -16,6 +16,7 @@ extern NSNotificationName const SJAliyunVodPlayerTimeControlStatusDidChangeNotif
 extern NSNotificationName const SJAliyunVodPlayerPresentationSizeDidChangeNotification;
 extern NSNotificationName const SJAliyunVodPlayerDidPlayToEndTimeNotification;
 extern NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification;
+extern NSNotificationName const SJAliyunVodPlayerDidReplayNotification;
 
 @interface SJAliyunVodPlayer : NSObject
 - (instancetype)initWithMedia:(__kindof SJAliyunVodModel *)media specifyStartTime:(NSTimeInterval)time;

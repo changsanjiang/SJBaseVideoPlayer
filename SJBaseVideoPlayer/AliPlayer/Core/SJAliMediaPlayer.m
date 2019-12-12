@@ -15,6 +15,7 @@ NSNotificationName const SJAliMediaPlayerTimeControlStatusDidChangeNotification 
 NSNotificationName const SJAliMediaPlayerPresentationSizeDidChangeNotification = @"SJAliMediaPlayerPresentationSizeDidChangeNotification";
 NSNotificationName const SJAliMediaPlayerDidPlayToEndTimeNotification = @"SJAliMediaPlayerDidPlayToEndTimeNotification";
 NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMediaPlayerReadyForDisplayNotification";
+NSNotificationName const SJAliMediaPlayerDidReplayNotification = @"SJAliMediaPlayerDidReplayNotification";
 
 @interface SJAliTimeObserverItem : NSObject
 - (instancetype)initWithCurrentTimeDidChangeExeBlock:(void (^)(NSTimeInterval time))block
@@ -145,6 +146,7 @@ NSNotificationName const SJAliMediaPlayerReadyForDisplayNotification = @"SJAliMe
         __strong typeof(_self) self = _self;
         if ( !self ) return;
         if ( self.playerStatus != AVPStatusStarted ) [self play];
+        [self _postNotification:SJAliMediaPlayerDidReplayNotification];
     }];
 }
 - (void)report {

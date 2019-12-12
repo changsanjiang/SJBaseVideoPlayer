@@ -316,6 +316,7 @@ NS_ASSUME_NONNULL_BEGIN
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerDidPlayToEndTime:) name:SJAliyunVodPlayerDidPlayToEndTimeNotification object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerPresentationSizeDidChange:) name:SJAliyunVodPlayerPresentationSizeDidChangeNotification object:nil];
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerReadyForDisplay:) name:SJAliyunVodPlayerReadyForDisplayNotification object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playerDidReplay:) name:SJAliyunVodPlayerDidReplayNotification object:nil];
 }
 
 - (void)playerAssetStatusDidChange:(NSNotification *)note {
@@ -354,6 +355,14 @@ NS_ASSUME_NONNULL_BEGIN
     if ( self.player == note.object ) {
         if ( [self.delegate respondsToSelector:@selector(playbackControllerIsReadyForDisplay:)] ) {
             [self.delegate playbackControllerIsReadyForDisplay:self];
+        }
+    }
+}
+
+- (void)playerDidReplay:(NSNotification *)note {
+    if ( self.player == note.object ) {
+        if ( [self.delegate respondsToSelector:@selector(playbackController:didReplay:)] ) {
+            [self.delegate playbackController:self didReplay:self.media];
         }
     }
 }
