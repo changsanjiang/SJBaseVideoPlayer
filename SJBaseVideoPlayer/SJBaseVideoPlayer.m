@@ -33,6 +33,7 @@
 #import "SJBarrageQueueController.h"
 #import "SJViewControllerManager.h"
 #import "UIView+SJBaseVideoPlayerExtended.h"
+#import "NSString+SJBaseVideoPlayerExtended.h"
 
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
@@ -654,7 +655,7 @@ typedef struct _SJPlayerControlInfo {
     // 维护当前播放的indexPath
     UIScrollView *scrollView = playModel.inScrollView;
     if ( scrollView.sj_enabledAutoplay ) {
-        scrollView.sj_currentPlayingIndexPath = [playModel performSelector:@selector(indexPath)];
+        scrollView.sj_currentPlayingIndexPath = playModel.indexPath;
     }
 }
 
@@ -820,22 +821,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (NSString *)stringForSeconds:(NSInteger)secs {
-    long min = 60;
-    long hour = 60 * min;
-    
-    long hours, seconds, minutes;
-    hours = secs / hour;
-    minutes = (secs - hours * hour) / 60;
-    seconds = (NSInteger)secs % 60;
-    if ( self.duration < hour ) {
-        return [NSString stringWithFormat:@"%02ld:%02ld", minutes, seconds];
-    }
-    else if ( hours < 100 ) {
-        return [NSString stringWithFormat:@"%02ld:%02ld:%02ld", hours, minutes, seconds];
-    }
-    else {
-        return [NSString stringWithFormat:@"%ld:%02ld:%02ld", hours, minutes, seconds];
-    }
+    return [NSString stringWithCurrentTime:secs duration:self.duration];
 }
 
 #pragma mark -
