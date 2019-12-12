@@ -15,8 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) UIPanGestureRecognizer *pan;
 @property (nonatomic, strong, readonly) UIPinchGestureRecognizer *pinch;
 
-@property (nonatomic, strong, nullable) _SJPerformRequestInfo *placeholderRequestInfo;
-@property (nonatomic, strong, nullable) _SJPerformRequestInfo *touchRequestInfo;
+@property (nonatomic, strong, nullable) NSTimer *timer; ///< 单击与双击手势识别timer
+@property (nonatomic) NSInteger numberOfTaps;
 @end
 
 @implementation SJVideoPlayerPresentView
