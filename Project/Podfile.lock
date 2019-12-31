@@ -1,41 +1,41 @@
 PODS:
   - Masonry (1.1.0)
   - Reachability (3.2)
-  - SJBaseVideoPlayer (3.1.4):
+  - SJBaseVideoPlayer (3.1.7):
     - Masonry
     - Reachability
-    - SJBaseVideoPlayer/AVPlayer (= 3.1.4)
-    - SJBaseVideoPlayer/Common (= 3.1.4)
+    - SJBaseVideoPlayer/AVPlayer (= 3.1.7)
+    - SJBaseVideoPlayer/Common (= 3.1.7)
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper (>= 0.0.0.38)
     - SJUIKit/Queues (>= 0.0.0.38)
-  - SJBaseVideoPlayer/AVPlayer (3.1.4):
+  - SJBaseVideoPlayer/AVPlayer (3.1.7):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Common
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper (>= 0.0.0.38)
     - SJUIKit/Queues (>= 0.0.0.38)
-  - SJBaseVideoPlayer/Common (3.1.4):
+  - SJBaseVideoPlayer/Common (3.1.7):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/ResourceLoader
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper (>= 0.0.0.38)
     - SJUIKit/Queues (>= 0.0.0.38)
-  - SJBaseVideoPlayer/ResourceLoader (3.1.4):
+  - SJBaseVideoPlayer/ResourceLoader (3.1.7):
     - Masonry
     - Reachability
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper (>= 0.0.0.38)
     - SJUIKit/Queues (>= 0.0.0.38)
-  - SJUIKit/AttributesFactory (0.0.0.38):
-    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.38)
-    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.38)
-  - SJUIKit/AttributesFactory/Deprecated (0.0.0.38)
-  - SJUIKit/AttributesFactory/UIKitText (0.0.0.38)
-  - SJUIKit/ObserverHelper (0.0.0.38)
-  - SJUIKit/Queues (0.0.0.38)
+  - SJUIKit/AttributesFactory (0.0.0.39):
+    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.39)
+    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.39)
+  - SJUIKit/AttributesFactory/Deprecated (0.0.0.39)
+  - SJUIKit/AttributesFactory/UIKitText (0.0.0.39)
+  - SJUIKit/ObserverHelper (0.0.0.39)
+  - SJUIKit/Queues (0.0.0.39)
 
 DEPENDENCIES:
   - SJBaseVideoPlayer (from `../../SJBaseVideoPlayer`)
@@ -53,8 +53,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SJBaseVideoPlayer: 25055f019982c0e72cba5f97e269557fdb02cbbb
-  SJUIKit: 3a8af44f281bc620f94e277f8cc586d6e4e0913a
+  SJBaseVideoPlayer: 9e18423fd106835ce84a882e7ac65959a2dec212
+  SJUIKit: 5479a150083e606937a796801ecaae6317e046f5
 
 PODFILE CHECKSUM: 8b9107f80673bb180537f670bf095c09a94ea1a5
 

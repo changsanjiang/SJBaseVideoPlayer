@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		773F8F7A232E4E5100355BE9 /* UIViewController+RotationControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 773F8F78232E4E5000355BE9 /* UIViewController+RotationControl.m */; };
 		77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDA203E7427009D5F2C /* AppDelegate.m */; };
 		77826BDE203E7427009D5F2C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDD203E7427009D5F2C /* ViewController.m */; };
 		77826BE1203E7427009D5F2C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 77826BDF203E7427009D5F2C /* Main.storyboard */; };
@@ -17,14 +16,13 @@
 		77826C10203E74AC009D5F2C /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 77826C0F203E74AC009D5F2C /* Podfile */; };
 		77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */; };
 		77826C18203FAB8B009D5F2C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 77826C17203FAB8B009D5F2C /* README.md */; };
+		77A41FAC23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m in Sources */ = {isa = PBXBuildFile; fileRef = 77A41FAA23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m */; };
 		C72090F66CE012968A1699AF /* libPods-Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3783465EF81E7A5838D5F3FF /* libPods-Project.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		04C647CC6AA139DA4312FCCE /* Pods-Project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.release.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.release.xcconfig"; sourceTree = "<group>"; };
 		3783465EF81E7A5838D5F3FF /* libPods-Project.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Project.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		773F8F78232E4E5000355BE9 /* UIViewController+RotationControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+RotationControl.m"; sourceTree = "<group>"; };
-		773F8F79232E4E5100355BE9 /* UIViewController+RotationControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+RotationControl.h"; sourceTree = "<group>"; };
 		77826BD6203E7427009D5F2C /* Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77826BD9203E7427009D5F2C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		77826BDA203E7427009D5F2C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -38,6 +36,8 @@
 		77826C0F203E74AC009D5F2C /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = SJBaseVideoPlayer.podspec; path = ../SJBaseVideoPlayer.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		77826C17203FAB8B009D5F2C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		77A41FAA23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+SJRotationControlExtended.m"; sourceTree = "<group>"; };
+		77A41FAB23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+SJRotationControlExtended.h"; sourceTree = "<group>"; };
 		77DE8360EA219A9C5A02BA5F /* Pods-Project.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,10 +79,10 @@
 			children = (
 				77826BD9203E7427009D5F2C /* AppDelegate.h */,
 				77826BDA203E7427009D5F2C /* AppDelegate.m */,
-				773F8F79232E4E5100355BE9 /* UIViewController+RotationControl.h */,
-				773F8F78232E4E5000355BE9 /* UIViewController+RotationControl.m */,
 				77826BDC203E7427009D5F2C /* ViewController.h */,
 				77826BDD203E7427009D5F2C /* ViewController.m */,
+				77A41FAB23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.h */,
+				77A41FAA23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m */,
 				77826BDF203E7427009D5F2C /* Main.storyboard */,
 				77826BE2203E7427009D5F2C /* Assets.xcassets */,
 				77826BE4203E7427009D5F2C /* LaunchScreen.storyboard */,
@@ -231,7 +231,7 @@
 			files = (
 				77826BDE203E7427009D5F2C /* ViewController.m in Sources */,
 				77826BE9203E7427009D5F2C /* main.m in Sources */,
-				773F8F7A232E4E5100355BE9 /* UIViewController+RotationControl.m in Sources */,
+				77A41FAC23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m in Sources */,
 				77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

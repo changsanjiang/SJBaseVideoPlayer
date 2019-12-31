@@ -1,32 +1,26 @@
 //
-//  UIViewController+RotationControl.m
-//  TestPlayer
+//  UIViewController+SJRotationControlExtended.m
+//  SJVideoPlayer_Example
 //
-//  Created by BlueDancer on 2019/8/28.
-//  Copyright © 2019 SanJiang. All rights reserved.
+//  Created by 畅三江 on 2019/12/22.
+//  Copyright © 2019 changsanjiang. All rights reserved.
 //
 
-#import "UIViewController+RotationControl.h"
+#import "UIViewController+SJRotationControlExtended.h"
 
-@implementation UIViewController (RotationControl)
+@implementation UIViewController (SJRotationControlExtended)
 - (BOOL)shouldAutorotate {
-#ifdef DEBUG
-    NSLog(@"%d - %s", (int)__LINE__, __func__);
-#endif
     return NO;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-#ifdef DEBUG
-    NSLog(@"%d - %s", (int)__LINE__, __func__);
-#endif
     return UIInterfaceOrientationMaskPortrait;
 }
 
 @end
 
 
-@implementation UITabBarController (RotationControl)
+@implementation UITabBarController (SJRotationControlExtended)
 - (UIViewController *)sj_topViewController {
     if ( self.selectedIndex == NSNotFound )
         return self.viewControllers.firstObject;
@@ -46,7 +40,7 @@
 }
 @end
 
-@implementation UINavigationController (RotationControl)
+@implementation UINavigationController (SJRotationControlExtended)
 - (BOOL)shouldAutorotate {
     return self.topViewController.shouldAutorotate;
 }
@@ -67,3 +61,5 @@
     return self.topViewController;
 }
 @end
+
+
