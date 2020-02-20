@@ -6,14 +6,14 @@
 //  Copyright © 2019 changsanjiang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "SJVideoPlayerPlaybackControllerDefines.h"
+#import "SJMediaPlaybackController.h"
 #import "SJVideoPlayerURLAsset+SJAliMediaPlaybackAdd.h"
+#import "SJAliMediaPlayer.h"
 #import <AliyunPlayer/AVPDef.h>
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJAliMediaPlaybackController : NSObject<SJVideoPlayerPlaybackController>
-@property (nonatomic, strong, nullable) SJVideoPlayerURLAsset *media;
+@interface SJAliMediaPlaybackController : SJMediaPlaybackController
 @property (nonatomic) AVPSeekMode seekMode;
+@property (nonatomic, strong, readonly, nullable) SJAliMediaPlayer *currentPlayer;
 @end
 NS_ASSUME_NONNULL_END

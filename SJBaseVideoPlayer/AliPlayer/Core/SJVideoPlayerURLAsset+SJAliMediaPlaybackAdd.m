@@ -15,16 +15,16 @@ NS_ASSUME_NONNULL_BEGIN
     return [self initWithSource:source playModel:SJPlayModel.new];
 }
 - (instancetype)initWithSource:(__kindof AVPSource *)source playModel:(__kindof SJPlayModel *)playModel {
-    return [self initWithSource:source specifyStartTime:0 playModel:playModel];
+    return [self initWithSource:source startPosition:0 playModel:playModel];
 }
-- (instancetype)initWithSource:(__kindof AVPSource *)source specifyStartTime:(NSTimeInterval)specifyStartTime {
-    return [self initWithSource:source specifyStartTime:specifyStartTime playModel:SJPlayModel.new];
+- (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)startPosition {
+    return [self initWithSource:source startPosition:startPosition playModel:SJPlayModel.new];
 }
-- (instancetype)initWithSource:(__kindof AVPSource *)source specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel {
+- (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel {
     self = [super init];
     if ( self ) {
         self.source = source;
-        self.specifyStartTime = specifyStartTime;
+        self.startPosition = startPosition;
         self.playModel = playModel;
     }
     return self;

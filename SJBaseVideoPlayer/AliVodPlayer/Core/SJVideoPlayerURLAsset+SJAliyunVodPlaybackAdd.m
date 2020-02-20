@@ -15,17 +15,17 @@ NS_ASSUME_NONNULL_BEGIN
     return [self initWithAliyunVodModel:media playModel:SJPlayModel.new];
 }
 - (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media playModel:(__kindof SJPlayModel *)playModel {
-    return [self initWithAliyunVodModel:media specifyStartTime:0 playModel:playModel];
+    return [self initWithAliyunVodModel:media startPosition:0 playModel:playModel];
 }
-- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media specifyStartTime:(NSTimeInterval)specifyStartTime {
-    return [self initWithAliyunVodModel:media specifyStartTime:specifyStartTime playModel:SJPlayModel.new];
+- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media startPosition:(NSTimeInterval)startPosition {
+    return [self initWithAliyunVodModel:media startPosition:startPosition playModel:SJPlayModel.new];
 }
-- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel {
+- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel {
     self = [super init];
     if ( self ) {
         self.aliyunMedia = media;
         self.playModel = playModel;
-        self.specifyStartTime = specifyStartTime;
+        self.startPosition = startPosition;
     }
     return self;
 }
@@ -33,6 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setAliyunMedia:(__kindof SJAliyunVodModel * _Nullable)aliyunMedia {
     objc_setAssociatedObject(self, @selector(aliyunMedia), aliyunMedia, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
+
 - (nullable SJAliyunVodModel *)aliyunMedia {
     __kindof SJAliyunVodModel *media = objc_getAssociatedObject(self, _cmd);
     if ( media == nil ) {

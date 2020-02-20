@@ -6,57 +6,21 @@
 //  Copyright © 2019 SanJiang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "SJVideoPlayerPlaybackControllerDefines.h"
+#import "SJMediaPlaybackController.h"
 #import "SJAliyunVodModel.h"
+#import <AliyunVodPlayerSDK/AliyunVodPlayerSDK.h>
 
 NS_ASSUME_NONNULL_BEGIN
-extern NSNotificationName const SJAliyunVodPlayerAssetStatusDidChangeNotification;
-extern NSNotificationName const SJAliyunVodPlayerTimeControlStatusDidChangeNotification;
-extern NSNotificationName const SJAliyunVodPlayerPresentationSizeDidChangeNotification;
-extern NSNotificationName const SJAliyunVodPlayerDidPlayToEndTimeNotification;
-extern NSNotificationName const SJAliyunVodPlayerReadyForDisplayNotification;
-extern NSNotificationName const SJAliyunVodPlayerDidReplayNotification;
+///
+/// 内部封装了 AliyunVodPlayer
+///
+@interface SJAliyunVodPlayer : NSObject<SJMediaPlayer>
+- (instancetype)initWithMedia:(__kindof SJAliyunVodModel *)media startPosition:(NSTimeInterval)time;
 
-@interface SJAliyunVodPlayer : NSObject
-- (instancetype)initWithMedia:(__kindof SJAliyunVodModel *)media specifyStartTime:(NSTimeInterval)time;
-@property (nonatomic, strong, readonly) SJAliyunVodModel *media;
-@property (nonatomic, readonly) NSTimeInterval specifyStartTime;
-@property (nonatomic, readonly, nullable) SJWaitingReason reasonForWaitingToPlay;
-@property (nonatomic, readonly) SJPlaybackTimeControlStatus timeControlStatus;
-@property (nonatomic, readonly) SJSeekingInfo seekingInfo;
-@property (nonatomic, readonly) SJAssetStatus assetStatus;
-@property (nonatomic, readonly) CGSize presentationSize;
-@property (nonatomic, readonly) BOOL isReplayed;
-@property (nonatomic, readonly) BOOL isPlayed;
-@property (nonatomic, readonly) BOOL isPlayedToEndTime;
-@property (nonatomic) SJVideoGravity videoGravity;
-@property (nonatomic) float rate;
-@property (nonatomic) float volume;
-@property (nonatomic, getter=isMuted) BOOL muted;
-@property (nonatomic, readonly, getter=isReadyForDisplay) BOOL readyForDisplay;
-@property (nonatomic, strong, readonly) UIView *view;
-@property (nonatomic) BOOL shouldAutoplay;
-
-- (void)seekToTime:(CMTime)time completionHandler:(nullable void (^)(BOOL finished))completionHandler;
-
-@property (nonatomic, readonly) NSTimeInterval currentTime;
-@property (nonatomic, readonly) NSTimeInterval duration;
-@property (nonatomic, readonly) NSTimeInterval playableDuration;
-
-- (void)play;
-- (void)pause;
-
+@property (nonatomic) AliyunVodPlayerDisplayMode displayMode;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
-
-- (void)replay;
-- (void)report;
-
-- (id)addTimeObserverWithCurrentTimeDidChangeExeBlock:(void (^)(NSTimeInterval time))block
-                    playableDurationDidChangeExeBlock:(void (^)(NSTimeInterval time))block1
-                            durationDidChangeExeBlock:(void (^)(NSTimeInterval time))block2;
-- (void)removeTimeObserver:(id)observer;
-- (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)new NS_UNAVAILABLE;
+@property (nonatomic, strong, readonly) SJAliyunVodModel *media;
+@property (nonatomic, strong, readonly) UIView *view;
+@property (nonatomic, readonly) BOOL firstVideoFrameRendered;
 @end
 NS_ASSUME_NONNULL_END

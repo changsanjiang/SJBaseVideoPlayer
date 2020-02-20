@@ -6,12 +6,14 @@
 //  Copyright © 2019 SanJiang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "SJVideoPlayerPlaybackControllerDefines.h"
+#import "SJMediaPlaybackController.h"
 #import "SJVideoPlayerURLAsset+SJAliyunVodPlaybackAdd.h"
+#import "SJAliyunVodPlayer.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJAliyunVodPlaybackController : NSObject<SJVideoPlayerPlaybackController>
-@property (nonatomic, strong, nullable) SJVideoPlayerURLAsset *media;
+@interface SJAliyunVodPlaybackController : SJMediaPlaybackController
+
+@property (nonatomic, strong, readonly, nullable) SJAliyunVodPlayer *currentPlayer;
+
 @end
 NS_ASSUME_NONNULL_END

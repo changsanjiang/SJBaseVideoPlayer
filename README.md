@@ -450,7 +450,7 @@ _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithAVAsset:avAsset];
 
 ```Objective-C
 NSTimeInterval secs = 20.0;
-_player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL specifyStartTime:secs]; // 直接从20秒处开始播放
+_player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:URL startPosition:secs]; // 直接从20秒处开始播放
 ```
 
 <h3 id="2.4">2.4 续播(进入下个页面时, 继续播放)</h3>

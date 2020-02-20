@@ -13,8 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SJVideoPlayerURLAsset (SJAliyunVodPlaybackAdd)
 - (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media;
 - (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media playModel:(__kindof SJPlayModel *)playModel;
-- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media specifyStartTime:(NSTimeInterval)specifyStartTime;
-- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media specifyStartTime:(NSTimeInterval)specifyStartTime playModel:(__kindof SJPlayModel *)playModel;
+- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media startPosition:(NSTimeInterval)startPosition;
+- (instancetype)initWithAliyunVodModel:(SJAliyunVodModel *)media startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel;
 
 @property (nonatomic, strong, readonly, nullable) __kindof SJAliyunVodModel *aliyunMedia;
 @end
