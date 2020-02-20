@@ -26,7 +26,15 @@ static void *kPlayer = &kPlayer;
     
     AVPlayer *avPlayer = target.avPlayer;
     if ( avPlayer == nil ) {
-        return nil;
+        AVPlayerItem *avPlayerItem = target.avPlayerItem;
+        if ( avPlayerItem == nil ) {
+            AVAsset *avAsset = target.avAsset;
+            if ( avAsset == nil ) {
+                avAsset = [AVURLAsset URLAssetWithURL:target.mediaURL options:nil];
+            }
+            avPlayerItem = [AVPlayerItem playerItemWithAsset:avAsset];
+        }
+        avPlayer = [AVPlayer playerWithPlayerItem:avPlayerItem];
     }
     
     player = [SJAVMediaPlayer.alloc initWithAVPlayer:avPlayer startPosition:media.startPosition];

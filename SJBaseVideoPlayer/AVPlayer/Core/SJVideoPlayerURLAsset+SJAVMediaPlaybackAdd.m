@@ -19,7 +19,13 @@ NS_ASSUME_NONNULL_BEGIN
 }
 - (nullable instancetype)initWithAVAsset:(__kindof AVAsset *)asset startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel {
     if ( asset == nil ) return nil;
-    return [self initWithAVPlayerItem:[AVPlayerItem playerItemWithAsset:asset] startPosition:startPosition playModel:playModel];
+    self = [super init];
+    if ( self ) {
+        self.avAsset = asset;
+        self.playModel = playModel;
+        self.startPosition = startPosition;
+    }
+    return self;
 }
 
 - (nullable instancetype)initWithAVPlayerItem:(AVPlayerItem *)playerItem {
@@ -30,7 +36,13 @@ NS_ASSUME_NONNULL_BEGIN
 }
 - (nullable instancetype)initWithAVPlayerItem:(AVPlayerItem *)playerItem startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel {
     if ( playerItem == nil ) return nil;
-    return [self initWithAVPlayer:[AVPlayer playerWithPlayerItem:playerItem] startPosition:startPosition playModel:playModel];
+    self = [super init];
+    if ( self ) {
+        self.avPlayerItem = playerItem;
+        self.playModel = playModel;
+        self.startPosition = startPosition;
+    }
+    return self;
 }
 
 - (nullable instancetype)initWithAVPlayer:(AVPlayer *)player {
@@ -49,18 +61,28 @@ NS_ASSUME_NONNULL_BEGIN
     }
     return self;
 }
+- (void)setAvAsset:(__kindof AVAsset * _Nullable)avAsset {
+    objc_setAssociatedObject(self, @selector(avAsset), avAsset, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+- (nullable __kindof AVAsset *)avAsset {
+    if ( self.original != nil ) return self.original.avAsset;
+    return objc_getAssociatedObject(self, _cmd);
+}
+
+- (void)setAvPlayerItem:(AVPlayerItem * _Nullable)avPlayerItem {
+    objc_setAssociatedObject(self, @selector(avPlayerItem), avPlayerItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+- (nullable AVPlayerItem *)avPlayerItem {
+    if ( self.original != nil ) return self.original.avPlayerItem;
+    return objc_getAssociatedObject(self, _cmd);
+}
 
 - (void)setAvPlayer:(AVPlayer * _Nullable)avPlayer {
     objc_setAssociatedObject(self, @selector(avPlayer), avPlayer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (nullable AVPlayer *)avPlayer {
     if ( self.original != nil ) return self.original.avPlayer;
-    AVPlayer *player = objc_getAssociatedObject(self, _cmd);
-    if ( player == nil && self.mediaURL != nil ) {
-        player = [AVPlayer playerWithURL:self.mediaURL];
-        objc_setAssociatedObject(self, _cmd, player, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-    return player;
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 - (nullable instancetype)initWithOtherAsset:(SJVideoPlayerURLAsset *)otherAsset playModel:(nullable __kindof SJPlayModel *)playModel {
