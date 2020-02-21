@@ -9,6 +9,12 @@
 #import "SJAliyunVodPlaybackController.h"
 #import "SJAliyunVodPlayerLayerView.h"
 
+#if __has_include(<SJUIKit/SJRunLoopTaskQueue.h>)
+#import <SJUIKit/SJRunLoopTaskQueue.h>
+#else
+#import "SJRunLoopTaskQueue.h"
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 @interface SJAliyunVodPlaybackController ()
 
@@ -19,9 +25,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)playerWithMedia:(SJVideoPlayerURLAsset *)media completionHandler:(void (^)(id<SJMediaPlayer> _Nullable))completionHandler {
     if ( media.aliyunMedia != nil ) {
-        SJAliyunVodPlayer *player = [SJAliyunVodPlayer.alloc initWithMedia:self.media.aliyunMedia startPosition:self.media.startPosition];
-        player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
-        if ( completionHandler ) completionHandler(player);
+        __weak typeof(self) _self = self;
+        SJRunLoopTaskQueue.main.enqueue(^{
+            __strong typeof(_self) self = _self;
+            if ( !self ) return;
+            SJAliyunVodPlayer *player = [SJAliyunVodPlayer.alloc initWithMedia:media.aliyunMedia startPosition:media.startPosition];
+            player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
+            if ( completionHandler ) completionHandler(player);
+        });
     }
 }
 

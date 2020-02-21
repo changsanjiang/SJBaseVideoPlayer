@@ -13,7 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SJAliyunVodPlayer ()<AliyunVodPlayerDelegate>
 @property (nonatomic) BOOL isPlayedToEndTime;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
-@property (nonatomic) BOOL needSeekToSpecifyStartTime;
+@property (nonatomic) NSTimeInterval startPosition;
+@property (nonatomic) BOOL needSeekToStartPosition;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
 @property (nonatomic) SJPlaybackTimeControlStatus timeControlStatus;
 @property (nonatomic) SJSeekingInfo seekingInfo;
@@ -30,14 +31,12 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation SJAliyunVodPlayer
-@synthesize startPosition = _startPosition;
 @synthesize pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
 @synthesize isPlayed = _isPlayed;
 @synthesize isReplayed = _isReplayed;
 @synthesize rate = _rate;
 @synthesize volume = _volume;
 @synthesize muted = _muted;
-@synthesize shouldAutoplay = _shouldAutoplay;
 
 - (instancetype)initWithMedia:(__kindof SJAliyunVodModel *)media startPosition:(NSTimeInterval)time {
     self = [super init];
@@ -47,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
         _assetStatus = SJAssetStatusPreparing;
         _player.delegate = self;
         _pauseWhenAppDidEnterBackground = YES;
-        _needSeekToSpecifyStartTime = time != 0;
+        _needSeekToStartPosition = time != 0;
         
         _player = AliyunVodPlayer.alloc.init;
         _player.delegate = self;
@@ -263,13 +262,9 @@ NS_ASSUME_NONNULL_BEGIN
         self.assetStatus = status;
         
         if ( status == SJAssetStatusReadyToPlay ) {
-            if ( self.needSeekToSpecifyStartTime ) {
-                self.needSeekToSpecifyStartTime = NO;
+            if ( self.needSeekToStartPosition ) {
+                self.needSeekToStartPosition = NO;
                 [self seekToTime:CMTimeMakeWithSeconds(self.startPosition, NSEC_PER_SEC) completionHandler:nil];
-            }
-            
-            if ( self.shouldAutoplay ) {
-                [self play];
             }
         }
     }

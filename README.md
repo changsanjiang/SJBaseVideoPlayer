@@ -1245,20 +1245,20 @@ self.playbackController.videoGravity = scale > 1 ?AVLayerVideoGravityResizeAspec
 <h3 id="10.5">10.5 设置支持的手势</h3>
 
 ```Objective-C
-_player.gestureControl.supportedGestureTypes = SJPlayerGestureTypeMask_All
+_player.gestureControl.supportedGestureTypes = SJPlayerGestureTypeMask_Default
 
 typedef enum : NSUInteger {
-SJPlayerGestureTypeMask_None,
-SJPlayerGestureTypeMask_SingleTap = 1 << 0,
-SJPlayerGestureTypeMask_DoubleTap = 1 << 1,
-SJPlayerGestureTypeMask_Pan_H = 1 << 2, // 水平方向
-SJPlayerGestureTypeMask_Pan_V = 1 << 3, // 垂直方向
-SJPlayerGestureTypeMask_Pinch = 1 << 4,
-SJPlayerGestureTypeMask_Pan = SJPlayerGestureTypeMask_Pan_H | SJPlayerGestureTypeMask_Pan_V,
-SJPlayerGestureTypeMask_All = SJPlayerGestureTypeMask_SingleTap |
-SJPlayerGestureTypeMask_DoubleTap |
-SJPlayerGestureTypeMask_Pan |
-SJPlayerGestureTypeMask_Pinch,
+    SJPlayerGestureTypeMask_None,
+    SJPlayerGestureTypeMask_SingleTap   = 1 << 0,
+    SJPlayerGestureTypeMask_DoubleTap   = 1 << 1,
+    SJPlayerGestureTypeMask_Pan_H       = 1 << 2, // 水平方向
+    SJPlayerGestureTypeMask_Pan_V       = 1 << 3, // 垂直方向
+    SJPlayerGestureTypeMask_Pinch       = 1 << 4,
+    SJPlayerGestureTypeMask_LongPress   = 1 << 5,
+    
+    SJPlayerGestureTypeMask_Pan = SJPlayerGestureTypeMask_Pan_H | SJPlayerGestureTypeMask_Pan_V,
+    SJPlayerGestureTypeMask_Default = SJPlayerGestureTypeMask_SingleTap | SJPlayerGestureTypeMask_DoubleTap | SJPlayerGestureTypeMask_Pan | SJPlayerGestureTypeMask_Pinch,
+    SJPlayerGestureTypeMask_All = SJPlayerGestureTypeMask_Default | SJPlayerGestureTypeMask_LongPress,
 } SJPlayerGestureTypeMask;
 ```
 

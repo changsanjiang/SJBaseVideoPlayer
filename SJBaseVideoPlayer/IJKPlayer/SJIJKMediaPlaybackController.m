@@ -9,6 +9,12 @@
 #import "SJIJKMediaPlaybackController.h"
 #import "SJIJKMediaPlayerLayerView.h"
 
+#if __has_include(<SJUIKit/SJRunLoopTaskQueue.h>)
+#import <SJUIKit/SJRunLoopTaskQueue.h>
+#else
+#import "SJRunLoopTaskQueue.h"
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 @interface SJIJKMediaPlaybackController ()
 
@@ -23,9 +29,14 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)playerWithMedia:(SJVideoPlayerURLAsset *)media completionHandler:(void (^)(id<SJMediaPlayer> _Nullable))completionHandler {
-    SJIJKMediaPlayer *player = [SJIJKMediaPlayer.alloc initWithURL:self.media.mediaURL startPosition:self.media.startPosition options:self.options];
-    player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
-    if ( completionHandler ) completionHandler(player);
+    __weak typeof(self) _self = self;
+    SJRunLoopTaskQueue.main.enqueue(^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return;
+        SJIJKMediaPlayer *player = [SJIJKMediaPlayer.alloc initWithURL:media.mediaURL startPosition:media.startPosition options:self.options];
+        player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
+        if ( completionHandler ) completionHandler(player);
+    });
 }
 
 - (UIView<SJMediaPlayerView> *)playerViewWithPlayer:(SJIJKMediaPlayer *)player {

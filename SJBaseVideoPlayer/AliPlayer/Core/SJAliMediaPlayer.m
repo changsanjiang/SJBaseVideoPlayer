@@ -14,7 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL isPlayedToEndTime;
 @property (nonatomic) BOOL firstVideoFrameRendered;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
-@property (nonatomic) BOOL needSeekToSpecifyStartTime;
+@property (nonatomic) NSTimeInterval startPosition;
+@property (nonatomic) BOOL needSeekToStartPosition;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
 @property (nonatomic) SJPlaybackTimeControlStatus timeControlStatus;
 @property (nonatomic) SJSeekingInfo seekingInfo;
@@ -31,14 +32,12 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation SJAliMediaPlayer
-@synthesize startPosition = _startPosition;
 @synthesize pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
 @synthesize isPlayed = _isPlayed;
 @synthesize isReplayed = _isReplayed;
 @synthesize rate = _rate;
 @synthesize volume = _volume;
 @synthesize muted = _muted;
-@synthesize shouldAutoplay = _shouldAutoplay;
 
 - (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)time {
     self = [super init];
@@ -51,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
         _player.playerView = UIView.new;
         _pauseWhenAppDidEnterBackground = YES;
         _seekMode = AVP_SEEKMODE_INACCURATE;
-        _needSeekToSpecifyStartTime = time != 0;
+        _needSeekToStartPosition = time != 0;
         
         if      ( [source isKindOfClass:AVPUrlSource.class] ) {
             [_player setUrlSource:source];
@@ -270,18 +269,14 @@ NS_ASSUME_NONNULL_BEGIN
         self.assetStatus = status;
         
         if ( status == SJAssetStatusReadyToPlay ) {
-            if ( self.needSeekToSpecifyStartTime ) {
-                self.needSeekToSpecifyStartTime = NO;
+            if ( self.needSeekToStartPosition ) {
+                self.needSeekToStartPosition = NO;
                 [self seekToTime:CMTimeMakeWithSeconds(self.startPosition, NSEC_PER_SEC) completionHandler:nil];
-            }
-            
-            if ( self.shouldAutoplay ) {
-                [self play];
             }
         }
     }
     
-    if ( self.eventType == AVPEventFirstRenderedStart ) {
+    if ( status == SJAssetStatusReadyToPlay && self.duration == 0 ) {
         self.duration = self.player.duration * 1.0 / 1000;
     }
     

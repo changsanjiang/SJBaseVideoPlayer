@@ -10,6 +10,12 @@
 #import "SJAliMediaPlayer.h"
 #import "SJAliMediaPlayerLayerView.h"
 
+#if __has_include(<SJUIKit/SJRunLoopTaskQueue.h>)
+#import <SJUIKit/SJRunLoopTaskQueue.h>
+#else
+#import "SJRunLoopTaskQueue.h"
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 @interface SJAliMediaPlaybackController ()
 
@@ -26,11 +32,16 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)playerWithMedia:(SJVideoPlayerURLAsset *)media completionHandler:(void (^)(id<SJMediaPlayer> _Nullable))completionHandler {
-    if ( self.media.source != nil ) {
-        SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:self.media.source startPosition:self.media.startPosition];
-        player.seekMode = self.seekMode;
-        player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
-        if ( completionHandler ) completionHandler(player);
+    if ( media.source != nil ) {
+        __weak typeof(self) _self = self;
+        SJRunLoopTaskQueue.main.enqueue(^{
+            __strong typeof(_self) self = _self;
+            if ( !self ) return;
+            SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:media.source startPosition:media.startPosition];
+            player.seekMode = self.seekMode;
+            player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
+            if ( completionHandler ) completionHandler(player);
+        });
     }
 }
 

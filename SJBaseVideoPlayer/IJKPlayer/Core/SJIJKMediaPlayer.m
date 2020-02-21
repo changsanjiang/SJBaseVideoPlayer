@@ -24,6 +24,7 @@ typedef struct {
 @property (nonatomic) SJIJKMediaPlaybackFinishedInfo finishedInfo;
 @property (nonatomic) SJSeekingInfo seekingInfo;
 @property (nonatomic) SJAssetStatus assetStatus;
+@property (nonatomic) NSTimeInterval startPosition;
 @property (nonatomic) BOOL needSeekToStartPosition;
 @property (nonatomic) BOOL firstVideoFrameRendered;
 @property (nonatomic, strong, nullable) NSTimer *playableDurationRefreshTimer;
@@ -38,7 +39,6 @@ typedef struct {
 @synthesize muted = _muted;
 @synthesize pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
 @synthesize presentationSize = _presentationSize;
-@synthesize startPosition = _startPosition;
 
 + (void)initialize {
     static dispatch_once_t onceToken;
