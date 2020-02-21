@@ -35,15 +35,16 @@ $ pod update --no-repo-update   (不要用 pod install 了, 用这个命令安�
     - wiki: https://github.com/changsanjiang/SJVideoPlayer/wiki/Use-AliPlayer
 - 播放控制切换为: AliyunVodPlayer
     - wiki: https://github.com/changsanjiang/SJVideoPlayer/wiki/Use-AliVodPlayer
- 
-
+- 播放控制切换为: PLPlayerKit 
+    - wiki: https://github.com/changsanjiang/SJVideoPlayer/wiki/Use-PLPlayerKit
+    
 ## Author
 
 Email: changsanjiang@gmail.com
 
 QQGroup: 930508201 (iOS 开发)
 
-[大佬辛苦, 犒赏一下🤕](#赞助)
+[请我喝咖啡☕️](#赞助)
 
 ## Documents
 
