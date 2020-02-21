@@ -490,6 +490,4 @@ static NSString *kTimeControlStatus = @"timeControlStatus";
     }
 }
 @end
-
-NSNotificationName const SJMediaPlayerPlaybackTypeDidChangeNotification = @"SJMediaPlayerPlaybackTypeDidChangeNotification";
 NS_ASSUME_NONNULL_END

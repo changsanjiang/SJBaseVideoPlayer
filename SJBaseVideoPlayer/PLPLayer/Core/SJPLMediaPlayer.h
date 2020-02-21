@@ -10,8 +10,6 @@
 #import <PLPlayerKit/PLPlayerKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
-extern NSNotificationName const SJMediaPlayerPlaybackTypeDidChangeNotification;
-
 @interface SJPLMediaPlayer : NSObject<SJMediaPlayer>
 - (instancetype)initWithURL:(NSURL *)URL options:(PLPlayerOption *)options startPosition:(NSTimeInterval)startPosition;
 - (instancetype)initWithLiveURL:(NSURL *)URL options:(PLPlayerOption *)options;

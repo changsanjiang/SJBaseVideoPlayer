@@ -89,4 +89,7 @@ extern NSNotificationName const SJMediaPlayerViewReadyForDisplayNotification;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 @end
+
+/// 这个通知是可选的(如果可以获取到playbacType, 请发送该通知)
+extern NSNotificationName const SJMediaPlayerPlaybackTypeDidChangeNotification;
 NS_ASSUME_NONNULL_END

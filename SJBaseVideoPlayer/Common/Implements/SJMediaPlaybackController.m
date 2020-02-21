@@ -714,4 +714,5 @@ NSNotificationName const SJMediaPlayerDurationDidChangeNotification = @"SJMediaP
 NSNotificationName const SJMediaPlayerPlayableDurationDidChangeNotification = @"SJMediaPlayerPlayableDurationDidChangeNotification";
 
 NSNotificationName const SJMediaPlayerViewReadyForDisplayNotification = @"SJMediaPlayerViewReadyForDisplayNotification";
+NSNotificationName const SJMediaPlayerPlaybackTypeDidChangeNotification = @"SJMediaPlayerPlaybackTypeDidChangeNotification";
 NS_ASSUME_NONNULL_END
