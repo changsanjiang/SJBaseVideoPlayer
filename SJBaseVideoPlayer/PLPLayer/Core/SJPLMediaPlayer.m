@@ -208,7 +208,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)report {
     [self _postNotification:SJMediaPlayerAssetStatusDidChangeNotification];
     [self _postNotification:SJMediaPlayerTimeControlStatusDidChangeNotification];
-    [self _postNotification:SJMediaPlayerPresentationSizeDidChangeNotification];
+    [self _postNotification:SJMediaPlayerDurationDidChangeNotification];
+    [self _postNotification:SJMediaPlayerPlayableDurationDidChangeNotification];
     [self _postNotification:SJMediaPlayerPlaybackTypeDidChangeNotification];
 }
 

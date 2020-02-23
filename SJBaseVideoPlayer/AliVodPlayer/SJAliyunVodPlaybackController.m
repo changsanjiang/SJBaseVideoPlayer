@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
-    [super pauseWhenAppDidEnterBackground];
+    [super setPauseWhenAppDidEnterBackground:pauseWhenAppDidEnterBackground];
     self.currentPlayer.pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
 }
 
