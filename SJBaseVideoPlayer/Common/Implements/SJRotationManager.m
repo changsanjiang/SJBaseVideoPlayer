@@ -311,8 +311,8 @@ static NSNotificationName const SJRotationManagerTransitioningValueDidChangeNoti
     }
     
     [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(deviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:device];
-    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(enterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(enterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(willResignActive) name:UIApplicationWillResignActiveNotification object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(didBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
 }
 
 - (void)deviceOrientationDidChange:(NSNotification *)note {
@@ -329,12 +329,12 @@ static NSNotificationName const SJRotationManagerTransitioningValueDidChangeNoti
     }
 }
 
-- (void)enterBackground {
+- (void)willResignActive {
     [self.timerControl clear];
     _inactivated = YES;
 }
 
-- (void)enterForeground {
+- (void)didBecomeActive {
     [self.timerControl start];
 }
 
