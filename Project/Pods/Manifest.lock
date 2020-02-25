@@ -51,7 +51,7 @@ DEPENDENCIES:
   - SJBaseVideoPlayer (from `../../SJBaseVideoPlayer`)
 
 SPEC REPOS:
-  trunk:
+  https://github.com/CocoaPods/Specs.git:
     - Masonry
     - Reachability
     - SJUIKit
@@ -66,6 +66,6 @@ SPEC CHECKSUMS:
   SJBaseVideoPlayer: 682d5373d0e9e1ecab754e970b6d7a19543b717c
   SJUIKit: e94b093420a76fe8c1751d12b83e9e2b007e409a
 
-PODFILE CHECKSUM: 8b9107f80673bb180537f670bf095c09a94ea1a5
+PODFILE CHECKSUM: 13070d80da18811530102acb9ec4b9c927f01dee
 
 COCOAPODS: 1.8.4
