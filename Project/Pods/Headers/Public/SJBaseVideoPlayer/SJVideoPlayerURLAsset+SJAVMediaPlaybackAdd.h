@@ -1,1 +1,1 @@
-../../../../../SJBaseVideoPlayer/Common/Implements/SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h
+../../../../../SJBaseVideoPlayer/AVPlayer/Core/SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h

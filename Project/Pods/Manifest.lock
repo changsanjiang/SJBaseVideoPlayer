@@ -1,41 +1,51 @@
 PODS:
   - Masonry (1.1.0)
   - Reachability (3.2)
-  - SJBaseVideoPlayer (3.1.7):
+  - SJBaseVideoPlayer (3.2.3):
     - Masonry
     - Reachability
-    - SJBaseVideoPlayer/AVPlayer (= 3.1.7)
-    - SJBaseVideoPlayer/Common (= 3.1.7)
+    - SJBaseVideoPlayer/AVPlayer (= 3.2.3)
+    - SJBaseVideoPlayer/Common (= 3.2.3)
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
-    - SJUIKit/ObserverHelper (>= 0.0.0.38)
-    - SJUIKit/Queues (>= 0.0.0.38)
-  - SJBaseVideoPlayer/AVPlayer (3.1.7):
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJBaseVideoPlayer/AVPlayer (3.2.3):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Common
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
-    - SJUIKit/ObserverHelper (>= 0.0.0.38)
-    - SJUIKit/Queues (>= 0.0.0.38)
-  - SJBaseVideoPlayer/Common (3.1.7):
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJBaseVideoPlayer/Common (3.2.3):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/ResourceLoader
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
-    - SJUIKit/ObserverHelper (>= 0.0.0.38)
-    - SJUIKit/Queues (>= 0.0.0.38)
-  - SJBaseVideoPlayer/ResourceLoader (3.1.7):
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJBaseVideoPlayer/ResourceLoader (3.2.3):
     - Masonry
     - Reachability
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
-    - SJUIKit/ObserverHelper (>= 0.0.0.38)
-    - SJUIKit/Queues (>= 0.0.0.38)
-  - SJUIKit/AttributesFactory (0.0.0.39):
-    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.39)
-    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.39)
-  - SJUIKit/AttributesFactory/Deprecated (0.0.0.39)
-  - SJUIKit/AttributesFactory/UIKitText (0.0.0.39)
-  - SJUIKit/ObserverHelper (0.0.0.39)
-  - SJUIKit/Queues (0.0.0.39)
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJUIKit/AttributesFactory (0.0.0.40):
+    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.40)
+    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.40)
+  - SJUIKit/AttributesFactory/Deprecated (0.0.0.40)
+  - SJUIKit/AttributesFactory/UIKitText (0.0.0.40)
+  - SJUIKit/ObserverHelper (0.0.0.40)
+  - SJUIKit/Queues (0.0.0.40)
+  - SJUIKit/SQLite3 (0.0.0.40):
+    - SJUIKit/SQLite3/Core (= 0.0.0.40)
+    - SJUIKit/SQLite3/Protocol (= 0.0.0.40)
+  - SJUIKit/SQLite3/Core (0.0.0.40):
+    - SJUIKit/SQLite3/Protocol
+  - SJUIKit/SQLite3/Protocol (0.0.0.40)
 
 DEPENDENCIES:
   - SJBaseVideoPlayer (from `../../SJBaseVideoPlayer`)
@@ -53,8 +63,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SJBaseVideoPlayer: 9e18423fd106835ce84a882e7ac65959a2dec212
-  SJUIKit: 5479a150083e606937a796801ecaae6317e046f5
+  SJBaseVideoPlayer: 682d5373d0e9e1ecab754e970b6d7a19543b717c
+  SJUIKit: e94b093420a76fe8c1751d12b83e9e2b007e409a
 
 PODFILE CHECKSUM: 8b9107f80673bb180537f670bf095c09a94ea1a5
 
