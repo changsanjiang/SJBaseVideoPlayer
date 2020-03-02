@@ -424,7 +424,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ( currentPlayer != nil ) {
         currentPlayer.volume = self.volume;
         currentPlayer.muted = self.muted;
-        currentPlayer.rate = self.rate;
+        if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) currentPlayer.rate = self.rate;
         [self _addPeriodicTimeObserver];
         [currentPlayer report];
     }
