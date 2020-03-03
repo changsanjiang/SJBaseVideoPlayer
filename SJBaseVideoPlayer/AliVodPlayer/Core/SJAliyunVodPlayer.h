@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SJAliyunVodPlayer : NSObject<SJMediaPlayer>
 - (instancetype)initWithMedia:(__kindof SJAliyunVodModel *)media startPosition:(NSTimeInterval)time;
 
+@property (nonatomic) NSTimeInterval trialEndPosition;
 @property (nonatomic) AliyunVodPlayerDisplayMode displayMode;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 @property (nonatomic, strong, readonly) SJAliyunVodModel *media;

@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly, strong) NSURL *URL;
 
+@property (nonatomic) NSTimeInterval trialEndPosition;
+
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 
 @property (nonatomic, readonly) BOOL firstVideoFrameRendered;

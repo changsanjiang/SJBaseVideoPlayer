@@ -18,17 +18,21 @@ typedef struct {
 
 
 @interface SJIJKMediaPlayer ()
+@property (nonatomic) SJIJKMediaPlaybackFinishedInfo IJKFinishedInfo;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
 @property (nonatomic) SJPlaybackTimeControlStatus timeControlStatus;
-@property (nonatomic) SJIJKMediaPlaybackFinishedInfo finishedInfo;
 @property (nonatomic) SJSeekingInfo seekingInfo;
 @property (nonatomic) SJAssetStatus assetStatus;
 @property (nonatomic) NSTimeInterval startPosition;
 @property (nonatomic) BOOL needSeekToStartPosition;
 @property (nonatomic) BOOL firstVideoFrameRendered;
-@property (nonatomic, strong, nullable) NSTimer *playableDurationRefreshTimer;
-@property (nonatomic) NSTimeInterval previousPlayableDuration;
+@property (nonatomic) BOOL isPlaybackFinished;                        ///< 播放结束
+@property (nonatomic, nullable) SJFinishedReason finishedReason;      ///< 播放结束的reason
+
+@property (nonatomic, strong, nullable) NSTimer *refreshTimer;
+@property (nonatomic) NSTimeInterval pre_playbaleTime;
+@property (nonatomic, readonly) BOOL isPlayedToTrialEndPosition;
 @end
 
 @implementation SJIJKMediaPlayer
@@ -81,7 +85,6 @@ typedef struct {
         self.shouldAutoplay = NO;
         self.assetStatus = SJAssetStatusPreparing;
         [self prepareToPlay];
-        [self _refreshPlaybaleDuration];
     }
     return self;
 }
@@ -90,25 +93,13 @@ typedef struct {
 #ifdef DEBUG
     NSLog(@"%d \t %s", (int)__LINE__, __func__);
 #endif
-    [_playableDurationRefreshTimer invalidate];
+    [_refreshTimer invalidate];
     [self.view removeFromSuperview];
     [NSNotificationCenter.defaultCenter removeObserver:self];
     [super stop];
 }
 
-- (NSTimeInterval)currentTime {
-    return self.currentPlaybackTime;
-}
-
-- (BOOL)isPlayedToEndTime {
-    return self.finishedInfo.isFinished &&
-           self.finishedInfo.reason == IJKMPMovieFinishReasonPlaybackEnded;
-}
-
 - (void)replay {
-    _finishedInfo.reason = 0;
-    _finishedInfo.isFinished = NO;
-    
     _isReplayed = YES;
     __weak typeof(self) _self = self;
     [self seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
@@ -131,7 +122,7 @@ typedef struct {
 - (void)play {
     _isPlayed = YES;
     
-    if ( _finishedInfo.isFinished ) {
+    if ( self.isPlaybackFinished ) {
         [self replay];
     }
     else {
@@ -164,12 +155,15 @@ typedef struct {
         if ( completionHandler ) completionHandler(NO);
         return;
     }
-    
+
+    time = [self _adjustSeekTimeIfNeeded:time];
+    BOOL isPlaybackEnded = _IJKFinishedInfo.isFinished;
     [self _willSeeking:time];
     _seekCompletionHandler = completionHandler;
+
     NSTimeInterval secs = CMTimeGetSeconds(time);
     if ( ceil(secs) == ceil(self.duration) ) secs = secs * 0.98;
-    if ( _finishedInfo.isFinished ) {
+    if ( isPlaybackEnded ) {
         [self play];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.05 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             self.currentPlaybackTime = secs;
@@ -207,6 +201,34 @@ typedef struct {
 - (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
     _pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
     [self setPauseInBackground:pauseWhenAppDidEnterBackground];
+}
+
+- (void)setIsPlaybackFinished:(BOOL)isPlaybackFinished {
+    if ( isPlaybackFinished != _isPlaybackFinished ) {
+        if ( !isPlaybackFinished ) _finishedReason = nil;
+        _isPlaybackFinished = isPlaybackFinished;
+        if ( isPlaybackFinished ) {
+            [self _postNotification:SJMediaPlayerPlaybackDidFinishNotification];
+        }
+    }
+}
+
+- (NSTimeInterval)currentTime {
+    if ( self.isPlaybackFinished ) {
+        if ( self.finishedReason == SJFinishedReasonToEndTimePosition )
+            return self.duration;
+        else if ( self.finishedReason == SJFinishedReasonToTrialEndPosition )
+            return self.trialEndPosition;
+    }
+    return self.currentPlaybackTime;
+}
+
+- (NSTimeInterval)playableDuration {
+    NSTimeInterval playableDuration = [super playableDuration];
+    if ( self.trialEndPosition != 0 && playableDuration >= self.trialEndPosition ) {
+        return self.trialEndPosition;
+    }
+    return playableDuration;
 }
 
 #pragma mark -
@@ -285,40 +307,13 @@ typedef struct {
     });
 }
  
-- (void)_refreshPlaybaleDuration {
-    __weak typeof(self) _self = self;
-    _playableDurationRefreshTimer = [NSTimer sj_timerWithTimeInterval:1 repeats:YES usingBlock:^(NSTimer * _Nonnull timer) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) {
-            [timer invalidate];
-            return ;
-        }
-        
-        NSTimeInterval playableDuration = self.playableDuration;
-        if ( floor(self.previousPlayableDuration + 0.5) != floor(playableDuration + 0.5) ) {
-            self.previousPlayableDuration = playableDuration;
-            [self _postNotification:SJMediaPlayerPlayableDurationDidChangeNotification];
-        }
-    }];
-    
-    [_playableDurationRefreshTimer sj_fire];
-    [NSRunLoop.mainRunLoop addTimer:_playableDurationRefreshTimer forMode:NSRunLoopCommonModes];
-}
-
 #pragma mark -
 
 - (void)_toEvaluating {
     // update asset status
     SJAssetStatus status = self.assetStatus;
-    if ( self.finishedInfo.isFinished ) {
-        switch ( self.finishedInfo.reason ) {
-            case IJKMPMovieFinishReasonPlaybackEnded: break;
-            case IJKMPMovieFinishReasonUserExited: break;
-            case IJKMPMovieFinishReasonPlaybackError: {
-                status = SJAssetStatusFailed;
-            }
-                break;
-        }
+    if ( _IJKFinishedInfo.isFinished && _IJKFinishedInfo.reason == IJKMPMovieFinishReasonPlaybackError ) {
+        status = SJAssetStatusFailed;
     }
     else if ( self.isPreparedToPlay ) {
         status = SJAssetStatusReadyToPlay;
@@ -327,9 +322,25 @@ typedef struct {
     if ( status != self.assetStatus ) {
         self.assetStatus = status;
     }
+    
+    if ( status == SJAssetStatusFailed ) {
+        self.reasonForWaitingToPlay = nil;
+        self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
+        return;
+    }
 
+    if ( self.isPlayedToTrialEndPosition ) {
+        [self _didPlayToTrialEndPosition];
+        return;
+    }
+    
     // finished info
-    if ( _finishedInfo.isFinished ) {
+    if ( _IJKFinishedInfo.isFinished ) {
+        if ( _IJKFinishedInfo.reason == IJKMPMovieFinishReasonPlaybackEnded ) {
+            self.finishedReason = SJFinishedReasonToEndTimePosition;
+            self.isPlaybackFinished = YES;
+            [self pause];
+        }
         if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) {
             self.reasonForWaitingToPlay = nil;
             self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
@@ -376,12 +387,9 @@ typedef struct {
 
 - (void)_updatePlaybackFinishedInfo:(NSNotification *)note {
     IJKMPMovieFinishReason reason = [note.userInfo[IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey] integerValue];
-    _finishedInfo.isFinished = YES;
-    _finishedInfo.reason = reason;
-
-    if ( _finishedInfo.reason == IJKMPMovieFinishReasonPlaybackEnded ) {
-        [self _postNotification:SJMediaPlayerDidPlayToEndTimeNotification];
-    }
+    _IJKFinishedInfo.isFinished = YES;
+    _IJKFinishedInfo.reason = reason;
+    [self _toEvaluating];
 }
 
 - (void)_postNotification:(NSNotificationName)name {
@@ -391,6 +399,9 @@ typedef struct {
 }
 
 - (void)_willSeeking:(CMTime)time {
+    _IJKFinishedInfo.reason = 0;
+    _IJKFinishedInfo.isFinished = NO;
+    self.isPlaybackFinished = NO;
     _seekingInfo.time = time;
     _seekingInfo.isSeeking = YES;
 }
@@ -439,6 +450,8 @@ typedef struct {
 - (void)setTimeControlStatus:(SJPlaybackTimeControlStatus)timeControlStatus {
     _timeControlStatus = timeControlStatus;
 
+    [self _refreshOrStop];
+    
 #ifdef SJDEBUG
     switch ( timeControlStatus ) {
         case SJPlaybackTimeControlStatusPaused:
@@ -456,9 +469,66 @@ typedef struct {
     [self _postNotification:SJMediaPlayerTimeControlStatusDidChangeNotification];
 }
 
-- (NSTimeInterval)currentPlaybackTime {
-    BOOL isFinished = self.finishedInfo.isFinished && self.finishedInfo.reason == IJKMPMovieFinishReasonPlaybackEnded;
-    return isFinished ? self.duration : [super currentPlaybackTime];
+- (BOOL)isPlayedToTrialEndPosition {
+    return self.trialEndPosition != 0 && self.currentTime >= self.trialEndPosition;
+}
+
+- (void)_didPlayToTrialEndPosition {
+    if ( self.finishedReason != SJFinishedReasonToTrialEndPosition ) {
+        self.finishedReason = SJFinishedReasonToTrialEndPosition;
+        self.isPlaybackFinished = YES;
+        [self pause];
+    }
+}
+
+- (void)_didPlayToEndPositoion {
+    if ( self.finishedReason != SJFinishedReasonToEndTimePosition ) {
+        self.finishedReason = SJFinishedReasonToEndTimePosition;
+        self.isPlaybackFinished = YES;
+        self.reasonForWaitingToPlay = nil;
+        self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
+    }
+}
+
+- (CMTime)_adjustSeekTimeIfNeeded:(CMTime)time {
+    if ( _trialEndPosition != 0 && CMTimeGetSeconds(time) >= _trialEndPosition ) {
+        time = CMTimeMakeWithSeconds(_trialEndPosition * 0.98, NSEC_PER_SEC);
+    }
+    return time;
+}
+
+- (void)_refreshOrStop {
+    
+    if ( self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
+        if ( _refreshTimer != nil ) {
+            [_refreshTimer invalidate];
+            _refreshTimer = nil;
+        }
+    }
+    else if ( _refreshTimer == nil ) {
+        __weak typeof(self) _self = self;
+        _refreshTimer = [NSTimer sj_timerWithTimeInterval:0.5 repeats:YES usingBlock:^(NSTimer * _Nonnull timer) {
+            __strong typeof(_self) self = _self;
+            if ( !self ) {
+                [timer invalidate];
+                return ;
+            }
+            
+            if ( self.isPlayedToTrialEndPosition ) {
+                [self _didPlayToTrialEndPosition];
+                return;
+            }
+            
+            NSTimeInterval playableDuration = self.playableDuration;
+            if ( floor(self.pre_playbaleTime + 0.5) != floor(playableDuration + 0.5) ) {
+                self.pre_playbaleTime = playableDuration;
+                [self _postNotification:SJMediaPlayerPlayableDurationDidChangeNotification];
+            }
+        }];
+        
+        [_refreshTimer sj_fire];
+        [NSRunLoop.mainRunLoop addTimer:_refreshTimer forMode:NSRunLoopCommonModes];
+    }
 }
 @end
 NS_ASSUME_NONNULL_END

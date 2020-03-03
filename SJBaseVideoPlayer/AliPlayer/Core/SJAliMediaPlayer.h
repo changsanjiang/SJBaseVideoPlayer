@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SJAliMediaPlayer : NSObject<SJMediaPlayer>
 - (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)time;
 
+@property (nonatomic) NSTimeInterval trialEndPosition;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 @property (nonatomic) AVPScalingMode scalingMode;
 @property (nonatomic) AVPSeekMode seekMode;

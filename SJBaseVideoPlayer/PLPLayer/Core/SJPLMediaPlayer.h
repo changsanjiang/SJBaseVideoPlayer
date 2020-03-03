@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithURL:(NSURL *)URL options:(PLPlayerOption *)options startPosition:(NSTimeInterval)startPosition;
 - (instancetype)initWithLiveURL:(NSURL *)URL options:(PLPlayerOption *)options;
 
+@property (nonatomic) NSTimeInterval trialEndPosition;
+
 @property (nonatomic, getter=isAutoReconnectEnable) BOOL autoReconnectEnable;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 

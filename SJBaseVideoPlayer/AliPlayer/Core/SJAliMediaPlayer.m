@@ -11,7 +11,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJAliMediaPlayer ()<AVPDelegate>
-@property (nonatomic) BOOL isPlayedToEndTime;
+@property (nonatomic) BOOL isPlaybackFinished;                      ///< 播放结束
+@property (nonatomic, nullable) SJFinishedReason finishedReason;    ///< 播放结束的reason
 @property (nonatomic) BOOL firstVideoFrameRendered;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
 @property (nonatomic) NSTimeInterval startPosition;
@@ -29,15 +30,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) NSTimeInterval currentTime;
 @property (nonatomic) NSTimeInterval duration;
 @property (nonatomic) NSTimeInterval playableDuration;
+
+@property (nonatomic, readonly) BOOL isPlayedToTrialEndPosition;
 @end
 
 @implementation SJAliMediaPlayer
 @synthesize pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
+@synthesize playableDuration = _playableDuration;
 @synthesize isPlayed = _isPlayed;
 @synthesize isReplayed = _isReplayed;
 @synthesize rate = _rate;
 @synthesize volume = _volume;
-@synthesize muted = _muted;
+@synthesize muted = _muted; 
 
 - (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)time {
     self = [super init];
@@ -94,6 +98,8 @@ NS_ASSUME_NONNULL_BEGIN
         [self _didEndSeeking:NO];
     }
     
+    time = [self _adjustSeekTimeIfNeeded:time];
+    
     _seekCompletionHandler = completionHandler;
     [self _willSeeking:time];
     [_player seekToTime:CMTimeGetSeconds(time) * 1000 seekMode:_seekMode];
@@ -103,7 +109,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)play {
     _isPlayed = YES;
     
-    if ( _isPlayedToEndTime ) {
+    if ( self.isPlaybackFinished ) {
         [self replay];
     }
     else {
@@ -194,6 +200,9 @@ NS_ASSUME_NONNULL_BEGIN
     dispatch_async(dispatch_get_main_queue(), ^{
         NSTimeInterval time = 1.0 * position / 1000;
         self.currentTime = time;
+        if ( self.isPlayedToTrialEndPosition ) {
+            [self _didPlayToTrialEndPosition];
+        }
     });
 }
 
@@ -246,7 +255,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)_willSeeking:(CMTime)time {
-    _isPlayedToEndTime = NO;
+    self.isPlaybackFinished = NO;
     _seekingInfo.time = time;
     _seekingInfo.isSeeking = YES;
 }
@@ -288,10 +297,12 @@ NS_ASSUME_NONNULL_BEGIN
     if ( self.eventType == AVPEventSeekEnd && self.seekingInfo.isSeeking ) {
         [self _didEndSeeking:YES];
     }
+    else if ( self.isPlayedToTrialEndPosition ) {
+        [self _didPlayToTrialEndPosition];
+        return;
+    }
     else if ( self.playerStatus == AVPStatusCompletion ) {
-        self.isPlayedToEndTime = YES;
-        self.reasonForWaitingToPlay = nil;
-        self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
+        [self _didPlayToEndPositoion];
         return;
     }
     
@@ -373,10 +384,13 @@ NS_ASSUME_NONNULL_BEGIN
     [self _postNotification:SJMediaPlayerPlayableDurationDidChangeNotification];
 }
 
-- (void)setIsPlayedToEndTime:(BOOL)isPlayedToEndTime {
-    _isPlayedToEndTime = isPlayedToEndTime;
-    if ( isPlayedToEndTime ) {
-        [self _postNotification:SJMediaPlayerDidPlayToEndTimeNotification];
+- (void)setIsPlaybackFinished:(BOOL)isPlaybackFinished {
+    if ( isPlaybackFinished != _isPlaybackFinished ) {
+        if ( !isPlaybackFinished ) _finishedReason = nil;
+        _isPlaybackFinished = isPlaybackFinished;
+        if ( isPlaybackFinished ) {
+            [self _postNotification:SJMediaPlayerPlaybackDidFinishNotification];
+        }
     }
 }
 
@@ -408,12 +422,53 @@ NS_ASSUME_NONNULL_BEGIN
     _player.muted = muted;
 }
 
+- (NSTimeInterval)playableDuration {
+    if ( _trialEndPosition != 0 && _playableDuration >= _trialEndPosition ) {
+        return _trialEndPosition;
+    }
+    return _playableDuration;
+}
+
 - (NSTimeInterval)currentTime {
+    if ( _isPlaybackFinished ) {
+        if ( _finishedReason == SJFinishedReasonToEndTimePosition )
+            return _duration;
+        else if ( _finishedReason == SJFinishedReasonToTrialEndPosition )
+            return _trialEndPosition;
+    }
     return _seekingInfo.isSeeking ? CMTimeGetSeconds(_seekingInfo.time) : _currentTime;
 }
 
 - (void)applicationDidEnterBackground {
     if ( self.pauseWhenAppDidEnterBackground ) [self pause];
+}
+
+- (BOOL)isPlayedToTrialEndPosition {
+    return self.trialEndPosition != 0 && self.currentTime >= self.trialEndPosition;
+}
+
+- (void)_didPlayToTrialEndPosition {
+    if ( self.finishedReason != SJFinishedReasonToTrialEndPosition ) {
+        self.finishedReason = SJFinishedReasonToTrialEndPosition;
+        self.isPlaybackFinished = YES;
+        [self pause];
+    }
+}
+
+- (void)_didPlayToEndPositoion {
+    if ( self.finishedReason != SJFinishedReasonToEndTimePosition ) {
+        self.finishedReason = SJFinishedReasonToEndTimePosition;
+        self.isPlaybackFinished = YES;
+        self.reasonForWaitingToPlay = nil;
+        self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
+    }
+}
+
+- (CMTime)_adjustSeekTimeIfNeeded:(CMTime)time {
+    if ( _trialEndPosition != 0 && CMTimeGetSeconds(time) >= _trialEndPosition ) {
+        time = CMTimeMakeWithSeconds(_trialEndPosition * 0.98, NSEC_PER_SEC);
+    }
+    return time;
 }
 @end
 NS_ASSUME_NONNULL_END
