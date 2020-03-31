@@ -7,8 +7,9 @@
 //
 
 #import "ViewController.h"
-#import "SJBaseVideoPlayer.h"
 #import <Masonry.h>
+#import <SJBaseVideoPlayer/SJBaseVideoPlayer.h>
+#import <SJBaseVideoPlayer/SJIJKMediaPlaybackController.h>
 
 @interface ViewController ()
 @property (nonatomic, strong) SJBaseVideoPlayer *player;
@@ -20,7 +21,7 @@
     [super viewDidLoad];
     
     _player = [SJBaseVideoPlayer player];
-    
+    _player.playbackController = SJIJKMediaPlaybackController.new;
     [self.view addSubview:_player.view];
     
     [_player.view mas_makeConstraints:^(MASConstraintMaker *make) {

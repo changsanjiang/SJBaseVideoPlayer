@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "76A445C38D13436849B0EAD21F555034"
-               BuildableName = "libSJBaseVideoPlayer.a"
+               BuildableName = "SJBaseVideoPlayer.framework"
                BlueprintName = "SJBaseVideoPlayer"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

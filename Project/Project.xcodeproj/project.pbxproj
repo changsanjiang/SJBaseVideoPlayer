@@ -17,12 +17,12 @@
 		77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 77826C15203E84E8009D5F2C /* SJBaseVideoPlayer.podspec */; };
 		77826C18203FAB8B009D5F2C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 77826C17203FAB8B009D5F2C /* README.md */; };
 		77A41FAC23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m in Sources */ = {isa = PBXBuildFile; fileRef = 77A41FAA23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m */; };
-		C72090F66CE012968A1699AF /* libPods-Project.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3783465EF81E7A5838D5F3FF /* libPods-Project.a */; };
+		890A330D8A6A89567B5C7BDC /* Pods_Project.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14841A7E97C0750AFB4CB3F2 /* Pods_Project.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		04C647CC6AA139DA4312FCCE /* Pods-Project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.release.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.release.xcconfig"; sourceTree = "<group>"; };
-		3783465EF81E7A5838D5F3FF /* libPods-Project.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Project.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		14841A7E97C0750AFB4CB3F2 /* Pods_Project.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Project.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		77826BD6203E7427009D5F2C /* Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77826BD9203E7427009D5F2C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		77826BDA203E7427009D5F2C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -46,7 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C72090F66CE012968A1699AF /* libPods-Project.a in Frameworks */,
+				890A330D8A6A89567B5C7BDC /* Pods_Project.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,7 +95,7 @@
 		D032E6A2ED349265007434F2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3783465EF81E7A5838D5F3FF /* libPods-Project.a */,
+				14841A7E97C0750AFB4CB3F2 /* Pods_Project.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -374,6 +374,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = U5A7L7SMNP;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Project/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -393,6 +394,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = U5A7L7SMNP;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Project/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

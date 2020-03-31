@@ -1,1 +1,0 @@
-../../../SJUIKit/SJUIKit/SQLite3/Core/SJSQLiteTableModelConstraints.h

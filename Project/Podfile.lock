@@ -1,16 +1,16 @@
 PODS:
   - Masonry (1.1.0)
   - Reachability (3.2)
-  - SJBaseVideoPlayer (3.2.3):
+  - SJBaseVideoPlayer (3.2.5.1):
     - Masonry
     - Reachability
-    - SJBaseVideoPlayer/AVPlayer (= 3.2.3)
-    - SJBaseVideoPlayer/Common (= 3.2.3)
+    - SJBaseVideoPlayer/AVPlayer (= 3.2.5.1)
+    - SJBaseVideoPlayer/Common (= 3.2.5.1)
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/AVPlayer (3.2.3):
+  - SJBaseVideoPlayer/AVPlayer (3.2.5.1):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/Common
@@ -18,7 +18,7 @@ PODS:
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/Common (3.2.3):
+  - SJBaseVideoPlayer/Common (3.2.5.1):
     - Masonry
     - Reachability
     - SJBaseVideoPlayer/ResourceLoader
@@ -26,26 +26,26 @@ PODS:
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/ResourceLoader (3.2.3):
+  - SJBaseVideoPlayer/ResourceLoader (3.2.5.1):
     - Masonry
     - Reachability
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJUIKit/AttributesFactory (0.0.0.40):
-    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.40)
-    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.40)
-  - SJUIKit/AttributesFactory/Deprecated (0.0.0.40)
-  - SJUIKit/AttributesFactory/UIKitText (0.0.0.40)
-  - SJUIKit/ObserverHelper (0.0.0.40)
-  - SJUIKit/Queues (0.0.0.40)
-  - SJUIKit/SQLite3 (0.0.0.40):
-    - SJUIKit/SQLite3/Core (= 0.0.0.40)
-    - SJUIKit/SQLite3/Protocol (= 0.0.0.40)
-  - SJUIKit/SQLite3/Core (0.0.0.40):
+  - SJUIKit/AttributesFactory (0.0.0.42):
+    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.42)
+    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.42)
+  - SJUIKit/AttributesFactory/Deprecated (0.0.0.42)
+  - SJUIKit/AttributesFactory/UIKitText (0.0.0.42)
+  - SJUIKit/ObserverHelper (0.0.0.42)
+  - SJUIKit/Queues (0.0.0.42)
+  - SJUIKit/SQLite3 (0.0.0.42):
+    - SJUIKit/SQLite3/Core (= 0.0.0.42)
+    - SJUIKit/SQLite3/Protocol (= 0.0.0.42)
+  - SJUIKit/SQLite3/Core (0.0.0.42):
     - SJUIKit/SQLite3/Protocol
-  - SJUIKit/SQLite3/Protocol (0.0.0.40)
+  - SJUIKit/SQLite3/Protocol (0.0.0.42)
 
 DEPENDENCIES:
   - SJBaseVideoPlayer (from `../../SJBaseVideoPlayer`)
@@ -63,9 +63,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SJBaseVideoPlayer: 682d5373d0e9e1ecab754e970b6d7a19543b717c
-  SJUIKit: e94b093420a76fe8c1751d12b83e9e2b007e409a
+  SJBaseVideoPlayer: 6e99f0f76da61ebeeaf4d9ceb9c7657694cd1411
+  SJUIKit: 1356488a2488a9aafeddaf6a098006277c0eb9b8
 
-PODFILE CHECKSUM: 13070d80da18811530102acb9ec4b9c927f01dee
+PODFILE CHECKSUM: cbd77097d2851a431a2bbe42169a2873b81153fa
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.1
