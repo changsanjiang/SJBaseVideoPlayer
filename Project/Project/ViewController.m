@@ -16,6 +16,10 @@
 
 @implementation ViewController
 
+- (BOOL)shouldAutorotate {
+    return NO;
+}
+ 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -41,20 +45,6 @@
 //    [_player rotation];
     
     // Do any additional setup after loading the view, typically from a nib.
-}
-
-- (BOOL)prefersStatusBarHidden {
-    return _player.vc_prefersStatusBarHidden;
-}
-
-- (UIStatusBarStyle)preferredStatusBarStyle {
-    return _player.vc_preferredStatusBarStyle;
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    
-    // Dispose of any resources that can be recreated.
 }
 
 - (IBAction)playVideo:(id)sender {
