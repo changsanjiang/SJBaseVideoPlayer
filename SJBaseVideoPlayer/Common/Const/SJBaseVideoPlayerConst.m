@@ -10,8 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-NSInteger const SJBaseVideoPlayerViewTag = 10000;
-NSInteger const SJBaseVideoPlayerPresentViewTag = 10001;
+NSInteger const SJBaseVideoPlayerViewTag = 0xFFFFFFF0;
+NSInteger const SJBaseVideoPlayerPresentViewTag = 0xFFFFFFF1;
 
 ///
 /// assetStatus 改变的通知
