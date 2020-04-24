@@ -72,6 +72,12 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 - (id<SJBarrageQueueControllerObserver>)getObserver;
 
+///
+/// 未显示的弹幕数量
+///
+@property (nonatomic, readonly) NSInteger queueSize;
+@property (nonatomic, readonly) NSInteger lines;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 @end
@@ -91,6 +97,11 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol SJBarrageQueueControllerObserver <NSObject>
 @property (nonatomic, copy, nullable) void(^disabledDidChangeExeBlock)(id<SJBarrageQueueController> controller);
 @property (nonatomic, copy, nullable) void(^pausedDidChangeExeBlock)(id<SJBarrageQueueController> controller);
+
+/// 该条弹幕已出队列, 将要显示时调用
+@property (nonatomic, copy, nullable) void(^willDisplayBarrageExeBlock)(id<SJBarrageQueueController> controller, id<SJBarrageItem> item);
+/// 结束显示时调用
+@property (nonatomic, copy, nullable) void(^didEndDisplayBarrageExeBlock)(id<SJBarrageQueueController> controller, id<SJBarrageItem> item);
 @end
 NS_ASSUME_NONNULL_END
 #endif /* SJBarrageControllerDefines_h */

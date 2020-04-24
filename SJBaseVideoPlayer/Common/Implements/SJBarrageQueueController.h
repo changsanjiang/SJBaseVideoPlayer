@@ -30,6 +30,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id<SJBarrageQueueControllerObserver>)getObserver;
 
+@property (nonatomic, readonly) NSInteger queueSize;
+@property (nonatomic, readonly) NSInteger lines;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 @end

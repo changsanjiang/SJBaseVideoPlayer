@@ -30,6 +30,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 static NSNotificationName const SJBarrageQueueControllerDisabledDidChangeNotification = @"SJBarrageQueueControllerDisabledDidChangeNotification";
 static NSNotificationName const SJBarrageQueueControllerPausedDidChangeNotification = @"SJBarrageQueueControllerPausedDidChangeNotification";
+static NSNotificationName const SJBarrageQueueControllerWillDisplayBarrageNotification = @"SJBarrageQueueControllerWillDisplayBarrageNotification";
+static NSNotificationName const SJBarrageQueueControllerDidEndDisplayBarrageNotification = @"SJBarrageQueueControllerDidEndDisplayBarrageNotification";
+static NSString *const SJBarrageQueueControllerBarrageItemKey = @"barrageItem";
+
 
 @interface SJBarrageViewModel : NSObject
 - (instancetype)initWithBarrageItem:(id<SJBarrageItem>)item;
@@ -268,11 +272,15 @@ static NSNotificationName const SJBarrageQueueControllerPausedDidChangeNotificat
 @implementation SJBarrageQueueControllerObserver
 @synthesize disabledDidChangeExeBlock = _disabledDidChangeExeBlock;
 @synthesize pausedDidChangeExeBlock = _pausedDidChangeExeBlock;
+@synthesize willDisplayBarrageExeBlock = _willDisplayBarrageExeBlock;
+@synthesize didEndDisplayBarrageExeBlock = _didEndDisplayBarrageExeBlock;
 - (instancetype)initWithController:(SJBarrageQueueController *)controller {
     self = [super init];
     if ( self ) {
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_pausedDidChange:) name:SJBarrageQueueControllerPausedDidChangeNotification object:controller];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_disabledDidChange:) name:SJBarrageQueueControllerDisabledDidChangeNotification object:controller];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_willDisplayBarrage:) name:SJBarrageQueueControllerWillDisplayBarrageNotification object:controller];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_didEndDisplayBarrage:) name:SJBarrageQueueControllerDidEndDisplayBarrageNotification object:controller];
     }
     return self;
 }
@@ -284,6 +292,12 @@ static NSNotificationName const SJBarrageQueueControllerPausedDidChangeNotificat
 }
 - (void)_disabledDidChange:(NSNotification *)note {
     if ( _disabledDidChangeExeBlock ) _disabledDidChangeExeBlock(note.object);
+}
+- (void)_willDisplayBarrage:(NSNotification *)note {
+    if ( _willDisplayBarrageExeBlock ) _willDisplayBarrageExeBlock(note.object, note.userInfo[SJBarrageQueueControllerBarrageItemKey]);
+}
+- (void)_didEndDisplayBarrage:(NSNotification *)note {
+    if ( _didEndDisplayBarrageExeBlock ) _didEndDisplayBarrageExeBlock(note.object, note.userInfo[SJBarrageQueueControllerBarrageItemKey]);
 }
 @end
 
@@ -406,6 +420,16 @@ static CGFloat SJScreenMaxWidth;
     return [SJBarrageQueueControllerObserver.alloc initWithController:self];
 }
 
+- (NSInteger)queueSize {
+    return _queue.size;
+}
+
+- (NSInteger)lines {
+    return _configurations.count;
+}
+
+#pragma mark -
+
 - (void)clock:(SJBarrageClock *)clock timeDidChange:(NSTimeInterval)time {
     if ( CGRectIsEmpty(self.view.bounds) )
         return;
@@ -416,6 +440,7 @@ static CGFloat SJScreenMaxWidth;
         if ( time >= last.nextBarrageStartTime + last.delay ) {
             id<SJBarrageItem> _Nullable item = self.queue.dequeue;
             if ( item != nil ) {
+                [self _postNotification:SJBarrageQueueControllerWillDisplayBarrageNotification userInfo:@{SJBarrageQueueControllerBarrageItemKey:item}];
                 SJBarrageLineConfiguration *config = self.configurations[i];
                 SJBarrageViewModel *viewModel = [SJBarrageViewModel.alloc initWithBarrageItem:item];
                 NSTimeInterval pointDuration = [self _pointDuration] / config.rate;
@@ -452,6 +477,7 @@ static CGFloat SJScreenMaxWidth;
                     if ( !self ) return;
                     [_barrageView removeFromSuperview];
                     [self.reusablePool addBarrageView:_barrageView];
+                    [self _postNotification:SJBarrageQueueControllerDidEndDisplayBarrageNotification userInfo:@{SJBarrageQueueControllerBarrageItemKey:item}];
                     [self _pauseClockIfNeeded];
                 }];
             }
@@ -495,8 +521,12 @@ static CGFloat SJScreenMaxWidth;
 }
 
 - (void)_postNotification:(NSNotificationName)note {
+    [self _postNotification:note userInfo:nil];
+}
+
+- (void)_postNotification:(NSNotificationName)note userInfo:(nullable NSDictionary *)userInfo {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [NSNotificationCenter.defaultCenter postNotificationName:note object:self];
+        [NSNotificationCenter.defaultCenter postNotificationName:note object:self userInfo:userInfo];
     });
 }
 @end
