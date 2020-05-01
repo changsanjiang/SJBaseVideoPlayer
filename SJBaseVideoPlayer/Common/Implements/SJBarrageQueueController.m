@@ -570,10 +570,10 @@ static CGFloat SJScreenMaxWidth;
 }
 
 - (void)barrageQueueControllerView:(SJBarrageQueueControllerView *)view boundsDidChange:(CGRect)bounds previousBounds:(CGRect)previousBounds {
-    if ( previousBounds.size.width != bounds.size.width ) {
+    if ( previousBounds.size.width > bounds.size.width ) {
         CGFloat points = previousBounds.size.width - bounds.size.width;
         for ( NSInteger i = 0 ; i < _numberOfLines ; ++ i ) {
-            _lines[i].last.delay = points * [self _pointDurationForLineAtIndex:i];
+            _lines[i].last.delay += points * [self _pointDurationForLineAtIndex:i];
         }
     }
     previousBounds = bounds;
