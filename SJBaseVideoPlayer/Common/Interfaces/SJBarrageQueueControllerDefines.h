@@ -16,7 +16,7 @@
 ///
 NS_ASSUME_NONNULL_BEGIN
 @protocol SJBarrageQueueController <NSObject>
-- (instancetype)initWithLines:(NSUInteger)lines;
+- (instancetype)initWithNumberOfLines:(NSUInteger)numberOfLines;
 
 ///
 /// 是否禁用
@@ -65,7 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 控制器视图
 ///
-- (UIView *)view;
+@property (nonatomic, strong, readonly) __kindof UIView *view;
 
 ///
 /// 获取观察者
@@ -76,7 +76,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// 未显示的弹幕数量
 ///
 @property (nonatomic, readonly) NSInteger queueSize;
-@property (nonatomic, readonly) NSInteger lines;
+@property (nonatomic) NSInteger numberOfLines;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

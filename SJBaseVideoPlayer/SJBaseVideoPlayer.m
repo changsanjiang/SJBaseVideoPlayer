@@ -914,10 +914,10 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)refresh {
     if ( !self.URLAsset ) return;
-    [self _postNotification:SJVideoPlayerPlaybackWillRereshNotification];
+    [self _postNotification:SJVideoPlayerPlaybackWillRefreshNotification];
     [_playbackController refresh];
     [self play];
-    [self _postNotification:SJVideoPlayerPlaybackDidRereshNotification];
+    [self _postNotification:SJVideoPlayerPlaybackDidRefreshNotification];
 }
 
 - (void)setPlayerVolume:(float)playerVolume {
@@ -1796,7 +1796,7 @@ typedef struct _SJPlayerControlInfo {
             [self.controlLayerDelegate unlockedVideoPlayer:self];
         }
         
-        [self _postNotification:SJVideoPlayeScreenLockStateDidChangeNotification];
+        [self _postNotification:SJVideoPlayerScreenLockStateDidChangeNotification];
     }
 }
 
@@ -2133,7 +2133,7 @@ typedef struct _SJPlayerControlInfo {
 - (id<SJBarrageQueueController>)barrageQueueController {
     id<SJBarrageQueueController> controller = _barrageQueueController;
     if ( controller == nil ) {
-        controller = [SJBarrageQueueController.alloc initWithLines:4];
+        controller = [SJBarrageQueueController.alloc initWithNumberOfLines:4];
         [self setBarrageQueueController:controller];
     }
     return controller;

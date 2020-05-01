@@ -7,13 +7,18 @@
 
 #import "SJBarrageQueueControllerDefines.h"
 #import <UIKit/UIKit.h>
+@protocol SJBarrageLineConfigurationDelegate;
 @class SJBarrageLineConfiguration;
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJBarrageQueueController : NSObject<SJBarrageQueueController>
-- (instancetype)initWithLines:(NSUInteger)lines;
-- (nullable SJBarrageLineConfiguration *)configurationAtIndex:(NSInteger)idx;
-- (void)updateForConfigurations;
+- (instancetype)initWithNumberOfLines:(NSUInteger)numberOfLines;
+
+@property (nonatomic) NSInteger numberOfLines;
+
+@property (nonatomic, strong, readonly) SJBarrageLineConfiguration *configuration;
+
+- (void)reloadConfiguration; ///< 当修改配置后, 请调用该方法来应用新的配置
 
 @property (nonatomic, getter=isDisabled) BOOL disabled;
 
@@ -26,12 +31,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pause;
 - (void)resume;
 
-- (UIView *)view;
-
 - (id<SJBarrageQueueControllerObserver>)getObserver;
 
-@property (nonatomic, readonly) NSInteger queueSize;
-@property (nonatomic, readonly) NSInteger lines;
+@property (nonatomic, strong, readonly) __kindof UIView *view;
+@property (nonatomic, readonly) NSInteger queueSize; ///< 未显示的弹幕数量
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -39,6 +42,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 @interface SJBarrageLineConfiguration : NSObject
+
+@property (nonatomic, weak, nullable) id<SJBarrageLineConfigurationDelegate> delegate;
+
 ///
 /// 弹幕移动速率
 ///
@@ -47,18 +53,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) CGFloat rate;
 
 ///
-/// 顶部间距
+/// 顶部外间距
 ///
 ///         default value is 3.0
 ///
 @property (nonatomic) CGFloat topMargin;
 
 ///
-/// item的间距
+/// 弹幕之间的间距
 ///
 ///         default value is 38.0
 ///
-@property (nonatomic) CGFloat itemMargin;
+@property (nonatomic) CGFloat itemSpacing;
 
 ///
 /// 行高
@@ -66,5 +72,18 @@ NS_ASSUME_NONNULL_BEGIN
 ///         default value is 26.0
 ///
 @property (nonatomic) CGFloat height;
+@end
+
+
+@protocol SJBarrageLineConfigurationDelegate <NSObject>
+@optional
+/// 移动速率
+- (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration rateForLineAtIndex:(NSInteger)index;
+/// 顶部外间距
+- (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration topMarginForLineAtIndex:(NSInteger)index;
+/// 弹幕之间的间距
+- (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration itemSpacingForLineAtIndex:(NSInteger)index;
+/// 行高
+- (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration heightForLineAtIndex:(NSInteger)index;
 @end
 NS_ASSUME_NONNULL_END
