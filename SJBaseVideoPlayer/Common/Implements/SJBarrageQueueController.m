@@ -58,9 +58,10 @@ static NSString *const SJBarrageQueueControllerBarrageItemKey = @"barrageItem";
         }
         else {
             _customView = item.customView;
-            _contentSize = item.customView.bounds.size;
             if ( CGSizeEqualToSize(CGSizeZero, _contentSize) )
                 _contentSize = [item.customView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
+            else
+                _contentSize = item.customView.bounds.size;
         }
     }
     return self;
@@ -216,19 +217,14 @@ static NSString *const SJBarrageQueueControllerBarrageItemKey = @"barrageItem";
 #pragma mark -
 
 @interface SJBarrageLineView : UIView
-@property (nonatomic, strong, readonly, nullable) SJBarrageView *lastView;
 @end
 
 @implementation SJBarrageLineView
-- (nullable SJBarrageView *)lastView {
-    return self.subviews.lastObject;
-}
 @end
 
 #pragma mark -
 
 @interface SJBarrageLineConfiguration ()
-- (instancetype)initWithDelegate:(id<SJBarrageLineConfigurationDelegate>)delegate;
 - (CGFloat)rateForLineAtIndex:(NSInteger)index;
 - (CGFloat)topMarginForLineAtIndex:(NSInteger)index;
 - (CGFloat)itemSpacingForLineAtIndex:(NSInteger)index;
@@ -241,12 +237,6 @@ static NSString *const SJBarrageQueueControllerBarrageItemKey = @"barrageItem";
 - (instancetype)initWithPool:(SJBarrageViewReusablePool *)pool;
 @property (nonatomic, strong, readonly) SJBarrageViewReusablePool *pool;
 @property (nonatomic, strong, readonly) SJBarrageLineView *view;
-
-@property (nonatomic) CGFloat height;
-@property (nonatomic) CGFloat topMargin;
-
-@property (nonatomic) CGFloat rate;
-@property (nonatomic) CGFloat itemSpacing;
 
 @property (nonatomic, strong, readonly, nullable) SJBarrageViewModel *last;
 - (void)pause;
@@ -398,7 +388,7 @@ static NSString *const SJBarrageQueueControllerBarrageItemKey = @"barrageItem";
 #pragma mark -
 
 
-@interface SJBarrageQueueController ()<SJBarrageQueueControllerViewDelegate, SJBarrageClockDelegate, SJBarrageLineConfigurationDelegate> {
+@interface SJBarrageQueueController ()<SJBarrageQueueControllerViewDelegate, SJBarrageClockDelegate> {
     SJQueue<id<SJBarrageItem>> *_queue;
     SJBarrageClock *_clock;
 }
@@ -425,7 +415,7 @@ static CGFloat SJScreenMaxWidth;
         _clock = [SJBarrageClock clockWithDelegate:self];
         _view = [SJBarrageQueueControllerView.alloc initWithDelegate:self];
         _lines = [NSMutableArray arrayWithCapacity:4];
-        _configuration = [SJBarrageLineConfiguration.alloc initWithDelegate:self];
+        _configuration = SJBarrageLineConfiguration.alloc.init;
         
         self.numberOfLines = numberOfLines;
     }
@@ -470,21 +460,14 @@ static CGFloat SJScreenMaxWidth;
     SJBarrageLine *last = _lines.lastObject;
     __block SJBarrageLine *prel = nil;
     [_lines enumerateObjectsUsingBlock:^(SJBarrageLine * _Nonnull line, NSUInteger idx, BOOL * _Nonnull stop) {
-        line.rate = [self.configuration rateForLineAtIndex:idx];
-        line.itemSpacing = [self.configuration itemSpacingForLineAtIndex:idx];
-
         CGFloat topMargin = [self.configuration topMarginForLineAtIndex:idx];
         CGFloat height = [self.configuration heightForLineAtIndex:idx];
-        if ( topMargin != line.topMargin || height != line.height ) {
-            line.topMargin = topMargin;
-            line.height = height;
-            [line.view mas_remakeConstraints:^(MASConstraintMaker *make) {
-                prel == nil ? make.top.offset(topMargin) : make.top.equalTo(prel.view.mas_bottom).offset(topMargin);
-                make.left.right.offset(0);
-                make.height.offset(height);
-                if ( line == last ) make.bottom.offset(0);
-            }];
-        }
+        [line.view mas_remakeConstraints:^(MASConstraintMaker *make) {
+            prel == nil ? make.top.offset(topMargin) : make.top.equalTo(prel.view.mas_bottom).offset(topMargin);
+            make.left.right.offset(0);
+            make.height.offset(height);
+            if ( line == last ) make.bottom.offset(0);
+        }];
     
         prel = line;
     }];
@@ -536,17 +519,17 @@ static CGFloat SJScreenMaxWidth;
     if ( CGRectIsEmpty(self.view.bounds) )
         return;
     
-    for ( NSInteger i = 0 ; i < _numberOfLines ; ++ i ) {
-        SJBarrageLine *line = _lines[i];
+    for ( NSInteger index = 0 ; index < _numberOfLines ; ++ index ) {
+        SJBarrageLine *line = _lines[index];
         SJBarrageViewModel *_Nullable last = line.last;
         if ( time >= last.nextBarrageStartTime + last.delay ) {
             id<SJBarrageItem> _Nullable item = _queue.dequeue;
             if ( item != nil ) {
                 [self _postNotification:SJBarrageQueueControllerWillDisplayBarrageNotification userInfo:@{SJBarrageQueueControllerBarrageItemKey:item}];
                 SJBarrageViewModel *viewModel = [SJBarrageViewModel.alloc initWithBarrageItem:item];
-                NSTimeInterval pointDuration = [self _pointDurationForLineAtIndex:i];
+                CGFloat itemSpacing = [_configuration itemSpacingForLineAtIndex:index];
                 CGFloat barragePoints = viewModel.contentSize.width;
-                CGFloat itemSpacing = line.itemSpacing;
+                NSTimeInterval pointDuration = [self _pointDurationForLineAtIndex:index];
                 CGFloat allPoints = [self _allPointsWithBarragePoints:barragePoints];
                 
                 viewModel.duration = allPoints * pointDuration;
@@ -579,10 +562,6 @@ static CGFloat SJScreenMaxWidth;
     previousBounds = bounds;
 }
 
-- (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration rateForLineAtIndex:(NSInteger)index {
-    return (index % 2 == 0) ? 1 : 0.9;
-}
-
 #pragma mark -
 
 - (void)setPaused:(BOOL)paused {
@@ -593,7 +572,7 @@ static CGFloat SJScreenMaxWidth;
 }
 
 - (NSTimeInterval)_pointDurationForLineAtIndex:(NSInteger)index {
-    return POINT_SPEED_FAST / _lines[index].rate;
+    return POINT_SPEED_FAST / [_configuration rateForLineAtIndex:index];
 }
 
 - (CGFloat)_allPointsWithBarragePoints:(CGFloat)barragePoints {
@@ -629,13 +608,7 @@ static CGFloat SJScreenMaxWidth;
     BOOL _isResponse_itemSpacingForLineAtIndex;
     BOOL _isResponse_heightForLineAtIndex;
 }
-- (instancetype)initWithDelegate:(id<SJBarrageLineConfigurationDelegate>)delegate {
-    self = [self init];
-    if ( self ) {
-        self.delegate = delegate;
-    }
-    return self;
-}
+
 - (instancetype)init {
     self = [super init];
     if ( self ) {
@@ -656,7 +629,8 @@ static CGFloat SJScreenMaxWidth;
 }
 
 - (CGFloat)rateForLineAtIndex:(NSInteger)index {
-    return _isResponse_rateForLineAtIndex ? [_delegate barrageLineConfiguration:self rateForLineAtIndex:index] : _rate;
+    CGFloat rate = _isResponse_rateForLineAtIndex ? [_delegate barrageLineConfiguration:self rateForLineAtIndex:index] : _rate;
+    return rate ?: CGFLOAT_MIN;
 }
 - (CGFloat)topMarginForLineAtIndex:(NSInteger)index {
     return _isResponse_topMarginForLineAtIndex ? [_delegate barrageLineConfiguration:self topMarginForLineAtIndex:index] : _topMargin;

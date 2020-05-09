@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly) SJBarrageLineConfiguration *configuration;
 
-- (void)reloadConfiguration; ///< 当修改配置后, 请调用该方法来应用新的配置
+- (void)reloadConfiguration; ///< 当配置修改后, 请调用该方法来刷新
 
 @property (nonatomic, getter=isDisabled) BOOL disabled;
 
@@ -53,18 +53,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) CGFloat rate;
 
 ///
-/// 顶部外间距
-///
-///         default value is 3.0
-///
-@property (nonatomic) CGFloat topMargin;
-
-///
 /// 弹幕之间的间距
 ///
 ///         default value is 38.0
 ///
 @property (nonatomic) CGFloat itemSpacing;
+
+///
+/// 顶部外间距
+///
+///         default value is 3.0
+///
+@property (nonatomic) CGFloat topMargin;
 
 ///
 /// 行高
@@ -79,10 +79,11 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 /// 移动速率
 - (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration rateForLineAtIndex:(NSInteger)index;
-/// 顶部外间距
-- (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration topMarginForLineAtIndex:(NSInteger)index;
 /// 弹幕之间的间距
 - (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration itemSpacingForLineAtIndex:(NSInteger)index;
+
+/// 顶部外间距
+- (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration topMarginForLineAtIndex:(NSInteger)index;
 /// 行高
 - (CGFloat)barrageLineConfiguration:(SJBarrageLineConfiguration *)configuration heightForLineAtIndex:(NSInteger)index;
 @end
