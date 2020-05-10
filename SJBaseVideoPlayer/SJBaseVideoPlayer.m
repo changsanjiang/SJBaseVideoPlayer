@@ -673,7 +673,7 @@ typedef struct _SJPlayerControlInfo {
 /// - 当用户触摸到TableView或者ScrollView时, 这个值为YES.
 /// - 这个值用于旋转的条件之一, 如果用户触摸在TableView或者ScrollView上时, 将不会自动旋转.
 - (BOOL)touchedOnTheScrollView {
-    return _playModelObserver.isTouchedTablView || _playModelObserver.isTouchedCollectionView;
+    return _playModelObserver.isTouchedTableView || _playModelObserver.isTouchedCollectionView;
 }
 @end
 
