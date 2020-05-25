@@ -107,9 +107,9 @@ static NSNotificationName const SJFitOnScreenManagerTransitioningValueDidChangeN
         self.innerFitOnScreen = fitOnScreen;
         self.transitioning = YES;
         if ( fitOnScreen ) {
-            UIViewController *rootViewController = UIApplication.sharedApplication.keyWindow.rootViewController;
+            UIViewController *top = [self topMostController];
             if ( !animated ) [self _presentedAnimationWithDuration:0 completionHandler:nil];
-            [rootViewController presentViewController:self.viewController animated:animated completion:^{
+            [top presentViewController:self.viewController animated:animated completion:^{
                 if ( completionHandler ) completionHandler(self);
             }];
         }
@@ -120,6 +120,14 @@ static NSNotificationName const SJFitOnScreenManagerTransitioningValueDidChangeN
             }];
         } 
     });
+}
+
+- (UIViewController *)topMostController {
+    UIViewController *topController = UIApplication.sharedApplication.keyWindow.rootViewController;
+    while( topController.presentedViewController != nil ) {
+        topController = topController.presentedViewController;
+    }
+    return topController;
 }
 
 - (void)setInnerFitOnScreen:(BOOL)innerFitOnScreen {
