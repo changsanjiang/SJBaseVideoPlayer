@@ -96,7 +96,6 @@ typedef struct {
     [_refreshTimer invalidate];
     [self.view removeFromSuperview];
     [NSNotificationCenter.defaultCenter removeObserver:self];
-    [super stop];
 }
 
 - (void)replay {
@@ -146,8 +145,47 @@ typedef struct {
 - (void)stop {
     self.reasonForWaitingToPlay = nil;
     self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
-    
     [super stop];
+    [self shutdown];
+
+//    https://github.com/bilibili/ijkplayer/blob/cced91e3ae3730f5c63f3605b00d25eafcf5b97b/ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFMoviePlayerController.m#L434
+//
+//    - (void)setScreenOn: (BOOL)on {
+//        [IJKMediaModule sharedModule].mediaModuleIdleTimerDisabled = on;
+//        // [UIApplication sharedApplication].idleTimerDisabled = on;
+//    }
+//
+//    - (void)shutdown {
+//        if (!_mediaPlayer)
+//            return;
+//
+//        [self stopHudTimer];
+//        [self unregisterApplicationObservers];
+//        [self setScreenOn:NO];
+//
+//        [self performSelectorInBackground:@selector(shutdownWaitStop:) withObject:self];
+//    }
+//
+//    - (void)shutdownWaitStop:(IJKFFMoviePlayerController *) mySelf  {
+//        if (!_mediaPlayer)
+//            return;
+//
+//        ijkmp_stop(_mediaPlayer);
+//        ijkmp_shutdown(_mediaPlayer);
+//
+//        [self performSelectorOnMainThread:@selector(shutdownClose:) withObject:self waitUntilDone:YES];
+//    }
+//
+//    - (void)stop {
+//        if (!_mediaPlayer)
+//            return;
+//
+//        [self setScreenOn:NO];
+//
+//        [self stopHudTimer];
+//        ijkmp_stop(_mediaPlayer);
+//    }
+//
 }
 
 - (void)seekToTime:(CMTime)time completionHandler:(nullable void (^)(BOOL))completionHandler {

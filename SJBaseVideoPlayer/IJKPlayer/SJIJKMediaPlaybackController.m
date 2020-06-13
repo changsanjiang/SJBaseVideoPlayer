@@ -23,6 +23,15 @@ NS_ASSUME_NONNULL_BEGIN
 @implementation SJIJKMediaPlaybackController
 @dynamic currentPlayer;
 
+- (void)dealloc {
+    [self.currentPlayer stop];
+}
+
+- (void)stop {
+    [self.currentPlayer stop];
+    [super stop];
+}
+
 - (IJKFFOptions *)options {
     if ( _options == nil ) _options = IJKFFOptions.optionsByDefault;
     return _options;
