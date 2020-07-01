@@ -213,8 +213,8 @@ typedef struct _SJPlayerControlInfo {
     NSLog(@"%d \t %s", (int)__LINE__, __func__);
 #endif
     [NSNotificationCenter.defaultCenter postNotificationName:SJVideoPlayerPlaybackControllerWillDeallocateNotification object:_playbackController];
-    [_presentView removeFromSuperview];
-    [_view removeFromSuperview];
+    [_presentView performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
+    [_view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
     free(_controlInfo);
 }
 

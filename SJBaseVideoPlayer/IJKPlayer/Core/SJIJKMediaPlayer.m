@@ -94,7 +94,7 @@ typedef struct {
     NSLog(@"%d \t %s", (int)__LINE__, __func__);
 #endif
     [_refreshTimer invalidate];
-    [self.view removeFromSuperview];
+    [self.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 

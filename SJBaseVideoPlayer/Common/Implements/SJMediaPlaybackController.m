@@ -160,10 +160,7 @@ NS_ASSUME_NONNULL_BEGIN
 #ifdef DEBUG
     NSLog(@"%d - %s", (int)__LINE__, __func__);
 #endif
-    UIView *playerView = _playerView;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [playerView removeFromSuperview];
-    });
+    [_playerView performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 

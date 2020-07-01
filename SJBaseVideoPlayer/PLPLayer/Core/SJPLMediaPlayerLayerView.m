@@ -25,7 +25,7 @@
 }
 
 - (void)dealloc {
-    [_player.view removeFromSuperview];
+    [_player.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
     [_player removeObserver:self forKeyPath:@"firstVideoFrameRendered"];
 }
 

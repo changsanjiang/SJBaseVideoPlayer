@@ -112,7 +112,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)dealloc {
-    [_floatView removeFromSuperview];
+    [_floatView performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
 }
 
 - (__kindof UIView *)floatView {
