@@ -338,7 +338,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (NSTimeInterval)currentTime {
-    return _currentPlayer.currentTime;
+    return _currentPlayer.seekingInfo.isSeeking ? CMTimeGetSeconds(_currentPlayer.seekingInfo.time) : _currentPlayer.currentTime;
 }
 
 - (NSTimeInterval)duration {
