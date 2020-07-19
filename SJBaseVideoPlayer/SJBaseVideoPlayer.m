@@ -1082,6 +1082,10 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)seekToTime:(CMTime)time toleranceBefore:(CMTime)toleranceBefore toleranceAfter:(CMTime)toleranceAfter completionHandler:(void (^ _Nullable)(BOOL))completionHandler {
+    if ( self.canSeekToTime && !self.canSeekToTime(self) ) {
+        return;
+    }
+    
     if ( self.canPlayAnAsset && !self.canPlayAnAsset(self) ) {
         return;
     }
