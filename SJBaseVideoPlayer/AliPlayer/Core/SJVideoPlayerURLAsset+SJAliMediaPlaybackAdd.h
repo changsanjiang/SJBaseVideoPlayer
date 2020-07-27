@@ -8,6 +8,7 @@
 
 #import "SJVideoPlayerURLAsset.h"
 #import <AliyunPlayer/AVPSource.h>
+#import <AliyunPlayer/AVPConfig.h>
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJVideoPlayerURLAsset (SJAliMediaPlaybackAdd)
@@ -17,5 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel;
 
 @property (nonatomic, strong, readonly, nullable) __kindof AVPSource *source;
+@property (nonatomic, strong, nullable) AVPConfig *avpConfig;
 @end
 NS_ASSUME_NONNULL_END

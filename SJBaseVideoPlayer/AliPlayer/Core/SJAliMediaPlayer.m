@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 @synthesize volume = _volume;
 @synthesize muted = _muted; 
 
-- (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)time {
+- (instancetype)initWithSource:(__kindof AVPSource *)source config:(nullable AVPConfig *)config startPosition:(NSTimeInterval)time {
     self = [super init];
     if ( self ) {
         _source = source;
@@ -55,6 +55,9 @@ NS_ASSUME_NONNULL_BEGIN
         _pauseWhenAppDidEnterBackground = YES;
         _seekMode = AVP_SEEKMODE_INACCURATE;
         _needSeekToStartPosition = time != 0;
+        
+        if ( config != nil )
+            [_player setConfig:config];
         
         if      ( [source isKindOfClass:AVPUrlSource.class] ) {
             [_player setUrlSource:source];

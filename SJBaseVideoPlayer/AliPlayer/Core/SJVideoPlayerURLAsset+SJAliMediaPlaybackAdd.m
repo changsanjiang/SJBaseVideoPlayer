@@ -44,5 +44,12 @@ NS_ASSUME_NONNULL_BEGIN
     }
     return source;
 }
+
+- (void)setAvpConfig:(nullable AVPConfig *)avpConfig {
+    objc_setAssociatedObject(self, @selector(avpConfig), avpConfig, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+- (nullable AVPConfig *)avpConfig {
+    return objc_getAssociatedObject(self, _cmd);
+}
 @end
 NS_ASSUME_NONNULL_END
