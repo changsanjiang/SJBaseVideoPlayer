@@ -373,7 +373,7 @@ typedef struct {
     }
     
     // finished info
-    if ( _IJKFinishedInfo.isFinished ) {
+    if ( _IJKFinishedInfo.isFinished && self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) {
         if ( _IJKFinishedInfo.reason == IJKMPMovieFinishReasonPlaybackEnded ) {
             self.finishedReason = SJFinishedReasonToEndTimePosition;
             self.isPlaybackFinished = YES;
