@@ -73,6 +73,15 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
+- (void)receivedApplicationWillResignActiveNotification {
+    if ( @available(iOS 14.0, *) ) {
+        if ( !self.pauseWhenAppDidEnterBackground ) {
+            SJAVMediaPlayerLayerView *view = self.currentPlayerView;
+            view.layer.player = nil;
+        }
+    }
+}
+
 - (void)replaceMediaForDefinitionMedia:(SJVideoPlayerURLAsset *)definitionMedia {
     [SJAVMediaPlayerLoader clearPlayerForMedia:self.media];
     [super replaceMediaForDefinitionMedia:definitionMedia];
