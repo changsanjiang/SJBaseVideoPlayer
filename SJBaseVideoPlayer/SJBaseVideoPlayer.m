@@ -97,7 +97,7 @@ typedef struct _SJPlayerControlInfo {
 
 /// - observe视图的滚动
 @property (nonatomic, strong, nullable) SJPlayModelPropertiesObserver *playModelObserver;
-@property (nonatomic, strong, readonly) SJViewControllerManager *viewControllerManager;
+@property (nonatomic, strong) SJViewControllerManager *viewControllerManager;
 @end
 
 @implementation SJBaseVideoPlayer {
@@ -157,7 +157,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 + (NSString *)version {
-    return @"v3.3.6";
+    return @"v3.4.0";
 }
 
 - (void)setVideoGravity:(SJVideoGravity)videoGravity {
@@ -200,13 +200,16 @@ typedef struct _SJPlayerControlInfo {
     self.autoManageViewToFitOnScreenOrRotation = YES;
     
     [self _setupViews];
-    [self _showOrHiddenPlaceholderImageViewIfNeeded];
+    [self fitOnScreenManager];
     [self rotationManager];
+    [self controlLayerAppearManager];
     [self registrar];
     [self reachability];
     [self gestureControl];
     [self.deviceVolumeAndBrightnessManager prepare];
     [self performSelectorInBackground:@selector(_configAVAudioSession) withObject:nil];
+    [self _setupViewControllerManager];
+    [self _showOrHiddenPlaceholderImageViewIfNeeded];
     return self;
 }
 
@@ -435,19 +438,6 @@ typedef struct _SJPlayerControlInfo {
 
 #pragma mark -
 
-@synthesize viewControllerManager = _viewControllerManager;
-- (SJViewControllerManager *)viewControllerManager {
-    if ( _viewControllerManager == nil ) {
-        _viewControllerManager = SJViewControllerManager.alloc.init;
-        _viewControllerManager.fitOnScreenManager = self.fitOnScreenManager;
-        _viewControllerManager.rotationManager = self.rotationManager;
-        _viewControllerManager.controlLayerAppearManager = self.controlLayerAppearManager;
-        _viewControllerManager.presentView = self.presentView;
-        _viewControllerManager.lockedScreen = self.isLockedScreen;
-    }
-    return _viewControllerManager;
-}
-
 - (SJVideoPlayerRegistrar *)registrar {
     if ( _registrar ) return _registrar;
     _registrar = [SJVideoPlayerRegistrar new];
@@ -516,6 +506,22 @@ typedef struct _SJPlayerControlInfo {
     _presentView.delegate = self;
     [self _configGestureControl:_presentView];
     [_view addSubview:_presentView];
+}
+
+- (void)_setupViewControllerManager {
+    if ( _viewControllerManager == nil ) {
+        _viewControllerManager = SJViewControllerManager.alloc.init;
+    }
+    _viewControllerManager.fitOnScreenManager = _fitOnScreenManager;
+    _viewControllerManager.rotationManager = _rotationManager;
+    _viewControllerManager.controlLayerAppearManager = _controlLayerAppearManager;
+    _viewControllerManager.presentView = self.presentView;
+    _viewControllerManager.lockedScreen = self.isLockedScreen;
+    
+    if ( [_rotationManager isKindOfClass:SJRotationManager.class] ) {
+        SJRotationManager *mgr = _rotationManager;
+        mgr.delegate = _viewControllerManager;
+    }
 }
 
 - (void)_configAVAudioSession {
@@ -1610,7 +1616,6 @@ typedef struct _SJPlayerControlInfo {
 - (id<SJFitOnScreenManager>)fitOnScreenManager {
     if ( _fitOnScreenManager == nil ) {
         SJFitOnScreenManager *mgr = [[SJFitOnScreenManager alloc] initWithTarget:self.presentView targetSuperview:self.view];
-        mgr.viewControllerManager = self.viewControllerManager;
         [self setFitOnScreenManager:mgr];
     }
     return _fitOnScreenManager;
@@ -1696,7 +1701,7 @@ typedef struct _SJPlayerControlInfo {
 - (id<SJRotationManager>)rotationManager {
     if ( _rotationManager == nil ) {
         SJRotationManager *mgr = [SJRotationManager.alloc init];
-        mgr.viewControllerManager = self.viewControllerManager;
+        mgr.delegate = _viewControllerManager;
         [self setRotationManager:mgr];
     }
     return _rotationManager;
