@@ -1186,6 +1186,8 @@ typedef struct _SJPlayerControlInfo {
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:pictureInPictureStatusDidChange:)] ) {
         [self.controlLayerDelegate videoPlayer:self pictureInPictureStatusDidChange:status];
     }
+    
+    [self _postNotification:SJVideoPlayerPictureInPictureStatusDidChangeNotification];
 }
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller durationDidChange:(NSTimeInterval)duration {

@@ -96,6 +96,10 @@ static NSString *kPictureInPicturePossible = @"pictureInPicturePossible";
     
     if ( isReady ) {
         [_pictureInPictureController startPictureInPicture];
+        
+#ifdef SJDEBUG
+        NSLog(@"%d - %s", (int)__LINE__, __func__);
+#endif
     }
 }
 
@@ -126,10 +130,16 @@ static NSString *kPictureInPicturePossible = @"pictureInPicturePossible";
 
 - (void)pictureInPictureControllerDidStartPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
     self.status = SJPictureInPictureStatusRunning;
+#ifdef SJDEBUG
+    NSLog(@"%d - %s", (int)__LINE__, __func__);
+#endif
 }
 
 - (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController failedToStartPictureInPictureWithError:(NSError *)error {
     [self _stopPictureInPicture];
+#ifdef SJDEBUG
+    NSLog(@"%d - %s", (int)__LINE__, __func__);
+#endif
 }
 
 #pragma mark stop
