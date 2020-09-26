@@ -730,7 +730,7 @@ typedef struct _SJPlayerControlInfo {
 
 #pragma mark - 控制
 @implementation SJBaseVideoPlayer (PlayControl)
-- (void)setPlaybackController:(nullable id<SJVideoPlayerPlaybackController>)playbackController {
+- (void)setPlaybackController:(nullable __kindof id<SJVideoPlayerPlaybackController>)playbackController {
     if ( _playbackController != nil ) {
         [_playbackController.playerView removeFromSuperview];
         [NSNotificationCenter.defaultCenter postNotificationName:SJVideoPlayerPlaybackControllerWillDeallocateNotification object:_playbackController];
@@ -739,7 +739,7 @@ typedef struct _SJPlayerControlInfo {
     [self _playbackControllerDidChange];
 }
 
-- (id<SJVideoPlayerPlaybackController>)playbackController {
+- (__kindof id<SJVideoPlayerPlaybackController>)playbackController {
     if ( _playbackController ) return _playbackController;
     _playbackController = [SJAVMediaPlaybackController new];
     [self _playbackControllerDidChange];
@@ -895,7 +895,7 @@ typedef struct _SJPlayerControlInfo {
         self.subtitlesPromptController.subtitles = URLAsset.subtitles;
     }
     
-    [self.playbackController prepareToPlay];
+    [(SJMediaPlaybackController *)self.playbackController prepareToPlay];
     [self _tryToPlayIfNeeded];
 }
 - (nullable SJVideoPlayerURLAsset *)URLAsset {
@@ -1147,7 +1147,7 @@ typedef struct _SJPlayerControlInfo {
     [self.playModelObserver refreshAppearState];
 }
 
-// - Playback Controll Delegate -
+#pragma mark - SJVideoPlayerPlaybackControllerDelegate
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller assetStatusDidChange:(SJAssetStatus)status {
  
@@ -1180,6 +1180,12 @@ typedef struct _SJPlayerControlInfo {
 #ifdef SJDEBUG
     [self showLog_TimeControlStatus];
 #endif
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller pictureInPictureStatusDidChange:(SJPictureInPictureStatus)status API_AVAILABLE(ios(14.0)) {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:pictureInPictureStatusDidChange:)] ) {
+        [self.controlLayerDelegate videoPlayer:self pictureInPictureStatusDidChange:status];
+    }
 }
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller durationDidChange:(NSTimeInterval)duration {
