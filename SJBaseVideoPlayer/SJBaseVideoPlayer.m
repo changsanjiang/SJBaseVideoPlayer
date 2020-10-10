@@ -535,7 +535,11 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)_postNotification:(NSNotificationName)name {
-    [NSNotificationCenter.defaultCenter postNotificationName:name object:self];
+    [self _postNotification:name userInfo:nil];
+}
+
+- (void)_postNotification:(NSNotificationName)name userInfo:(nullable NSDictionary *)userInfo {
+    [NSNotificationCenter.defaultCenter postNotificationName:name object:self userInfo:userInfo];
 }
 
 - (void)_showOrHiddenPlaceholderImageViewIfNeeded {
@@ -1263,6 +1267,18 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)playbackControllerIsReadyForDisplay:(id<SJVideoPlayerPlaybackController>)controller {
     [self _showOrHiddenPlaceholderImageViewIfNeeded];
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller willSeekToTime:(CMTime)time {
+    [self _postNotification:SJVideoPlayerPlaybackWillSeekNotification userInfo:@{
+        SJVideoPlayerNotificationUserInfoKeySeekTime : [NSValue valueWithCMTime:time]
+    }];
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller didSeekToTime:(CMTime)time {
+    [self _postNotification:SJVideoPlayerPlaybackDidSeekNotification userInfo:@{
+        SJVideoPlayerNotificationUserInfoKeySeekTime : [NSValue valueWithCMTime:time]
+    }];
 }
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller switchingDefinitionStatusDidChange:(SJDefinitionSwitchStatus)status media:(id<SJMediaModelProtocol>)media {
