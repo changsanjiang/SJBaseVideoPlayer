@@ -41,6 +41,20 @@ static NSString *kPictureInPicturePossible = @"pictureInPicturePossible";
     }
 }
 
+- (void)setRequiresLinearPlayback:(BOOL)requiresLinearPlayback {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+    _pictureInPictureController.requiresLinearPlayback = requiresLinearPlayback;
+#endif
+}
+
+- (BOOL)requiresLinearPlayback {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+    return _pictureInPictureController.requiresLinearPlayback;
+#else
+    return NO;
+#endif
+}
+
 - (BOOL)isAvailable {
     return _status != SJPictureInPictureStatusStopping && _status != SJPictureInPictureStatusStopped;
 }
