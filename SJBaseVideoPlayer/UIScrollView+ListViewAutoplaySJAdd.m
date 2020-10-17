@@ -188,7 +188,7 @@ static void sj_playNextAssetAfterEndScroll(__kindof __kindof UIScrollView *scrol
     
     if ( superviewTag != 0 && [scrollView isViewAppearedWithTag:superviewTag atIndexPath:current] )
         return;
-    else if ( [scrollView isViewAppearedWithProtocol:@protocol(SJPlayModelPlayerSuperview) atIndexPath:current] )
+    else if ( [scrollView isViewAppearedWithProtocol:@protocol(SJPlayModelPlayerSuperview) tag:0 atIndexPath:current] )
         return;
     
     NSIndexPath *_Nullable next = nil;
@@ -197,7 +197,7 @@ static void sj_playNextAssetAfterEndScroll(__kindof __kindof UIScrollView *scrol
             for ( NSIndexPath *indexPath in visibleIndexPaths ) {
                 UIView *_Nullable target = superviewTag != 0 ?
                                     [scrollView viewWithTag:superviewTag atIndexPath:indexPath] :
-                                    [scrollView viewWithProtocol:@protocol(SJPlayModelPlayerSuperview) atIndexPath:indexPath];
+                [scrollView viewWithProtocol:@protocol(SJPlayModelPlayerSuperview) tag:0 atIndexPath:indexPath];
                 if ( !target ) continue;
                 CGRect intersection = [scrollView intersectionWithView:target];
                 if ( floor(intersection.size.height) >= floor(target.bounds.size.height) ) {
@@ -227,7 +227,7 @@ static void sj_playNextAssetAfterEndScroll(__kindof __kindof UIScrollView *scrol
                 NSIndexPath *indexPath = visibleIndexPaths[i];
                 UIView *_Nullable target = superviewTag != 0 ?
                                     [scrollView viewWithTag:superviewTag atIndexPath:indexPath] :
-                                    [scrollView viewWithProtocol:@protocol(SJPlayModelPlayerSuperview) atIndexPath:indexPath];
+                                    [scrollView viewWithProtocol:@protocol(SJPlayModelPlayerSuperview) tag:0 atIndexPath:indexPath];
                 if ( !target ) continue;
                 CGRect intersection = [scrollView intersectionWithView:target];
                 CGFloat result = floor(ABS(mid - CGRectGetMidY(intersection)));
@@ -305,7 +305,7 @@ static void sj_playNextVisibleAsset(__kindof UIScrollView *scrollView) {
     for ( NSIndexPath *indexPath in remain ) {
         UIView *_Nullable target = superviewTag != 0 ?
                             [scrollView viewWithTag:superviewTag atIndexPath:indexPath] :
-                            [scrollView viewWithProtocol:@protocol(SJPlayModelPlayerSuperview) atIndexPath:indexPath];
+                            [scrollView viewWithProtocol:@protocol(SJPlayModelPlayerSuperview) tag:0 atIndexPath:indexPath];
         if ( !target ) continue;
         CGRect intersection = [scrollView intersectionWithView:target];
         if ( floor(intersection.size.height) >= floor(target.bounds.size.height) ) {
