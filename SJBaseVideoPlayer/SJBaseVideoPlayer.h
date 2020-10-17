@@ -860,6 +860,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 @property (nonatomic, strong, nullable) UIView<SJWatermarkView> *watermarkView;
 
+- (void)updateWatermarkViewLayout;
 @end
 
 #pragma mark - 已弃用

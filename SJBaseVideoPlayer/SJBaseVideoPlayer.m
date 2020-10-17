@@ -165,7 +165,7 @@ typedef struct _SJPlayerControlInfo {
     
     if ( self.watermarkView != nil ) {
         [UIView animateWithDuration:0.28 animations:^{
-            [self.watermarkView layoutWatermarkInRect:self.presentView.bounds videoPresentationSize:self.videoPresentationSize videoGravity:videoGravity];
+            [self updateWatermarkViewLayout];
         }];
     }
 }
@@ -253,8 +253,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)presentViewDidLayoutSubviews:(SJVideoPlayerPresentView *)presentView {
-    [self.watermarkView layoutWatermarkInRect:presentView.bounds videoPresentationSize:self.videoPresentationSize videoGravity:self.videoGravity];
-
+    [self updateWatermarkViewLayout];
     if ( !CGSizeEqualToSize(_controlLayerDataSource.controlView.frame.size, presentView.bounds.size) ) {    
         _controlLayerDataSource.controlView.frame = presentView.bounds;
     }
@@ -1235,8 +1234,8 @@ typedef struct _SJPlayerControlInfo {
         _useFitOnScreenAndDisableRotation = presentationSize.width < presentationSize.height;
     }
     
-    [self.watermarkView layoutWatermarkInRect:self.presentView.bounds videoPresentationSize:self.videoPresentationSize videoGravity:self.videoGravity];
-
+    [self updateWatermarkViewLayout];
+    
     if ( self.presentationSizeDidChangeExeBlock )
         self.presentationSizeDidChangeExeBlock(self);
     
@@ -2226,6 +2225,10 @@ typedef struct _SJPlayerControlInfo {
 
 - (nullable UIView<SJWatermarkView> *)watermarkView {
     return objc_getAssociatedObject(self, _cmd);
+}
+
+- (void)updateWatermarkViewLayout {
+    [self.watermarkView layoutWatermarkInRect:self.presentView.bounds videoPresentationSize:self.videoPresentationSize videoGravity:self.videoGravity];
 }
 @end
 
