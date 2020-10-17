@@ -94,7 +94,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 ///     当一个界面中, 需要同时存在多个播放器时, 用此tag来进一步区分对应的父视图(请设置`SJPlayModelPlayerSuperview.tag`, 不可为 0)
 ///
-///     设置对应tag后, 播放器将结合此tag来定位父视图, 从而实现同一个页面中多个播放器同时播放的效果
+///     当多个父视图设置不同的tag后, 管理类将通过此tag来定位对应父视图, 从而实现同一个页面中多个播放器同时播放的效果
 ///
 @property (nonatomic) NSUInteger superviewTag;
 
