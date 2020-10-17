@@ -116,6 +116,11 @@ NS_ASSUME_NONNULL_BEGIN
     return SJAVPictureInPictureController.isPictureInPictureSupported;
 }
 
+- (void)setRequiresLinearPlaybackInPictureInPicture:(BOOL)requiresLinearPlaybackInPictureInPicture API_AVAILABLE(ios(14.0)) {
+    [super setRequiresLinearPlaybackInPictureInPicture:requiresLinearPlaybackInPictureInPicture];
+    _pictureInPictureController.requiresLinearPlayback = requiresLinearPlaybackInPictureInPicture;
+}
+
 - (SJPictureInPictureStatus)pictureInPictureStatus API_AVAILABLE(ios(14.0)) {
     return _pictureInPictureController.status;
 }
@@ -124,6 +129,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ( self.currentPlayerView != nil ) {
         if ( _pictureInPictureController == nil ) {
             _pictureInPictureController = [SJAVPictureInPictureController.alloc initWithLayer:self.currentPlayerView.layer delegate:self];
+            _pictureInPictureController.requiresLinearPlayback = self.requiresLinearPlaybackInPictureInPicture;
         }
         [_pictureInPictureController startPictureInPicture];
     }
