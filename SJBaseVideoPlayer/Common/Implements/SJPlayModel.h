@@ -98,6 +98,11 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 @property (nonatomic) NSUInteger superviewTag;
 
+/// 可播区域的insets
+///
+///
+@property (nonatomic) UIEdgeInsets playableAreaInsets;
+
 #pragma mark - 视图嵌套情况下使用
 
 /**

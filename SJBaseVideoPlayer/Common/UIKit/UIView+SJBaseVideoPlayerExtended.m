@@ -12,18 +12,21 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 子视图是否显示中
 ///
-- (BOOL)isViewAppeared:(UIView *_Nullable)childView {
+- (BOOL)isViewAppeared:(UIView *_Nullable)childView insets:(UIEdgeInsets)insets {
     if ( !childView ) return NO;
-    return !CGRectIsEmpty([self intersectionWithView:childView]);
+    return !CGRectIsEmpty([self intersectionWithView:childView insets:insets]);
 }
 
 ///
 /// 两者在window上的交叉点
 ///
-- (CGRect)intersectionWithView:(UIView *)view {
+- (CGRect)intersectionWithView:(UIView *)view insets:(UIEdgeInsets)insets {
     if ( view == nil || view.window == nil || self.window == nil ) return CGRectZero;
     CGRect rect1 = [view convertRect:view.bounds toView:self.window];
     CGRect rect2 = [self convertRect:self.bounds toView:self.window];
+    rect1 = UIEdgeInsetsInsetRect(rect1, insets);
+    rect2 = UIEdgeInsetsInsetRect(rect2, insets);
+    
     CGRect intersection = CGRectIntersection(rect1, rect2);
     return (CGRectIsEmpty(intersection) || CGRectIsNull(intersection)) ? CGRectZero : intersection;
 }
@@ -58,8 +61,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 对应视图是否在window中显示
 ///
-- (BOOL)isViewAppearedWithProtocol:(Protocol *)protocol tag:(NSInteger)tag {
-   return [self isViewAppeared:[self viewWithProtocol:protocol tag:tag]];
+- (BOOL)isViewAppearedWithProtocol:(Protocol *)protocol tag:(NSInteger)tag insets:(UIEdgeInsets)insets {
+   return [self isViewAppeared:[self viewWithProtocol:protocol tag:tag] insets:insets];
 }
 
 - (void)setSj_x:(CGFloat)sj_x {

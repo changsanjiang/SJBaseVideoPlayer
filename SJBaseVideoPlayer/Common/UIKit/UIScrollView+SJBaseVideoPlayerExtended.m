@@ -28,9 +28,9 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 对应视图是否在window中显示
 ///
-- (BOOL)isViewAppearedWithTag:(NSInteger)tag atIndexPath:(NSIndexPath *)indexPath {
+- (BOOL)isViewAppearedWithTag:(NSInteger)tag insets:(UIEdgeInsets)insets atIndexPath:(NSIndexPath *)indexPath {
     UIView *view = [self viewWithTag:tag atIndexPath:indexPath];
-    return !CGRectIsEmpty([self intersectionWithView:view]);
+    return !CGRectIsEmpty([self intersectionWithView:view insets:insets]);
 }
 
 ///
@@ -79,9 +79,9 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 对应视图是否在window中显示
 ///
-- (BOOL)isViewAppearedWithProtocol:(Protocol *)protocol tag:(NSInteger)tag atIndexPath:(NSIndexPath *)indexPath {
+- (BOOL)isViewAppearedWithProtocol:(Protocol *)protocol tag:(NSInteger)tag insets:(UIEdgeInsets)insets atIndexPath:(NSIndexPath *)indexPath {
     UIView *view = [self viewWithProtocol:protocol tag:tag atIndexPath:indexPath];
-    return !CGRectIsEmpty([self intersectionWithView:view]);
+    return !CGRectIsEmpty([self intersectionWithView:view insets:insets]);
 }
 @end
 NS_ASSUME_NONNULL_END
