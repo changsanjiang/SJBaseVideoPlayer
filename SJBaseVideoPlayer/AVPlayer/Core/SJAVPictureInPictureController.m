@@ -30,7 +30,7 @@ static NSString *kPictureInPicturePossible = @"pictureInPicturePossible";
 }
 
 - (void)dealloc {
-#ifdef DEBUG
+#ifdef SJDEBUG
     NSLog(@"%d - %s", (int)__LINE__, __func__);
 #endif
     
@@ -68,6 +68,10 @@ static NSString *kPictureInPicturePossible = @"pictureInPicturePossible";
 }
 
 - (void)startPictureInPicture {
+#ifdef SJDEBUG
+    NSLog(@"%d - -[%@ %s]", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
+#endif
+
     _wantsPictureInPictureStart = YES;
 
     switch ( self.status ) {
@@ -86,6 +90,10 @@ static NSString *kPictureInPicturePossible = @"pictureInPicturePossible";
 }
 
 - (void)stopPictureInPicture {
+#ifdef SJDEBUG
+    NSLog(@"%d - -[%@ %s]", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
+#endif
+    
     _wantsPictureInPictureStart = NO;
     
     switch ( self.status ) {
@@ -109,16 +117,14 @@ static NSString *kPictureInPicturePossible = @"pictureInPicturePossible";
     BOOL isReady = (_status == SJPictureInPictureStatusStarting) && _pictureInPictureController.isPictureInPicturePossible;
     
     if ( isReady ) {
-        [_pictureInPictureController startPictureInPicture];
-        
-#ifdef SJDEBUG
-        NSLog(@"%d - %s", (int)__LINE__, __func__);
-#endif
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_pictureInPictureController startPictureInPicture];
+        });
     }
 }
 
 - (void)_stopPictureInPicture {
-    [_pictureInPictureController stopPictureInPicture];
+    [self->_pictureInPictureController stopPictureInPicture];
 }
 
 - (void)setStatus:(SJPictureInPictureStatus)status {

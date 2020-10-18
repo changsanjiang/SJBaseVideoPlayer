@@ -157,7 +157,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 + (NSString *)version {
-    return @"v3.4.0";
+    return @"v3.4.1";
 }
 
 - (void)setVideoGravity:(SJVideoGravity)videoGravity {
