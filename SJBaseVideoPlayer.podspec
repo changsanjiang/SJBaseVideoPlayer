@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SJBaseVideoPlayer'
-  s.version      = '3.4.2'
+  s.version      = '3.4.3'
   s.summary      = 'video player.'
   s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
   s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -58,5 +58,4 @@ Pod::Spec.new do |s|
   s.dependency 'SJUIKit/ObserverHelper'
   s.dependency 'SJUIKit/Queues'
   s.dependency 'SJUIKit/SQLite3'
-  s.dependency 'Reachability'
 end
