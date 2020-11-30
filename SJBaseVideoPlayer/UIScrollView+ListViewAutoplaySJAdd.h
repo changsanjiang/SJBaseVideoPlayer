@@ -20,6 +20,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL sj_enabledAutoplay;
 
 ///
+/// 指定位置播放
+///
+- (void)sj_playAssetAtIndexPath:(NSIndexPath *)indexPath scrollAnimated:(BOOL)animated;
+
+///
 /// enable autoplay
 /// 开启
 ///
