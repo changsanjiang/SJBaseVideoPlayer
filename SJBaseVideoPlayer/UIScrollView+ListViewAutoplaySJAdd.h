@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Developers don't need to care, this category is automatically maintained by the SJBaseVideoPlayer.
 /// 开发者无需关心, 此分类由播放器自动维护
-@interface UIScrollView (SJPlayerCurrentPlayingIndexPath)
+@interface UIScrollView (SJAutoplayPrivate)
 @property (nonatomic, strong, nullable, readonly) NSIndexPath *sj_currentPlayingIndexPath;
 - (void)setSj_currentPlayingIndexPath:(nullable NSIndexPath *)sj_currentPlayingIndexPath;
 @end

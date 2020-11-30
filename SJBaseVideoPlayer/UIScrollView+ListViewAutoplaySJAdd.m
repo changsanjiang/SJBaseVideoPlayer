@@ -27,7 +27,7 @@
 NS_ASSUME_NONNULL_BEGIN
 static NSString *const kQueue = @"SJBaseVideoPlayerAutoplayTaskQueue";
 
-@implementation UIScrollView (SJPlayerCurrentPlayingIndexPath)
+@implementation UIScrollView (SJAutoplayPrivate)
 - (void)setSj_currentPlayingIndexPath:(nullable NSIndexPath *)sj_currentPlayingIndexPath {
     objc_setAssociatedObject(self, @selector(sj_currentPlayingIndexPath), sj_currentPlayingIndexPath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
