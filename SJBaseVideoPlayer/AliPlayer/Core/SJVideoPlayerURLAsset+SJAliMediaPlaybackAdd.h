@@ -9,6 +9,7 @@
 #import "SJVideoPlayerURLAsset.h"
 #import <AliyunPlayer/AVPSource.h>
 #import <AliyunPlayer/AVPConfig.h>
+#import <AliyunPlayer/AVPMediaInfo.h>
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJVideoPlayerURLAsset (SJAliMediaPlaybackAdd)
@@ -19,5 +20,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly, nullable) __kindof AVPSource *source;
 @property (nonatomic, strong, nullable) AVPConfig *avpConfig;
+
+@end
+
+/// 切换清晰度时使用
+@interface SJVideoPlayerURLAsset (SJAliMediaSelectTrack)
+- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo;
+- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo playModel:(__kindof SJPlayModel *)playModel;
+@property (nonatomic, strong, readonly, nullable) AVPTrackInfo *avpTrackInfo;
 @end
 NS_ASSUME_NONNULL_END

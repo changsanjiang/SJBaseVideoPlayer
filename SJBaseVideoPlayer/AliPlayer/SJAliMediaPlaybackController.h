@@ -15,5 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SJAliMediaPlaybackController : SJMediaPlaybackController
 @property (nonatomic) AVPSeekMode seekMode;
 @property (nonatomic, strong, readonly, nullable) SJAliMediaPlayer *currentPlayer;
+
+@property (nonatomic, copy, nullable) void(^onTrackReadyExeBlock)(SJAliMediaPlaybackController *playbackController);
 @end
 NS_ASSUME_NONNULL_END

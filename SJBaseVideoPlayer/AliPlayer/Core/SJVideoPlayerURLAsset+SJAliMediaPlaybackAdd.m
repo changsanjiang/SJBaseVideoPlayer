@@ -52,4 +52,23 @@ NS_ASSUME_NONNULL_BEGIN
     return objc_getAssociatedObject(self, _cmd);
 }
 @end
+
+/// 切换清晰度时使用
+@implementation SJVideoPlayerURLAsset (SJAliMediaSelectTrack)
+- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo {
+    return [self initWithSource:source subTrackInfo:trackInfo playModel:SJPlayModel.new];
+}
+- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo playModel:(__kindof SJPlayModel *)playModel {
+    self = [self initWithSource:source playModel:playModel];
+    if ( self ) {
+        objc_setAssociatedObject(self, @selector(avpTrackInfo), trackInfo, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return self;
+}
+
+- (nullable AVPTrackInfo *)avpTrackInfo {
+    return objc_getAssociatedObject(self, _cmd);
+}
+@end
+
 NS_ASSUME_NONNULL_END

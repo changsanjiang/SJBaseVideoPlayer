@@ -7,6 +7,7 @@
 //
 
 #import "SJMediaPlaybackController.h"
+#import <AliyunPlayer/AVPMediaInfo.h>
 #import <AliyunPlayer/AVPSource.h>
 #import <AliyunPlayer/AVPConfig.h>
 #import <AliyunPlayer/AVPDef.h>
@@ -26,8 +27,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) __kindof AVPSource *source;
 @property (nonatomic, readonly) BOOL firstVideoFrameRendered;
 @property (nonatomic, strong, readonly) UIView *view;
+@property (nonatomic, readonly, nullable) NSArray<AVPTrackInfo *> *trackInfos;
+- (nullable AVPTrackInfo *)currentTrackInfo:(AVPTrackType)type;
+- (void)selectTrack:(int)trackIndex accurateSeeking:(BOOL)accurateSeeking completed:(void(^)(BOOL finished))completionHandler;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 @end
+
+extern NSNotificationName const SJAliMediaPlayerOnTrackReadyNotification;
 NS_ASSUME_NONNULL_END

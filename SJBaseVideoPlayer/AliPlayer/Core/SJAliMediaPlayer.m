@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) SJFinishedReason finishedReason;    ///< 播放结束的reason
 @property (nonatomic) BOOL firstVideoFrameRendered;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
+@property (nonatomic, copy, nullable) void(^selectTrackCompletionHandler)(BOOL);
 @property (nonatomic) NSTimeInterval startPosition;
 @property (nonatomic) BOOL needSeekToStartPosition;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
@@ -91,6 +92,14 @@ NS_ASSUME_NONNULL_BEGIN
     return self.player.playerView;
 }
 
+- (nullable NSArray<AVPTrackInfo *> *)trackInfos {
+    return self.player.getMediaInfo.tracks;
+}
+
+- (nullable AVPTrackInfo *)currentTrackInfo:(AVPTrackType)type {
+    return [self.player getCurrentTrack:type];
+}
+
 - (void)seekToTime:(CMTime)time completionHandler:(void (^_Nullable)(BOOL))completionHandler {
     if ( self.assetStatus != SJAssetStatusReadyToPlay ) {
         if ( completionHandler ) completionHandler(NO);
@@ -150,6 +159,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable UIImage *)screenshot {
     return nil;
+}
+
+- (void)selectTrack:(int)trackIndex accurateSeeking:(BOOL)accurateSeeking completed:(void(^)(BOOL finished))completionHandler {
+    [_player selectTrack:trackIndex accurate:accurateSeeking];
+    _selectTrackCompletionHandler = completionHandler;
 }
 
 #pragma mark -
@@ -249,6 +263,17 @@ NS_ASSUME_NONNULL_BEGIN
     });
 }
 
+- (void)onTrackReady:(AliPlayer *)player info:(NSArray<AVPTrackInfo *> *)info {
+    [self _postNotification:SJAliMediaPlayerOnTrackReadyNotification];
+}
+
+- (void)onTrackChanged:(AliPlayer *)player info:(AVPTrackInfo *)info {
+    if ( _selectTrackCompletionHandler != nil ) {
+        _selectTrackCompletionHandler(YES);
+        _selectTrackCompletionHandler = nil;
+    }
+}
+
 #pragma mark -
 
 - (void)_postNotification:(NSNotificationName)name {
@@ -281,6 +306,11 @@ NS_ASSUME_NONNULL_BEGIN
     
     if ( status != self.assetStatus ) {
         self.assetStatus = status;
+        
+        if ( _selectTrackCompletionHandler != nil ) {
+            _selectTrackCompletionHandler(false);
+            _selectTrackCompletionHandler = nil;
+        }
         
         if ( status == SJAssetStatusReadyToPlay ) {
             if ( self.needSeekToStartPosition ) {
@@ -474,4 +504,6 @@ NS_ASSUME_NONNULL_BEGIN
     return time;
 }
 @end
+
+NSNotificationName const SJAliMediaPlayerOnTrackReadyNotification = @"SJAliMediaPlayerOnTrackReadyNotification";
 NS_ASSUME_NONNULL_END
