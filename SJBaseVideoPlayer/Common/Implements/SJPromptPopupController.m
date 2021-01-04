@@ -1,11 +1,11 @@
 //
-//  SJPopPromptController.m
+//  SJPromptPopupController.m
 //  Pods
 //
 //  Created by 畅三江 on 2019/7/12.
 //
 
-#import "SJPopPromptController.h"
+#import "SJPromptPopupController.h"
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
 #else
@@ -58,11 +58,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
-@interface SJPopPromptController ()
+@interface SJPromptPopupController ()
 @property (nonatomic, strong, readonly) NSMutableArray<_SJPopItemContainerView *> *subviews;
 @end
 
-@implementation SJPopPromptController
+@implementation SJPromptPopupController
 @synthesize target = _target;
 @synthesize leftMargin = _leftMargin;
 @synthesize bottomMargin = _bottomMargin;

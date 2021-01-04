@@ -24,7 +24,7 @@
 #import "SJDeviceVolumeAndBrightnessManagerDefines.h"
 #import "SJFloatSmallViewControllerDefines.h"
 #import "SJVideoDefinitionSwitchingInfo.h"
-#import "SJPopPromptControllerDefines.h"
+#import "SJPromptPopupControllerDefines.h"
 #import "SJPlaybackObservation.h"
 #import "SJVideoPlayerPresentViewDefines.h"
 #import "SJSubtitlesPromptControllerDefines.h"
@@ -390,7 +390,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 ///         了解更多请前往协议头文件查看
 ///
-@property (nonatomic, strong, null_resettable) id<SJPopPromptController> popPromptController;
+@property (nonatomic, strong, null_resettable) id<SJPromptPopupController> promptPopupController;
 @end
 
 
@@ -731,7 +731,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// - default value is YES.
 ///
-@property (nonatomic) BOOL autoDisappearFloatSmallView;
+@property (nonatomic, getter=isHiddenFloatSmallViewWhenPlaybackFinished) BOOL hiddenFloatSmallViewWhenPlaybackFinished;
 
 ///
 /// 滚动出去后, 是否暂停. 默认为YES
