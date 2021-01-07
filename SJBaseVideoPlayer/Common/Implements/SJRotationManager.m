@@ -89,7 +89,7 @@ NS_ASSUME_NONNULL_BEGIN
     
     if ( self.disableAnimations ) {
         [CATransaction begin];
-        [CATransaction setDisableActions:self.disableAnimations];
+        [CATransaction setDisableActions:YES];
     }
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> _Nonnull context) {
         if ( isFullscreen )
