@@ -262,6 +262,7 @@ NS_ASSUME_NONNULL_BEGIN
         self.reasonForWaitingToPlay = SJWaitingWhileEvaluatingBufferingRateReason;
         self.timeControlStatus = SJPlaybackTimeControlStatusWaitingToPlay;
         self.isPlaybackFinished ? [self.currentPlayer replay] : [self.currentPlayer play];
+        if ( self.currentPlayer.rate != self.rate ) self.currentPlayer.rate = self.rate;
         [self _toEvaluating];
     }
 }
@@ -279,6 +280,7 @@ NS_ASSUME_NONNULL_BEGIN
     self.reasonForWaitingToPlay = SJWaitingWhileEvaluatingBufferingRateReason;
     self.timeControlStatus = SJPlaybackTimeControlStatusWaitingToPlay;
     [self.currentPlayer replay];
+    if ( self.currentPlayer.rate != self.rate ) self.currentPlayer.rate = self.rate;
     [self _toEvaluating];
 }
 
