@@ -8,12 +8,8 @@
 
 #import "SJFloatSmallViewTransitionController.h"
 #import <objc/message.h>
-#import <SJBaseVideoPlayer/UIView+SJBaseVideoPlayerExtended.h>
-#if __has_include(<SJUIKit/NSObject+SJObserverHelper.h>)
-#import <SJUIKit/NSObject+SJObserverHelper.h>
-#else
+#import "UIView+SJBaseVideoPlayerExtended.h"
 #import "NSObject+SJObserverHelper.h"
-#endif
 
 @interface SJFloatSmallViewContainerView : UIView
 @end

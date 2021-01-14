@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <SJBaseVideoPlayer/SJFloatSmallViewController.h>
+#import "SJFloatSmallViewController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJFloatSmallViewTransitionController : NSObject<SJFloatSmallViewController>
