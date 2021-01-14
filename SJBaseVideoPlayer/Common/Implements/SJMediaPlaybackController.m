@@ -197,6 +197,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)prepareToPlay {
+    if ( _media == nil ) return;
     SJVideoPlayerURLAsset *media = _media;
     __weak typeof(self) _self = self;
     [self playerWithMedia:media completionHandler:^(id<SJMediaPlayer>  _Nullable player) {
