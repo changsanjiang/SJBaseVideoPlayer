@@ -472,8 +472,7 @@ NS_ASSUME_NONNULL_BEGIN
  
 - (void)setRate:(float)rate {
     _rate = rate;
-    if ( self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) [self play];
-    _currentPlayer.rate = rate;
+    if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) _currentPlayer.rate = rate;
 }
 
 - (void)setVolume:(float)volume {
