@@ -209,6 +209,7 @@ NS_ASSUME_NONNULL_BEGIN
         player.trialEndPosition = media.trialEndPosition;
         self.currentPlayer = player;
         self.currentPlayerView = [self playerViewWithPlayer:player];
+        self.currentPlayerView.videoComopsitionEnable = media.videoCompositionEnable;
     }];
 }
 

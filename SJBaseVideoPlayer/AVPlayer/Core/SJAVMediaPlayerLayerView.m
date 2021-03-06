@@ -53,7 +53,14 @@ static NSString *kReadyForDisplay = @"readyForDisplay";
 - (SJVideoGravity)videoGravity {
     return self.layer.videoGravity;
 }
-
+-(void)setVideoComopsitionEnable:(BOOL)videoComopsitionEnable{
+    
+    if (@available(iOS 9.0, *)) {
+        self.layer.pixelBufferAttributes = videoComopsitionEnable ? @{@"PixelFormatType":@(kCMPixelFormat_32BGRA)} :nil;
+    } else {
+        // Fallback on earlier versions
+    }
+}
 - (void)setScreenshot:(nullable UIImage *)image {
     _screenshotLayer.contents = image != nil ? (__bridge id)(image.CGImage) : nil;
 }
@@ -74,5 +81,6 @@ static NSString *kReadyForDisplay = @"readyForDisplay";
     [super layoutSubviews];
     _screenshotLayer.frame = self.bounds;
 }
+
 @end
 NS_ASSUME_NONNULL_END

@@ -58,6 +58,9 @@ extern NSNotificationName const SJMediaPlayerViewReadyForDisplayNotification;
 @protocol SJMediaPlayerView <NSObject>
 @property (nonatomic) SJVideoGravity videoGravity;
 @property (nonatomic, readonly, getter=isReadyForDisplay) BOOL readyForDisplay;
+/// 是否开启白幕视频合成
+@property (nonatomic) BOOL  videoComopsitionEnable;
+
 @end
 
 @protocol SJMediaPlayer <NSObject>

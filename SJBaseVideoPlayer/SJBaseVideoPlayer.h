@@ -57,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, nullable) id <SJVideoPlayerControlLayerDataSource> controlLayerDataSource;
 @property (nonatomic, weak, nullable) id <SJVideoPlayerControlLayerDelegate> controlLayerDelegate;
 @end
-
+   
 #pragma mark - present view
 
 @interface SJBaseVideoPlayer (Placeholder)
@@ -869,6 +869,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)updateWatermarkViewLayout;
 @end
+
+#pragma mark - metal 白幕视频合成
+@interface SJBaseVideoPlayer (metal)
+
+/// 是否开启白幕视频合成
+@property (nonatomic) BOOL videoCompositionEnable;
+
+
+@end
+
+
 
 #pragma mark - 已弃用
 

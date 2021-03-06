@@ -18,6 +18,27 @@ typedef enum : NSUInteger {
     SJPlaybackTypeFILE
 } SJPlaybackType;
 
+typedef NS_ENUM(NSInteger,SJVideoCompositionDirection){
+    ///
+    /// 白幕在左
+    ///
+    SJVideoCompositionDirectionLeftToRight,
+    ///
+    /// 白幕在右
+    ///
+    SJVideoCompositionDirectionRightToLeft,
+    ///
+    /// 白幕在上
+    ///
+    SJVideoCompositionDirectionTopToBottom,
+    ///
+    /// 白幕在下
+    ///
+    SJVideoCompositionDirectionBottomToTop
+};
+
+
+
 typedef NS_ENUM(NSInteger, SJAssetStatus) {
     ///
     /// 未知状态

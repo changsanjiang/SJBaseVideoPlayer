@@ -15,6 +15,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SJVideoPlayerURLAsset : NSObject<SJMediaModelProtocol>
+
+- (nullable instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel videoCompositionDirection:(SJVideoCompositionDirection)videoCompositionDirection;
 - (nullable instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel;
 - (nullable instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition;
 - (nullable instancetype)initWithURL:(NSURL *)URL playModel:(__kindof SJPlayModel *)playModel;
@@ -25,6 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 试用结束的位置, 单位秒
 @property (nonatomic) NSTimeInterval trialEndPosition;
+/// 是否开启白幕视频合成
+@property (nonatomic) BOOL videoCompositionEnable;
+///白幕视频合成方向
+@property (nonatomic) SJVideoCompositionDirection compositionDirection;
 
 @property (nonatomic, strong, null_resettable) SJPlayModel *playModel;
 - (id<SJVideoPlayerURLAssetObserver>)getObserver;

@@ -2304,7 +2304,16 @@ typedef struct _SJPlayerControlInfo {
 }
 @end
 
+@implementation SJBaseVideoPlayer (metal)
+-(BOOL)videoCompositionEnable{
+    return objc_getAssociatedObject(self, _cmd);
+}
+-(void)setVideoCompositionEnable:(BOOL)videoCompositionEnable{
+    self.URLAsset.videoCompositionEnable = videoCompositionEnable;
+    objc_setAssociatedObject(self, @selector(videoComopsitionEnable), @(videoCompositionEnable), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
 
+@end
 #pragma mark -
 
 @implementation SJBaseVideoPlayer (Deprecated)

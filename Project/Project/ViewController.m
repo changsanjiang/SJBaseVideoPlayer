@@ -10,7 +10,9 @@
 #import <Masonry.h>
 #import <SJBaseVideoPlayer/SJBaseVideoPlayer.h>
 
-@interface ViewController ()
+@interface ViewController (){
+    NSURL *_metalExampleURL;
+}
 @property (nonatomic, strong) SJBaseVideoPlayer *player;
 @end
 
@@ -22,10 +24,15 @@
  
 - (void)viewDidLoad {
     [super viewDidLoad];
+    NSString *urlStr = @"https://sango-frankfurt.oss-eu-central-1.aliyuncs.com/gift/13303825%E5%8A%B3%E5%8A%9B%E5%A3%AB.mp4";
+
+    _metalExampleURL = [NSURL URLWithString:urlStr];
     
-    _player = [SJBaseVideoPlayer player]; 
+    
+    _player = [SJBaseVideoPlayer player];
+
     [self.view addSubview:_player.view];
-    
+//    _player.view.backgroundColor = UIColor.clearColor;
     [_player.view mas_makeConstraints:^(MASConstraintMaker *make) {
         if (@available(iOS 11.0, *)) {
             make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop);
@@ -37,11 +44,16 @@
     }];
 
 //    _player.placeholderImageView.image =
+//
     
-    _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:[NSURL URLWithString:@"https://dh2.v.netease.com/2017/cg/fxtpty.mp4"]];
+  
     
+//    _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:videURL];
+
+    _player.URLAsset = [SJVideoPlayerURLAsset.alloc initWithURL:_metalExampleURL startPosition:0 playModel:[SJPlayModel new] videoCompositionDirection:SJVideoCompositionDirectionLeftToRight];
+    _player.videoCompositionEnable = YES;
+
     _player.pauseWhenAppDidEnterBackground = NO;
-    
 //    [_player rotation];
     
     // Do any additional setup after loading the view, typically from a nib.

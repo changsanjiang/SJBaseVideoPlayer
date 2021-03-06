@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3217895F25F3186F00F2B51A /* 手表.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 3217895E25F3186F00F2B51A /* 手表.mp4 */; };
+		321789A925F323F500F2B51A /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 321789A825F323F500F2B51A /* Metal.framework */; };
+		321789CD25F3253800F2B51A /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 321789CC25F3253800F2B51A /* MetalKit.framework */; };
+		321789D125F3257200F2B51A /* filter.metal in Sources */ = {isa = PBXBuildFile; fileRef = 321789D025F3257200F2B51A /* filter.metal */; };
 		77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDA203E7427009D5F2C /* AppDelegate.m */; };
 		77826BDE203E7427009D5F2C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77826BDD203E7427009D5F2C /* ViewController.m */; };
 		77826BE1203E7427009D5F2C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 77826BDF203E7427009D5F2C /* Main.storyboard */; };
@@ -23,6 +27,10 @@
 /* Begin PBXFileReference section */
 		04C647CC6AA139DA4312FCCE /* Pods-Project.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Project.release.xcconfig"; path = "Pods/Target Support Files/Pods-Project/Pods-Project.release.xcconfig"; sourceTree = "<group>"; };
 		14841A7E97C0750AFB4CB3F2 /* Pods_Project.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Project.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3217895E25F3186F00F2B51A /* 手表.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "手表.mp4"; sourceTree = "<group>"; };
+		321789A825F323F500F2B51A /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		321789CC25F3253800F2B51A /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		321789D025F3257200F2B51A /* filter.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = filter.metal; sourceTree = "<group>"; };
 		77826BD6203E7427009D5F2C /* Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77826BD9203E7427009D5F2C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		77826BDA203E7427009D5F2C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -46,6 +54,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				321789CD25F3253800F2B51A /* MetalKit.framework in Frameworks */,
+				321789A925F323F500F2B51A /* Metal.framework in Frameworks */,
 				890A330D8A6A89567B5C7BDC /* Pods_Project.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -77,6 +87,8 @@
 		77826BD8203E7427009D5F2C /* Project */ = {
 			isa = PBXGroup;
 			children = (
+				321789D025F3257200F2B51A /* filter.metal */,
+				3217895E25F3186F00F2B51A /* 手表.mp4 */,
 				77826BD9203E7427009D5F2C /* AppDelegate.h */,
 				77826BDA203E7427009D5F2C /* AppDelegate.m */,
 				77826BDC203E7427009D5F2C /* ViewController.h */,
@@ -95,6 +107,8 @@
 		D032E6A2ED349265007434F2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				321789CC25F3253800F2B51A /* MetalKit.framework */,
+				321789A825F323F500F2B51A /* Metal.framework */,
 				14841A7E97C0750AFB4CB3F2 /* Pods_Project.framework */,
 			);
 			name = Frameworks;
@@ -178,6 +192,7 @@
 				77826C16203E84E8009D5F2C /* SJBaseVideoPlayer.podspec in Resources */,
 				77826BE3203E7427009D5F2C /* Assets.xcassets in Resources */,
 				77826C10203E74AC009D5F2C /* Podfile in Resources */,
+				3217895F25F3186F00F2B51A /* 手表.mp4 in Resources */,
 				77826BE1203E7427009D5F2C /* Main.storyboard in Resources */,
 				77826C18203FAB8B009D5F2C /* README.md in Resources */,
 			);
@@ -230,6 +245,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				77826BDE203E7427009D5F2C /* ViewController.m in Sources */,
+				321789D125F3257200F2B51A /* filter.metal in Sources */,
 				77826BE9203E7427009D5F2C /* main.m in Sources */,
 				77A41FAC23BB7914000B3A48 /* UIViewController+SJRotationControlExtended.m in Sources */,
 				77826BDB203E7427009D5F2C /* AppDelegate.m in Sources */,
@@ -378,6 +394,8 @@
 				INFOPLIST_FILE = Project/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTLLINKER_FLAGS = "-fcikernel";
+				MTL_COMPILER_FLAGS = "-fcikernel";
 				PRODUCT_BUNDLE_IDENTIFIER = com.SanJiang.Project;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -398,6 +416,8 @@
 				INFOPLIST_FILE = Project/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTLLINKER_FLAGS = "-fcikernel";
+				MTL_COMPILER_FLAGS = "-fcikernel";
 				PRODUCT_BUNDLE_IDENTIFIER = com.SanJiang.Project;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

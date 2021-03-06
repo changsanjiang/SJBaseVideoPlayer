@@ -8,7 +8,6 @@
 #import <Foundation/Foundation.h>
 #import "SJVideoPlayerURLAsset.h"
 #import "SJAVMediaPlayer.h"
-
 NS_ASSUME_NONNULL_BEGIN
 @interface SJAVMediaPlayerLoader : NSObject
 

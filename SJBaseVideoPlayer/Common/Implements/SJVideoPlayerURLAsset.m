@@ -35,7 +35,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation SJVideoPlayerURLAsset
 @synthesize mediaURL = _mediaURL; 
-
+- (nullable instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel videoCompositionDirection:(SJVideoCompositionDirection)videoCompositionDirection{
+    if (self = [self initWithURL:URL startPosition:startPosition playModel:playModel]) {
+        _videoCompositionEnable = YES;
+        _compositionDirection = videoCompositionDirection;
+    }
+    return self;
+}
 - (nullable instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel {
     if ( !URL ) return nil;
     self = [super init];
