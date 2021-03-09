@@ -29,6 +29,9 @@
     CGSize videoDisplayedSize = CGSizeZero;
     if      ( videoGravity == AVLayerVideoGravityResizeAspect ) {
         videoDisplayedSize = CGSizeMake(vSize.width * rect.size.height / vSize.height, rect.size.height);
+        if  (videoDisplayedSize.width > rect.size.width) {
+            videoDisplayedSize = CGSizeMake(rect.size.width, vSize.height * rect.size.width / vSize.width);
+        }
     }
     else if ( videoGravity == AVLayerVideoGravityResizeAspectFill ) {
         videoDisplayedSize = CGSizeMake(rect.size.width, vSize.height * rect.size.width / vSize.width);
