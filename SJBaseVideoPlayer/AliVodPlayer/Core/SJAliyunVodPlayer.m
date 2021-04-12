@@ -10,7 +10,10 @@
 #import "NSTimer+SJAssetAdd.h"
 
 NS_ASSUME_NONNULL_BEGIN
+NSErrorDomain const SJAliyunVodPlayerErrorDomain = @"SJAliyunVodPlayerErrorDomain";
+
 @interface SJAliyunVodPlayer ()<AliyunVodPlayerDelegate>
+@property (nonatomic, strong, nullable) NSError *error;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
 @property (nonatomic) NSTimeInterval startPosition;
 @property (nonatomic) BOOL needSeekToStartPosition;
@@ -161,6 +164,10 @@ NS_ASSUME_NONNULL_BEGIN
     return self.player.snapshot;
 }
 
+- (nullable NSError *)error {
+    return _playerStatus == AliyunVodPlayerStateError ? _error : nil;
+}
+
 #pragma mark -
 
 - (void)vodPlayer:(AliyunVodPlayer *)vodPlayer onEventCallback:(AliyunVodPlayerEvent)event {
@@ -200,6 +207,10 @@ NS_ASSUME_NONNULL_BEGIN
 #ifdef DEBUG
     NSLog(@"%@", errorModel.errorMsg);
 #endif
+
+    _error = [NSError errorWithDomain:SJAliyunVodPlayerErrorDomain code:errorModel.errorCode userInfo:@{
+        @"error" : errorModel ?: @""
+    }];
 }
 
 - (void)vodPlayer:(AliyunVodPlayer *)vodPlayer newPlayerState:(AliyunVodPlayerState)newState {

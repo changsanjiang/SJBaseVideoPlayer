@@ -11,6 +11,8 @@
 #import "SJMediaPlaybackController.h"
 
 NS_ASSUME_NONNULL_BEGIN
+FOUNDATION_EXTERN NSErrorDomain const SJIJKMediaPlayerErrorDomain;
+
 @interface SJIJKMediaPlayer : IJKFFMoviePlayerController<SJMediaPlayer>
 - (instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition options:(IJKFFOptions *)ops;
 

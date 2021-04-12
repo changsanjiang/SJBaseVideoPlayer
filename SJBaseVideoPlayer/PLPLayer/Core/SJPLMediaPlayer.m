@@ -11,6 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJPLMediaPlayer ()<PLPlayerDelegate>
+@property (nonatomic, strong, nullable) NSError *error;
 @property (nonatomic, strong, readonly) PLPlayer *plPlayer;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
 @property (nonatomic) SJPlaybackTimeControlStatus timeControlStatus;
@@ -251,6 +252,10 @@ NS_ASSUME_NONNULL_BEGIN
     return _plPlayer.playerView;
 }
 
+- (nullable NSError *)error {
+    return _plPlayer.status == PLPlayerStatusError ? _error : nil;
+}
+
 #pragma mark -
 
 /**
@@ -336,6 +341,7 @@ NS_ASSUME_NONNULL_BEGIN
 #ifdef DEBUG
     NSLog(@"%d \t %s \t %@", (int)__LINE__, __func__, error);
 #endif
+    _error = error;
     [self _toEvaluating];
 }
 

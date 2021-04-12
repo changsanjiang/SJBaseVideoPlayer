@@ -11,6 +11,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NSErrorDomain const SJIJKMediaPlayerErrorDomain = @"SJIJKMediaPlayerErrorDomain";
+
 typedef struct {
     BOOL isFinished;
     IJKMPMovieFinishReason reason;
@@ -18,6 +20,7 @@ typedef struct {
 
 
 @interface SJIJKMediaPlayer ()
+@property (nonatomic, strong, nullable) NSError *error;
 @property (nonatomic) SJIJKMediaPlaybackFinishedInfo IJKFinishedInfo;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
@@ -217,6 +220,9 @@ typedef struct {
     return self.screenshot;
 }
 
+- (nullable NSError *)error {
+    return _IJKFinishedInfo.isFinished && _IJKFinishedInfo.reason == IJKMPMovieFinishReasonPlaybackError ? _error : nil;
+}
 
 #pragma mark -
 
@@ -425,6 +431,9 @@ typedef struct {
 
 - (void)_updatePlaybackFinishedInfo:(NSNotification *)note {
     IJKMPMovieFinishReason reason = [note.userInfo[IJKMPMoviePlayerPlaybackDidFinishReasonUserInfoKey] integerValue];
+    if ( reason == IJKMPMovieFinishReasonPlaybackError ) {
+        _error = [NSError errorWithDomain:SJIJKMediaPlayerErrorDomain code:[note.userInfo[IJKMPMoviePlayerDidSeekCompleteErrorKey] integerValue] userInfo:nil];
+    }
     _IJKFinishedInfo.isFinished = YES;
     _IJKFinishedInfo.reason = reason;
     [self _toEvaluating];

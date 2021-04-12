@@ -10,7 +10,10 @@
 #import <AliyunPlayer/AliyunPlayer.h>
 
 NS_ASSUME_NONNULL_BEGIN
+NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain";
+
 @interface SJAliMediaPlayer ()<AVPDelegate>
+@property (nonatomic, strong, nullable) NSError *error;
 @property (nonatomic) BOOL isPlaybackFinished;                      ///< 播放结束
 @property (nonatomic, nullable) SJFinishedReason finishedReason;    ///< 播放结束的reason
 @property (nonatomic) BOOL firstVideoFrameRendered;
@@ -42,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
 @synthesize isReplayed = _isReplayed;
 @synthesize rate = _rate;
 @synthesize volume = _volume;
-@synthesize muted = _muted; 
+@synthesize muted = _muted;
 
 - (instancetype)initWithSource:(__kindof AVPSource *)source config:(nullable AVPConfig *)config cacheConfig:(nullable AVPCacheConfig *)cacheConfig startPosition:(NSTimeInterval)time {
     self = [super init];
@@ -164,6 +167,10 @@ NS_ASSUME_NONNULL_BEGIN
     return nil;
 }
 
+- (nullable NSError *)error {
+    return _playerStatus == AVPStatusError ? _error : nil;
+}
+
 - (void)selectTrack:(int)trackIndex accurateSeeking:(BOOL)accurateSeeking completed:(void(^)(BOOL finished))completionHandler {
     [_player selectTrack:trackIndex accurate:accurateSeeking];
     _selectTrackCompletionHandler = completionHandler;
@@ -205,6 +212,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)onError:(AliPlayer *)player errorModel:(AVPErrorModel *)errorModel {
     dispatch_async(dispatch_get_main_queue(), ^{
+        self.error = [NSError errorWithDomain:SJAliMediaPlayerErrorDomain code:errorModel.code userInfo:@{
+            @"error" : errorModel ?: @""
+        }];
         self.playerStatus = AVPStatusError;
         [self _toEvaluating];
     });
