@@ -51,6 +51,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable AVPConfig *)avpConfig {
     return objc_getAssociatedObject(self, _cmd);
 }
+
+- (void)setAvpCacheConfig:(nullable AVPCacheConfig *)avpCacheConfig {
+    objc_setAssociatedObject(self, @selector(avpCacheConfig), avpCacheConfig, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+- (nullable AVPCacheConfig *)avpCacheConfig {
+    return objc_getAssociatedObject(self, _cmd);
+}
 @end
 
 /// 切换清晰度时使用

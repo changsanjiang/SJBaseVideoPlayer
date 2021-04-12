@@ -9,6 +9,7 @@
 #import "SJVideoPlayerURLAsset.h"
 #import <AliyunPlayer/AVPSource.h>
 #import <AliyunPlayer/AVPConfig.h>
+#import <AliyunPlayer/AVPCacheConfig.h>
 #import <AliyunPlayer/AVPMediaInfo.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -20,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly, nullable) __kindof AVPSource *source;
 @property (nonatomic, strong, nullable) AVPConfig *avpConfig;
-
+@property (nonatomic, strong, nullable) AVPCacheConfig *avpCacheConfig;
 @end
 
 /// 切换清晰度时使用

@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
         SJRunLoopTaskQueue.main.enqueue(^{
             __strong typeof(_self) self = _self;
             if ( !self ) return;
-            SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:media.source config:media.avpConfig startPosition:media.startPosition];
+            SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:media.source config:media.avpConfig cacheConfig:media.avpCacheConfig startPosition:media.startPosition];
             player.seekMode = self.seekMode;
             player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
             if ( completionHandler ) completionHandler(player);
