@@ -837,7 +837,7 @@ typedef struct _SJPlayerControlInfo {
         return;
     }
 
-    if ( URLAsset.subtitles != nil ) {
+    if ( URLAsset.subtitles != nil || _subtitlesPromptController != nil ) {
         self.subtitlesPromptController.subtitles = URLAsset.subtitles;
     }
     
