@@ -22,7 +22,10 @@ typedef enum : NSUInteger {
 } SJAutoplayPosition;
 
 @interface SJPlayerAutoplayConfig : NSObject
-+ (instancetype)configWithAutoplayDelegate:(id<SJPlayerAutoplayDelegate>)autoplayDelegate;
++ (instancetype)configWithPlayerSuperviewKey:(nullable NSString *)playerSuperviewKey autoplayDelegate:(id<SJPlayerAutoplayDelegate>)delegate;
+
+@property (nonatomic, copy, nullable) NSString *playerSuperviewKey;
+
 @property (nonatomic, weak, nullable, readonly) id<SJPlayerAutoplayDelegate> autoplayDelegate;
 
 /// 滚动的动画类型
@@ -42,8 +45,9 @@ typedef enum : NSUInteger {
 
 /// 已弃用
 @interface SJPlayerAutoplayConfig (SJDeprecated)
++ (instancetype)configWithAutoplayDelegate:(id<SJPlayerAutoplayDelegate>)autoplayDelegate  __deprecated_msg("use `configWithPlayerSuperviewKey:autoplayDelegate:`;");
 + (instancetype)configWithPlayerSuperviewTag:(NSInteger)playerSuperviewTag
-                            autoplayDelegate:(id<SJPlayerAutoplayDelegate>)autoplayDelegate __deprecated_msg("use `configWithAutoplayDelegate`;");
-@property (nonatomic, readonly) NSInteger playerSuperviewTag __deprecated;
+                            autoplayDelegate:(id<SJPlayerAutoplayDelegate>)autoplayDelegate __deprecated_msg("use `configWithPlayerSuperviewKey:autoplayDelegate:`;");
+@property (nonatomic, readonly) NSInteger playerSuperviewTag __deprecated_msg("use `config.playerSuperviewKey`");
 @end
 NS_ASSUME_NONNULL_END

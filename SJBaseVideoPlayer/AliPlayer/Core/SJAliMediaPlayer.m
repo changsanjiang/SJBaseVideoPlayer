@@ -121,7 +121,6 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
     _seekCompletionHandler = completionHandler;
     [self _willSeeking:time];
     [_player seekToTime:CMTimeGetSeconds(time) * 1000 seekMode:_seekMode];
-    [self play];
 }
 
 - (void)play {
