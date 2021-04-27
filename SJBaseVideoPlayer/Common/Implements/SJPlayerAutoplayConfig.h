@@ -16,10 +16,10 @@ typedef NS_ENUM(NSUInteger, SJAutoplayScrollAnimationType) {
     SJAutoplayScrollAnimationTypeMiddle,
 };
 
-typedef enum : NSUInteger {
+typedef NS_ENUM(NSUInteger, SJAutoplayPosition) {
     SJAutoplayPositionTop,
     SJAutoplayPositionMiddle,
-} SJAutoplayPosition;
+};
 
 @interface SJPlayerAutoplayConfig : NSObject
 + (instancetype)configWithPlayerSuperviewKey:(nullable NSString *)playerSuperviewKey autoplayDelegate:(id<SJPlayerAutoplayDelegate>)delegate;
