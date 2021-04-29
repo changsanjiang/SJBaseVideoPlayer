@@ -29,6 +29,12 @@ static void *kPlayer = &kPlayer;
     AVPlayer *avPlayer = target.avPlayer;
     if ( avPlayer == nil ) {
         AVPlayerItem *avPlayerItem = target.avPlayerItem;
+        // 重新创建playerItem规避`An AVPlayerItem cannot be associated with more than one instance of AVPlayer`错误.
+        if (avPlayerItem != nil && avPlayerItem.status == AVPlayerStatusFailed) {
+            NSURL *url = [avPlayerItem valueForKey:@"_URL"];
+            avPlayerItem = [AVPlayerItem playerItemWithURL: url];
+            [target setValue:avPlayerItem forKey:@"avPlayerItem"];
+        }
         if ( avPlayerItem == nil ) {
             AVAsset *avAsset = target.avAsset;
             if ( avAsset == nil ) {
