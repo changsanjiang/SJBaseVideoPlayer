@@ -112,7 +112,7 @@ NS_ASSUME_NONNULL_BEGIN
             return;
     }
     
-    if ( self.pauseWhenAppDidEnterBackground )
+    if ( self.pauseWhenAppDidEnterBackground && self.assetStatus == SJAssetStatusReadyToPlay /*fix #430 */ )
         [self.currentPlayerView setScreenshot:self.screenshot];
     
     // 修复 14.0 后台播放失效的问题
