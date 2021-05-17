@@ -238,7 +238,7 @@ typedef struct _SJPlayerControlInfo {
 ///
 - (nullable UIView *)playerView:(SJPlayerView *)playerView hitTestForView:(nullable __kindof UIView *)view {
 
-    if ( playerView.hidden ) return nil;
+    if ( playerView.hidden || !playerView.isUserInteractionEnabled ) return nil;
     
     for ( UIGestureRecognizer *gesture in playerView.superview.gestureRecognizers ) {
         if ( [gesture isKindOfClass:UITapGestureRecognizer.class] && gesture.isEnabled ) {
