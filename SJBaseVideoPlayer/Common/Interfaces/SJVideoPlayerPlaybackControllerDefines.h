@@ -116,6 +116,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 // - new -
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller volumeDidChange:(float)volume;
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller rateDidChange:(float)rate;
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller mutedDidChange:(BOOL)isMuted;
+
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller playbackDidFinish:(SJFinishedReason)reason;
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller durationDidChange:(NSTimeInterval)duration;
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller currentTimeDidChange:(NSTimeInterval)currentTime;

@@ -900,19 +900,16 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)setPlayerVolume:(float)playerVolume {
     self.playbackController.volume = playerVolume;
-    [self _postNotification:SJVideoPlayerVolumeDidChangeNotification];
 }
+
 - (float)playerVolume {
     return self.playbackController.volume;
 }
 
 - (void)setMuted:(BOOL)muted {
     self.playbackController.muted = muted;
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:muteChanged:)] ) {
-        [self.controlLayerDelegate videoPlayer:self muteChanged:muted];
-    }
-    [self _postNotification:SJVideoPlayerMutedDidChangeNotification];
 }
+
 - (BOOL)isMuted {
     return self.playbackController.muted;
 }
@@ -1097,12 +1094,6 @@ typedef struct _SJPlayerControlInfo {
         return;
     
     self.playbackController.rate = rate;
-    
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:rateChanged:)] ) {
-        [self.controlLayerDelegate videoPlayer:self rateChanged:rate];
-    }
-    
-    [self _postNotification:SJVideoPlayerRateDidChangeNotification];
 }
 
 - (float)rate {
@@ -1156,6 +1147,25 @@ typedef struct _SJPlayerControlInfo {
 #ifdef SJDEBUG
     [self showLog_TimeControlStatus];
 #endif
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller volumeDidChange:(float)volume {
+    [self _postNotification:SJVideoPlayerVolumeDidChangeNotification];
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller rateDidChange:(float)rate {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:rateChanged:)] ) {
+        [self.controlLayerDelegate videoPlayer:self rateChanged:rate];
+    }
+    
+    [self _postNotification:SJVideoPlayerRateDidChangeNotification];
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller mutedDidChange:(BOOL)isMuted {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:muteChanged:)] ) {
+        [self.controlLayerDelegate videoPlayer:self muteChanged:isMuted];
+    }
+    [self _postNotification:SJVideoPlayerMutedDidChangeNotification];
 }
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller pictureInPictureStatusDidChange:(SJPictureInPictureStatus)status API_AVAILABLE(ios(14.0)) {

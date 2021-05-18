@@ -51,6 +51,9 @@ extern NSNotificationName const SJMediaPlayerPlaybackDidFinishNotification;
 extern NSNotificationName const SJMediaPlayerDidReplayNotification;
 extern NSNotificationName const SJMediaPlayerDurationDidChangeNotification;
 extern NSNotificationName const SJMediaPlayerPlayableDurationDidChangeNotification;
+extern NSNotificationName const SJMediaPlayerRateDidChangeNotification;
+extern NSNotificationName const SJMediaPlayerVolumeDidChangeNotification;
+extern NSNotificationName const SJMediaPlayerMutedDidChangeNotification;
 
 /// view
 extern NSNotificationName const SJMediaPlayerViewReadyForDisplayNotification;

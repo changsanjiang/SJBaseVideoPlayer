@@ -474,16 +474,25 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setRate:(float)rate {
     _rate = rate;
     if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) _currentPlayer.rate = rate;
+    if ( [self.delegate respondsToSelector:@selector(playbackController:rateDidChange:)] ) {
+        [self.delegate playbackController:self rateDidChange:rate];
+    }
 }
 
 - (void)setVolume:(float)volume {
     _volume = volume;
     _currentPlayer.volume = volume;
+    if ( [self.delegate respondsToSelector:@selector(playbackController:volumeDidChange:)] ) {
+        [self.delegate playbackController:self volumeDidChange:volume];
+    }
 }
 
 - (void)setMuted:(BOOL)muted {
     _muted = muted;
     _currentPlayer.muted = muted;
+    if ( [self.delegate respondsToSelector:@selector(playbackController:mutedDidChange:)] ) {
+        [self.delegate playbackController:self mutedDidChange:muted];
+    }
 }
 
 - (void)setCurrentPlayer:(nullable id<SJMediaPlayer>)currentPlayer {
@@ -871,6 +880,10 @@ NSNotificationName const SJMediaPlayerPlaybackDidFinishNotification = @"SJMediaP
 NSNotificationName const SJMediaPlayerDidReplayNotification = @"SJMediaPlayerDidReplayNotification";
 NSNotificationName const SJMediaPlayerDurationDidChangeNotification = @"SJMediaPlayerDurationDidChangeNotification";
 NSNotificationName const SJMediaPlayerPlayableDurationDidChangeNotification = @"SJMediaPlayerPlayableDurationDidChangeNotification";
+NSNotificationName const SJMediaPlayerRateDidChangeNotification = @"SJMediaPlayerRateDidChangeNotification";
+NSNotificationName const SJMediaPlayerVolumeDidChangeNotification = @"SJMediaPlayerVolumeDidChangeNotification";
+NSNotificationName const SJMediaPlayerMutedDidChangeNotification = @"SJMediaPlayerMutedDidChangeNotification";
+
 
 NSNotificationName const SJMediaPlayerViewReadyForDisplayNotification = @"SJMediaPlayerViewReadyForDisplayNotification";
 NSNotificationName const SJMediaPlayerPlaybackTypeDidChangeNotification = @"SJMediaPlayerPlaybackTypeDidChangeNotification";

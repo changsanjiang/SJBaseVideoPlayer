@@ -196,6 +196,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setMuted:(BOOL)muted {
     _avPlayer.muted = muted;
+    [self _postNotification:SJMediaPlayerMutedDidChangeNotification];
 }
 - (BOOL)isMuted {
     return _avPlayer.isMuted;
@@ -203,6 +204,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setVolume:(float)volume {
     _avPlayer.volume = volume;
+    [self _postNotification:SJMediaPlayerVolumeDidChangeNotification];
 }
 - (float)volume {
     return _avPlayer.volume;
@@ -217,6 +219,8 @@ NS_ASSUME_NONNULL_BEGIN
     else {
         [self pause];
     }
+    
+    [self _postNotification:SJMediaPlayerRateDidChangeNotification];
 }
 
 - (void)setInnerError:(nullable NSError *)innerError {
