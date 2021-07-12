@@ -28,6 +28,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) SJFinishedReason finishedReason;      ///< 播放结束的reason
 @property (nonatomic, strong, nullable) NSTimer *refreshTimer;
 @property (nonatomic, readonly) BOOL isPlayedToTrialEndPosition;
+
+@property (nonatomic) NSTimeInterval startPosition;
+@property (nonatomic) BOOL needsSeekToStartPosition;
 @end
 
 @implementation SJPLMediaPlayer
@@ -47,9 +50,10 @@ NS_ASSUME_NONNULL_BEGIN
         _startPosition = startPosition;
         _assetStatus = SJAssetStatusPreparing;
         _playbackType = type;
+        _startPosition = startPosition;
+        _needsSeekToStartPosition = startPosition != 0;
         
         _plPlayer = [PLPlayer playerWithURL:URL option:options];
-        if ( startPosition != 0 ) [_plPlayer preStartPosTime:CMTimeMakeWithSeconds(startPosition, NSEC_PER_SEC)];
         _plPlayer.delegateQueue = dispatch_get_main_queue();
         _plPlayer.delegate = self;
         [_plPlayer play];
@@ -427,6 +431,18 @@ NS_ASSUME_NONNULL_BEGIN
     
     if ( self.isPlayedToTrialEndPosition ) {
         [self _didPlayToTrialEndPosition];
+        return;
+    }
+    
+    if ( _plPlayer.status == PLPlayerStatusPlaying && self.needsSeekToStartPosition && !self.seekingInfo.isSeeking ) {
+        [_plPlayer pause];
+        __weak typeof(self) _self = self;
+        [self seekToTime:CMTimeMakeWithSeconds(_startPosition, NSEC_PER_SEC) completionHandler:^(BOOL finished) {
+            __strong typeof(_self) self = _self;
+            if ( self == nil ) return;
+            self.needsSeekToStartPosition = NO;
+            [self _toEvaluating];
+        }];
         return;
     }
     

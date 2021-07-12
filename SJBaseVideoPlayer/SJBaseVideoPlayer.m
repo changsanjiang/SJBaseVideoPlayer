@@ -1275,7 +1275,8 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)applicationDidBecomeActiveWithPlaybackController:(id<SJVideoPlayerPlaybackController>)controller {
-    BOOL canPlay = self.isPaused &&
+    BOOL canPlay = self.URLAsset != nil &&
+                   self.isPaused &&
                    self.controlInfo->playbackControl.resumePlaybackWhenAppDidEnterForeground &&
                   !self.vc_isDisappeared;
     if ( self.isPlayOnScrollView ) {
