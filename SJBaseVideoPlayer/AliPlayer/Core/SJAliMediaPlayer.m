@@ -243,6 +243,9 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 }
 
 - (void)onPlayerStatusChanged:(AliPlayer *)player oldStatus:(AVPStatus)oldStatus newStatus:(AVPStatus)newStatus {
+    if ( newStatus == AVPStatusError) {
+        return;
+    }
     
 #ifdef SJDEBUG
     __auto_type toString = ^NSString *(AVPStatus status) {
