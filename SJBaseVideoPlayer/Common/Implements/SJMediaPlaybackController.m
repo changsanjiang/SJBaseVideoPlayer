@@ -403,7 +403,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (nullable NSError *)error {
-    return nil;
+    return _currentPlayer.error;
 }
 
 - (BOOL)isPlayed {

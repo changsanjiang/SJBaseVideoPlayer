@@ -1,14 +1,14 @@
 //
-//  SJIJKMediaPlayerLayerView.m
-//  Pods
+//  SJKSYMediaPlayerView.m
+//  SJBaseVideoPlayer
 //
-//  Created by BlueDancer on 2020/2/19.
+//  Created by 畅三江 on 2021/9/9.
 //
 
-#import "SJIJKMediaPlayerLayerView.h"
+#import "SJKSYMediaPlayerView.h"
 
-@implementation SJIJKMediaPlayerLayerView
-- (instancetype)initWithPlayer:(SJIJKMediaPlayer *)player {
+@implementation SJKSYMediaPlayerView
+- (instancetype)initWithPlayer:(SJKSYMediaPlayer *)player {
     self = [super init];
     if ( self ) {
         _player = player;
@@ -32,21 +32,17 @@
     [NSNotificationCenter.defaultCenter postNotificationName:SJMediaPlayerViewReadyForDisplayNotification object:self];
 }
 
-@synthesize videoGravity = _videoGravity;
 - (void)setVideoGravity:(SJVideoGravity)videoGravity {
     _videoGravity = videoGravity;
-    IJKMPMovieScalingMode mode = IJKMPMovieScalingModeNone;
-    if ( videoGravity == AVLayerVideoGravityResize )
-        mode = IJKMPMovieScalingModeFill;
-    else if ( videoGravity == AVLayerVideoGravityResizeAspect )
-        mode = IJKMPMovieScalingModeAspectFit;
-    else if ( videoGravity == AVLayerVideoGravityResizeAspectFill )
-        mode = IJKMPMovieScalingModeAspectFill;
-    _player.scalingMode = mode;
-}
- 
-- (SJVideoGravity)videoGravity {
-    return _videoGravity ? : AVLayerVideoGravityResizeAspect;
+    if ( videoGravity == AVLayerVideoGravityResize ) {
+        _player.scalingMode = SJKSYMovieScalingModeFill;
+    }
+    else if ( videoGravity == AVLayerVideoGravityResizeAspect ) {
+        _player.scalingMode = SJKSYMovieScalingModeAspectFit;
+    }
+    else if ( videoGravity == AVLayerVideoGravityResizeAspectFill ) {
+        _player.scalingMode = SJKSYMovieScalingModeAspectFill;
+    }
 }
 
 - (BOOL)isReadyForDisplay {

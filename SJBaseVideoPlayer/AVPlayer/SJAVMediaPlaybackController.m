@@ -172,6 +172,15 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
+- (void)pictureInPictureController:(id<SJPictureInPictureController>)controller restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:(void (^)(BOOL))completionHandler API_AVAILABLE(ios(14.0)) {
+    if ( self.restoreUserInterfaceForPictureInPictureStop != nil ) {
+        self.restoreUserInterfaceForPictureInPictureStop(self, completionHandler);
+    }
+    else {
+        completionHandler(NO);
+    }
+}
+
 #pragma mark -
 
 - (void)seekToTime:(CMTime)time toleranceBefore:(CMTime)toleranceBefore toleranceAfter:(CMTime)toleranceAfter completionHandler:(void (^_Nullable)(BOOL))completionHandler {
