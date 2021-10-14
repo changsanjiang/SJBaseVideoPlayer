@@ -87,7 +87,7 @@ typedef struct _SJPlayerControlInfo {
     } controlLayer;
     
     struct {
-        BOOL autoSetAudioSessionWhenPlay;
+        BOOL isEnabled;
     } audioSessionControl;
     
     struct {
@@ -200,7 +200,7 @@ typedef struct _SJPlayerControlInfo {
     _controlInfo->playbackControl.resumePlaybackWhenPlayerHasFinishedSeeking = YES;
     _controlInfo->floatSmallViewControl.hiddenFloatSmallViewWhenPlaybackFinished = YES;
     _controlInfo->gestureControl.rateWhenLongPressGestureTriggered = 2.0;
-    _controlInfo->audioSessionControl.autoSetAudioSessionWhenPlay = YES;
+    _controlInfo->audioSessionControl.isEnabled = YES;
     _controlInfo->pan.factor = 667;
     _mCategory = AVAudioSessionCategoryPlayback;
     _mSetActiveOptions = AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation;
@@ -628,12 +628,12 @@ typedef struct _SJPlayerControlInfo {
 @end
 
 @implementation SJBaseVideoPlayer (SJAVAudioSessionExtended)
-- (void)setAutoSetAudioSessionWhenPlay:(BOOL)autoSetAudioSessionWhenPlay {
-    _controlInfo->audioSessionControl.autoSetAudioSessionWhenPlay = autoSetAudioSessionWhenPlay;
+- (void)setAudioSessionControlEnabled:(BOOL)audioSessionControlEnabled {
+    _controlInfo->audioSessionControl.isEnabled = audioSessionControlEnabled;
 }
 
-- (BOOL)autoSetAudioSessionWhenPlay {
-    return _controlInfo->audioSessionControl.autoSetAudioSessionWhenPlay;
+- (BOOL)isAudioSessionControlEnabled {
+    return _controlInfo->audioSessionControl.isEnabled;
 }
 
 - (void)setCategory:(AVAudioSessionCategory)category withOptions:(AVAudioSessionCategoryOptions)options {
@@ -980,7 +980,7 @@ typedef struct _SJPlayerControlInfo {
         return;
     }
     
-    if (_controlInfo->audioSessionControl.autoSetAudioSessionWhenPlay) {
+    if (_controlInfo->audioSessionControl.isEnabled) {
         NSError *error = nil;
         if ( ![AVAudioSession.sharedInstance setCategory:_mCategory withOptions:_mCategoryOptions error:&error] ) {
 #ifdef DEBUG
@@ -2017,7 +2017,7 @@ typedef struct _SJPlayerControlInfo {
 
 @implementation SJBaseVideoPlayer (ScrollView)
 
-- (void)refreshPlayerViewAppearState {
+- (void)refreshAppearStateForPlayerView {
     [self.playModelObserver refreshAppearState];
 }
 

@@ -1,28 +1,28 @@
 PODS:
   - Masonry (1.1.0)
-  - SJBaseVideoPlayer (3.6.0):
+  - SJBaseVideoPlayer (3.6.5):
     - Masonry
-    - SJBaseVideoPlayer/AVPlayer (= 3.6.0)
-    - SJBaseVideoPlayer/Common (= 3.6.0)
+    - SJBaseVideoPlayer/AVPlayer (= 3.6.5)
+    - SJBaseVideoPlayer/Common (= 3.6.5)
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/AVPlayer (3.6.0):
+  - SJBaseVideoPlayer/AVPlayer (3.6.5):
     - Masonry
     - SJBaseVideoPlayer/Common
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/Common (3.6.0):
+  - SJBaseVideoPlayer/Common (3.6.5):
     - Masonry
     - SJBaseVideoPlayer/ResourceLoader
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/ResourceLoader (3.6.0):
+  - SJBaseVideoPlayer/ResourceLoader (3.6.5):
     - Masonry
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
@@ -61,7 +61,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  SJBaseVideoPlayer: cce3df2362ab1dee82a663394c0af1b9109cb4ac
+  SJBaseVideoPlayer: 23762dd5433a6f37d6214ae8a9ba267ebee69577
   SJUIKit: 8246b1001e616b0dbd090309fd58cdd609ae3fd4
   YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
 

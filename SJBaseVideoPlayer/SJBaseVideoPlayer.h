@@ -61,11 +61,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SJBaseVideoPlayer (SJAVAudioSessionExtended)
 ///
-/// 每次执行play的时候是否自动设置 AVAudioSession
+/// 每次执行play的时候是否设置 AVAudioSession
 ///
 ///         default value is YES
 ///
-@property (nonatomic) BOOL autoSetAudioSessionWhenPlay;
+@property (nonatomic, getter=isAudioSessionControlEnabled) BOOL audioSessionControlEnabled;
 
 - (void)setCategory:(AVAudioSessionCategory)category withOptions:(AVAudioSessionCategoryOptions)options;
 - (void)setActiveOptions:(AVAudioSessionSetActiveOptions)options;
@@ -703,7 +703,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SJBaseVideoPlayer (ScrollView)
 
-- (void)refreshPlayerViewAppearState;
+/// 刷新显示
+///
+/// 该方法针对的场景是: 在 CollectionView 或 TableView 调用 reloadData 时, cell 被重新创建后播放器会被移除, 调用此方法可以刷新以让播放器显示.
+///
+/// \code
+///     // cell被reload重新创建时, 调用此方法刷新以让播放器显示
+///     [_tableView reloadData];
+///     [_player refreshAppearStateForPlayerView];
+/// \endcode
+- (void)refreshAppearStateForPlayerView;
 
 ///
 /// 小浮窗控制
