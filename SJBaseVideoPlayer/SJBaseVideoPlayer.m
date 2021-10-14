@@ -2002,6 +2002,10 @@ typedef struct _SJPlayerControlInfo {
 
 @implementation SJBaseVideoPlayer (ScrollView)
 
+- (void)refreshPlayerViewAppearState {
+    [self.playModelObserver refreshAppearState];
+}
+
 - (void)setFloatSmallViewController:(nullable id<SJFloatSmallViewController>)floatSmallViewController {
     _floatSmallViewController = floatSmallViewController;
     [self _resetFloatSmallViewControllerObserver:floatSmallViewController];

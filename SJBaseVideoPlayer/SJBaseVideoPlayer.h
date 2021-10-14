@@ -696,6 +696,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SJBaseVideoPlayer (ScrollView)
 
+- (void)refreshPlayerViewAppearState;
+
 ///
 /// 小浮窗控制
 ///
