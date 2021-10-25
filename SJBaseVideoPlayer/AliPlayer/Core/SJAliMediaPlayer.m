@@ -443,6 +443,10 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
             reason = nil;
             status = SJPlaybackTimeControlStatusPlaying;
         }
+        else if ( self.playerStatus == AVPStatusStarted ) {
+            reason = nil;
+            status = SJPlaybackTimeControlStatusPlaying;
+        }
         
         if ( status != self.timeControlStatus || reason != self.reasonForWaitingToPlay ) {
             self.reasonForWaitingToPlay = reason;
