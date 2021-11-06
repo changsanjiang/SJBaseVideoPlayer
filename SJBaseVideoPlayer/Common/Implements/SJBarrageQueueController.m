@@ -282,6 +282,7 @@ static NSString *const SJBarrageQueueControllerBarrageItemKey = @"barrageItem";
 - (void)fire:(SJBarrageViewModel *)viewModel stoppedCallback:(void(^)(void))completion {
     SJBarrageView *barrageView = [_pool dequeueReusableBarrageView];
     barrageView.viewModel = viewModel;
+    [barrageView.layer removeAllAnimations];
     [_view addSubview:barrageView];
     
     CGRect frame = CGRectZero;
