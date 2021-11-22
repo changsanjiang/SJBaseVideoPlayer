@@ -12,15 +12,88 @@
 NS_ASSUME_NONNULL_BEGIN
 NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain";
 
+@interface SJAliMediaPlayerDelegateProxy : NSProxy
++ (instancetype)weakProxyWithTarget:(id)target;
+
+@property (nonatomic, weak, nullable) id target;
+@end
+
+@implementation SJAliMediaPlayerDelegateProxy
++ (instancetype)weakProxyWithTarget:(id)target {
+    SJAliMediaPlayerDelegateProxy *proxy = [SJAliMediaPlayerDelegateProxy alloc];
+    proxy.target = target;
+    return proxy;
+}
+
+- (id)forwardingTargetForSelector:(SEL)selector {
+    return _target;
+}
+
+- (void)forwardInvocation:(NSInvocation *)invocation {
+    void *null = NULL;
+    [invocation setReturnValue:&null];
+}
+
+- (nullable NSMethodSignature *)methodSignatureForSelector:(SEL)selector {
+    return [NSObject instanceMethodSignatureForSelector:@selector(init)];
+}
+
+- (BOOL)respondsToSelector:(SEL)aSelector {
+    return [_target respondsToSelector:aSelector];
+}
+
+- (BOOL)isEqual:(id)object {
+    return [_target isEqual:object];
+}
+
+- (NSUInteger)hash {
+    return [_target hash];
+}
+
+- (Class)superclass {
+    return [_target superclass];
+}
+
+- (Class)class {
+    return [_target class];
+}
+
+- (BOOL)isKindOfClass:(Class)aClass {
+    return [_target isKindOfClass:aClass];
+}
+
+- (BOOL)isMemberOfClass:(Class)aClass {
+    return [_target isMemberOfClass:aClass];
+}
+
+- (BOOL)conformsToProtocol:(Protocol *)aProtocol {
+    return [_target conformsToProtocol:aProtocol];
+}
+
+- (BOOL)isProxy {
+    return YES;
+}
+
+- (NSString *)description {
+    return [_target description];
+}
+
+- (NSString *)debugDescription {
+    return [_target debugDescription];
+}
+@end
+
+
 @interface SJAliMediaPlayer ()<AVPDelegate>
+@property (nonatomic, strong) SJAliMediaPlayerDelegateProxy *delegateProxy;
 @property (nonatomic, strong, nullable) NSError *error;
-@property (nonatomic) BOOL isPlaybackFinished;                      ///< 播放结束
+@property (nonatomic) BOOL isPlaybackFinished;///< 播放结束
 @property (nonatomic, nullable) SJFinishedReason finishedReason;    ///< 播放结束的reason
 @property (nonatomic) BOOL firstVideoFrameRendered;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
 @property (nonatomic, copy, nullable) void(^selectTrackCompletionHandler)(BOOL);
 @property (nonatomic) NSTimeInterval startPosition;
-@property (nonatomic) BOOL needSeekToStartPosition;
+@property (nonatomic) BOOL needsSeekToStartPosition;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
 @property (nonatomic) SJPlaybackTimeControlStatus timeControlStatus;
 @property (nonatomic) SJSeekingInfo seekingInfo;
@@ -53,12 +126,13 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
         _source = source;
         _startPosition = time;
         _assetStatus = SJAssetStatusPreparing;
+        _delegateProxy = [SJAliMediaPlayerDelegateProxy weakProxyWithTarget:self];
         _player = AliPlayer.alloc.init;
-        _player.delegate = self;
+        _player.delegate = (id)_delegateProxy;
         _player.playerView = UIView.new;
         _pauseWhenAppDidEnterBackground = YES;
         _seekMode = AVP_SEEKMODE_INACCURATE;
-        _needSeekToStartPosition = time != 0;
+        _needsSeekToStartPosition = time != 0;
         
         if ( config != nil )
             [_player setConfig:config];
@@ -243,6 +317,9 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 }
 
 - (void)onPlayerStatusChanged:(AliPlayer *)player oldStatus:(AVPStatus)oldStatus newStatus:(AVPStatus)newStatus {
+    if ( newStatus == AVPStatusError) {
+        return;
+    }
     
 #ifdef SJDEBUG
     __auto_type toString = ^NSString *(AVPStatus status) {
@@ -325,8 +402,8 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
         }
         
         if ( status == SJAssetStatusReadyToPlay ) {
-            if ( self.needSeekToStartPosition ) {
-                self.needSeekToStartPosition = NO;
+            if ( self.needsSeekToStartPosition ) {
+                self.needsSeekToStartPosition = NO;
                 [self seekToTime:CMTimeMakeWithSeconds(self.startPosition, NSEC_PER_SEC) completionHandler:nil];
             }
         }

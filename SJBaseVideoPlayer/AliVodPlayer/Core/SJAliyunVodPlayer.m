@@ -16,7 +16,7 @@ NSErrorDomain const SJAliyunVodPlayerErrorDomain = @"SJAliyunVodPlayerErrorDomai
 @property (nonatomic, strong, nullable) NSError *error;
 @property (nonatomic, copy, nullable) void(^seekCompletionHandler)(BOOL);
 @property (nonatomic) NSTimeInterval startPosition;
-@property (nonatomic) BOOL needSeekToStartPosition;
+@property (nonatomic) BOOL needsSeekToStartPosition;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
 @property (nonatomic) SJPlaybackTimeControlStatus timeControlStatus;
 @property (nonatomic) SJSeekingInfo seekingInfo;
@@ -52,7 +52,7 @@ NSErrorDomain const SJAliyunVodPlayerErrorDomain = @"SJAliyunVodPlayerErrorDomai
         _assetStatus = SJAssetStatusPreparing;
         _player.delegate = self;
         _pauseWhenAppDidEnterBackground = YES;
-        _needSeekToStartPosition = time != 0;
+        _needsSeekToStartPosition = time != 0;
         
         _player = AliyunVodPlayer.alloc.init;
         _player.delegate = self;
@@ -282,8 +282,8 @@ NSErrorDomain const SJAliyunVodPlayerErrorDomain = @"SJAliyunVodPlayerErrorDomai
         self.assetStatus = status;
         
         if ( status == SJAssetStatusReadyToPlay ) {
-            if ( self.needSeekToStartPosition ) {
-                self.needSeekToStartPosition = NO;
+            if ( self.needsSeekToStartPosition ) {
+                self.needsSeekToStartPosition = NO;
                 [self seekToTime:CMTimeMakeWithSeconds(self.startPosition, NSEC_PER_SEC) completionHandler:nil];
             }
         }

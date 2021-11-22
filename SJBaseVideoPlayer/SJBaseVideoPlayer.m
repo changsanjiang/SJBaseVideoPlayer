@@ -87,6 +87,10 @@ typedef struct _SJPlayerControlInfo {
     } controlLayer;
     
     struct {
+        BOOL isEnabled;
+    } audioSessionControl;
+    
+    struct {
         BOOL isAppeared;
         BOOL hiddenFloatSmallViewWhenPlaybackFinished;
     } floatSmallViewControl;
@@ -196,6 +200,7 @@ typedef struct _SJPlayerControlInfo {
     _controlInfo->playbackControl.resumePlaybackWhenPlayerHasFinishedSeeking = YES;
     _controlInfo->floatSmallViewControl.hiddenFloatSmallViewWhenPlaybackFinished = YES;
     _controlInfo->gestureControl.rateWhenLongPressGestureTriggered = 2.0;
+    _controlInfo->audioSessionControl.isEnabled = YES;
     _controlInfo->pan.factor = 667;
     _mCategory = AVAudioSessionCategoryPlayback;
     _mSetActiveOptions = AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation;
@@ -238,7 +243,7 @@ typedef struct _SJPlayerControlInfo {
 ///
 - (nullable UIView *)playerView:(SJPlayerView *)playerView hitTestForView:(nullable __kindof UIView *)view {
 
-    if ( playerView.hidden ) return nil;
+    if ( playerView.hidden || !playerView.isUserInteractionEnabled ) return nil;
     
     for ( UIGestureRecognizer *gesture in playerView.superview.gestureRecognizers ) {
         if ( [gesture isKindOfClass:UITapGestureRecognizer.class] && gesture.isEnabled ) {
@@ -623,6 +628,14 @@ typedef struct _SJPlayerControlInfo {
 @end
 
 @implementation SJBaseVideoPlayer (SJAVAudioSessionExtended)
+- (void)setAudioSessionControlEnabled:(BOOL)audioSessionControlEnabled {
+    _controlInfo->audioSessionControl.isEnabled = audioSessionControlEnabled;
+}
+
+- (BOOL)isAudioSessionControlEnabled {
+    return _controlInfo->audioSessionControl.isEnabled;
+}
+
 - (void)setCategory:(AVAudioSessionCategory)category withOptions:(AVAudioSessionCategoryOptions)options {
     _mCategory = category;
     _mCategoryOptions = options;
@@ -900,19 +913,16 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)setPlayerVolume:(float)playerVolume {
     self.playbackController.volume = playerVolume;
-    [self _postNotification:SJVideoPlayerVolumeDidChangeNotification];
 }
+
 - (float)playerVolume {
     return self.playbackController.volume;
 }
 
 - (void)setMuted:(BOOL)muted {
     self.playbackController.muted = muted;
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:muteChanged:)] ) {
-        [self.controlLayerDelegate videoPlayer:self muteChanged:muted];
-    }
-    [self _postNotification:SJVideoPlayerMutedDidChangeNotification];
 }
+
 - (BOOL)isMuted {
     return self.playbackController.muted;
 }
@@ -970,16 +980,18 @@ typedef struct _SJPlayerControlInfo {
         return;
     }
     
-    NSError *error = nil;
-    if ( ![AVAudioSession.sharedInstance setCategory:_mCategory withOptions:_mCategoryOptions error:&error] ) {
+    if (_controlInfo->audioSessionControl.isEnabled) {
+        NSError *error = nil;
+        if ( ![AVAudioSession.sharedInstance setCategory:_mCategory withOptions:_mCategoryOptions error:&error] ) {
 #ifdef DEBUG
-        NSLog(@"%@", error);
+            NSLog(@"%@", error);
 #endif
-    }
-    if ( ![AVAudioSession.sharedInstance setActive:YES withOptions:_mSetActiveOptions error:&error] ) {
+        }
+        if ( ![AVAudioSession.sharedInstance setActive:YES withOptions:_mSetActiveOptions error:&error] ) {
 #ifdef DEBUG
-        NSLog(@"%@", error);
+            NSLog(@"%@", error);
 #endif
+        }
     }
 
     [_playbackController play];
@@ -1097,12 +1109,6 @@ typedef struct _SJPlayerControlInfo {
         return;
     
     self.playbackController.rate = rate;
-    
-    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:rateChanged:)] ) {
-        [self.controlLayerDelegate videoPlayer:self rateChanged:rate];
-    }
-    
-    [self _postNotification:SJVideoPlayerRateDidChangeNotification];
 }
 
 - (float)rate {
@@ -1156,6 +1162,25 @@ typedef struct _SJPlayerControlInfo {
 #ifdef SJDEBUG
     [self showLog_TimeControlStatus];
 #endif
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller volumeDidChange:(float)volume {
+    [self _postNotification:SJVideoPlayerVolumeDidChangeNotification];
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller rateDidChange:(float)rate {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:rateChanged:)] ) {
+        [self.controlLayerDelegate videoPlayer:self rateChanged:rate];
+    }
+    
+    [self _postNotification:SJVideoPlayerRateDidChangeNotification];
+}
+
+- (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller mutedDidChange:(BOOL)isMuted {
+    if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:muteChanged:)] ) {
+        [self.controlLayerDelegate videoPlayer:self muteChanged:isMuted];
+    }
+    [self _postNotification:SJVideoPlayerMutedDidChangeNotification];
 }
 
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller pictureInPictureStatusDidChange:(SJPictureInPictureStatus)status API_AVAILABLE(ios(14.0)) {
@@ -1265,7 +1290,8 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)applicationDidBecomeActiveWithPlaybackController:(id<SJVideoPlayerPlaybackController>)controller {
-    BOOL canPlay = self.isPaused &&
+    BOOL canPlay = self.URLAsset != nil &&
+                   self.isPaused &&
                    self.controlInfo->playbackControl.resumePlaybackWhenAppDidEnterForeground &&
                   !self.vc_isDisappeared;
     if ( self.isPlayOnScrollView ) {
@@ -1990,6 +2016,10 @@ typedef struct _SJPlayerControlInfo {
 #pragma mark - 在`tableView`或`collectionView`上播放
 
 @implementation SJBaseVideoPlayer (ScrollView)
+
+- (void)refreshAppearStateForPlayerView {
+    [self.playModelObserver refreshAppearState];
+}
 
 - (void)setFloatSmallViewController:(nullable id<SJFloatSmallViewController>)floatSmallViewController {
     _floatSmallViewController = floatSmallViewController;

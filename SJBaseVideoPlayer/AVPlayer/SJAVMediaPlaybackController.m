@@ -29,6 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
     if ( self ) {
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_playbackTypeDidChange:) name:SJMediaPlayerPlaybackTypeDidChangeNotification object:nil];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_playerViewReadyForDisplay:) name:SJMediaPlayerViewReadyForDisplayNotification object:nil];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_rateDidChange:) name:SJMediaPlayerRateDidChangeNotification object:nil];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_volumeDidChange:) name:SJMediaPlayerVolumeDidChangeNotification object:nil];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_mutedDidChange:) name:SJMediaPlayerMutedDidChangeNotification object:nil];
     }
     return self;
 }
@@ -169,6 +172,15 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
+- (void)pictureInPictureController:(id<SJPictureInPictureController>)controller restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:(void (^)(BOOL))completionHandler API_AVAILABLE(ios(14.0)) {
+    if ( self.restoreUserInterfaceForPictureInPictureStop != nil ) {
+        self.restoreUserInterfaceForPictureInPictureStop(self, completionHandler);
+    }
+    else {
+        completionHandler(NO);
+    }
+}
+
 #pragma mark -
 
 - (void)seekToTime:(CMTime)time toleranceBefore:(CMTime)toleranceBefore toleranceAfter:(CMTime)toleranceAfter completionHandler:(void (^_Nullable)(BOOL))completionHandler {
@@ -246,6 +258,24 @@ NS_ASSUME_NONNULL_BEGIN
         if ( self.currentPlayerView.isReadyForDisplay ) {
             [self.currentPlayerView setScreenshot:nil];
         }
+    }
+}
+
+- (void)_av_rateDidChange:(NSNotification *)note {
+    if ( self.currentPlayer == note.object && self.rate != self.currentPlayer.rate ) {
+        self.rate = self.currentPlayer.rate;
+    }
+}
+
+- (void)_av_volumeDidChange:(NSNotification *)note {
+    if ( self.currentPlayer == note.object && self.volume != self.currentPlayer.volume ) {
+        self.volume = self.currentPlayer.volume;
+    }
+}
+
+- (void)_av_mutedDidChange:(NSNotification *)note {
+    if ( self.currentPlayer == note.object && self.isMuted != self.currentPlayer.isMuted ) {
+        self.muted = self.currentPlayer.isMuted;
     }
 }
 
