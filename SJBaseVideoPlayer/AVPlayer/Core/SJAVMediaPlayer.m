@@ -70,9 +70,13 @@ NS_ASSUME_NONNULL_BEGIN
         _reasonForWaitingToPlay = SJWaitingWhileEvaluatingBufferingRateReason;
         self.timeControlStatus = SJPlaybackTimeControlStatusWaitingToPlay;
     }
-    
-    [self.avPlayer play];
-    self.avPlayer.rate = self.rate;
+    // fix 播放后立即设置倍速,可能会导致画面卡住的问题, 直接使用系统提供api设置倍速播放
+    if (@available(iOS 10.0, *))  {
+        [self.avPlayer playImmediatelyAtRate:self.rate];
+    } else {
+        [self.avPlayer play];
+        self.avPlayer.rate = self.rate;
+    }
     [self _toEvaluating];
 }
 
