@@ -381,8 +381,8 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
     }
     
     
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
     if ( @available(iOS 16.0, *) ) {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
         UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
         [(id)UIDevice.currentDevice setOrientation:orientation animated:YES];
         [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
@@ -394,15 +394,16 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 #ifdef DEBUG
                 NSLog(@"旋转失败: %@", error);
 #endif
-                [self _endTransition];
+                [self _endRotation];
             }];
         }];
-    }
-#else
-    [UIViewController attemptRotationToDeviceOrientation];
-    [UIDevice.currentDevice setValue:@(UIDeviceOrientationUnknown) forKey:@"orientation"];
-    [UIDevice.currentDevice setValue:@(orientation) forKey:@"orientation"];
 #endif
+    }
+    else {
+        [UIViewController attemptRotationToDeviceOrientation];
+        [UIDevice.currentDevice setValue:@(UIDeviceOrientationUnknown) forKey:@"orientation"];
+        [UIDevice.currentDevice setValue:@(orientation) forKey:@"orientation"];
+    }
 }
 
 #pragma mark - SJRotationFullscreenWindow_4Delegate, SJRotationFullscreenViewController_4Delegate, SJRotationFullscreenNavigationController_4Delegate
