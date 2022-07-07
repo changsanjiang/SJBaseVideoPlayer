@@ -77,7 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// - landscapeRight 或者 landscapeLeft 即为全屏
 ///
 @property (nonatomic, readonly) BOOL isFullscreen;
-@property (nonatomic, readonly, getter=isTransitioning) BOOL transitioning; // 是否正在旋转
+@property (nonatomic, readonly, getter=isRotating) BOOL rotating; // 是否正在旋转
 
 
 ///

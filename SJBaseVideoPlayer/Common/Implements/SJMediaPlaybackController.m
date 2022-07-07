@@ -122,12 +122,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setView:(nullable UIView<SJMediaPlayerView> *)view {
     if ( _view ) [_view removeFromSuperview];
     _view = view;
-    if ( view != nil ) [self addSubview:view];
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    _view.frame = self.bounds;
+    if ( view != nil ) {
+        view.frame = self.bounds;
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:view];
+    }
 }
 @end
 

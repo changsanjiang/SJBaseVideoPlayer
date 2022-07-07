@@ -8,7 +8,8 @@
 
 #import "SJBaseVideoPlayer.h"
 #import <objc/message.h>
-#import "SJRotationManager.h"
+#import "SJRotationManager_4.h"
+#import "SJRotationManagerInternal_4.h"
 #import "SJDeviceVolumeAndBrightnessManager.h"
 #import "SJVideoPlayerRegistrar.h"
 #import "SJVideoPlayerPresentView.h"
@@ -479,8 +480,8 @@ typedef struct _SJPlayerControlInfo {
     _viewControllerManager.presentView = self.presentView;
     _viewControllerManager.lockedScreen = self.isLockedScreen;
     
-    if ( [_rotationManager isKindOfClass:SJRotationManager.class] ) {
-        SJRotationManager *mgr = _rotationManager;
+    if ( [_rotationManager isKindOfClass:SJRotationManager_4.class] ) {
+        SJRotationManager_4 *mgr = _rotationManager;
         mgr.delegate = _viewControllerManager;
     }
 }
@@ -1595,7 +1596,7 @@ typedef struct _SJPlayerControlInfo {
         }
         
         if ( !self.rotationManager.isFullscreen ||
-              self.rotationManager.isTransitioning ) {
+              self.rotationManager.isRotating ) {
             [UIView animateWithDuration:0 animations:^{
             } completion:^(BOOL finished) {
                 [self.viewControllerManager setNeedsStatusBarAppearanceUpdate];
@@ -1725,7 +1726,7 @@ typedef struct _SJPlayerControlInfo {
 
 - (id<SJRotationManager>)rotationManager {
     if ( _rotationManager == nil ) {
-        SJRotationManager *mgr = [SJRotationManager.alloc init];
+        SJRotationManager_4 *mgr = [SJRotationManager_4.alloc init];
         mgr.delegate = _viewControllerManager;
         [self setRotationManager:mgr];
     }
@@ -1801,12 +1802,12 @@ typedef struct _SJPlayerControlInfo {
         /// Thanks @SuperEvilRabbit
         /// https://github.com/changsanjiang/SJVideoPlayer/issues/58
         ///
-        [UIView animateWithDuration:0 animations:^{ } completion:^(BOOL finished) {
-            if ( mgr.isFullscreen )
-                [self needHiddenStatusBar];
-            else
-                [self needShowStatusBar];
-        }];
+//        [UIView animateWithDuration:0 animations:^{ } completion:^(BOOL finished) {
+//            if ( mgr.isFullscreen )
+//                [self needHiddenStatusBar];
+//            else
+//                [self needShowStatusBar];
+//        }];
     };
     
     _rotationManagerObserver.rotationDidEndExeBlock = ^(id<SJRotationManager>  _Nonnull mgr) {
@@ -1853,7 +1854,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (BOOL)isTransitioning {
-    return self.rotationManager.isTransitioning;
+    return self.rotationManager.isRotating;
 }
 
 - (BOOL)isFullScreen {
@@ -2306,7 +2307,7 @@ typedef struct _SJPlayerControlInfo {
         return;
     }
     
-    if ( _rotationManager.isTransitioning )
+    if ( _rotationManager.isRotating )
         return;
 
     _controlInfo->scrollControl.isScrollAppeared = NO;
