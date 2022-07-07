@@ -124,6 +124,14 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
     return [_sj_4_delegate preferredStatusBarStyle];
 }
 
+- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation {
+    return UIStatusBarAnimationFade;
+}
+
+- (void)setNeedsStatusBarAppearanceUpdate {
+    [super setNeedsStatusBarAppearanceUpdate];
+}
+
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     [_sj_4_delegate viewController:self viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
@@ -383,10 +391,11 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
     
     if ( @available(iOS 16.0, *) ) {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
+        __weak typeof(self) _self = self;
         UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
         [(id)UIDevice.currentDevice setOrientation:orientation animated:YES];
         [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
-            __weak typeof(self) _self = self;
+            self->_window.hidden = NO;
             [UIViewController attemptRotationToDeviceOrientation];
             [self->_window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
                 __strong typeof(_self) self = _self;
@@ -414,7 +423,7 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 }
 
 - (BOOL)prefersStatusBarHidden {
-    return [_delegate prefersStatusBarHidden];
+    return _rotating ? _isFullscreenOrientation(_deviceOrientation) : [_delegate prefersStatusBarHidden];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
@@ -492,9 +501,18 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 }
 
 - (void)_beginRotation {
-    _rotating = YES;
     _window.hidden = NO;
-    [_window.rootViewController setNeedsStatusBarAppearanceUpdate];
+    _rotating = YES;
+    if ( _isFullscreenOrientation(_deviceOrientation) ) {
+        [UIView animateWithDuration:0.0 animations:^{ } completion:^(BOOL finished) {
+            [self->_window.rootViewController setNeedsStatusBarAppearanceUpdate];
+        }];
+    }
+    else {
+        [UIView performWithoutAnimation:^{
+            [self->_window.rootViewController setNeedsStatusBarAppearanceUpdate];
+        }];
+    }
     [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification_4 object:self];
 }
 
@@ -506,7 +524,6 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
         _completionHandler(self);
         _completionHandler = nil;
     }
-    [_window.rootViewController setNeedsStatusBarAppearanceUpdate];
     [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification_4 object:self];
 }
 
@@ -536,10 +553,12 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
         case UIDeviceOrientationPortrait:
         case UIDeviceOrientationLandscapeLeft:
         case UIDeviceOrientationLandscapeRight: {
-            _deviceOrientation = orientation;
-            
-            if ( [self allowsRotation] && _isFullscreenOrientation(_deviceOrientation) && !_isFullscreenOrientation(_currentOrientation) ) {
-                [UIViewController attemptRotationToDeviceOrientation];
+            if ( _deviceOrientation != orientation ) {
+                _deviceOrientation = orientation;
+                
+                if ( [self allowsRotation] ) {
+                    [self rotate:_deviceOrientation animated:YES];
+                }
             }
             
         }
