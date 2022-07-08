@@ -631,9 +631,9 @@ API_AVAILABLE(ios(16.0))
     __weak typeof(self) _self = self;
     UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
     self.deviceOrientation = orientation;
-    //        [self->_window.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
     [UIViewController attemptRotationToDeviceOrientation];
     [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
+        [self _rotationBegin];
         [self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
             __strong typeof(_self) self = _self;
             if ( !self ) return ;
