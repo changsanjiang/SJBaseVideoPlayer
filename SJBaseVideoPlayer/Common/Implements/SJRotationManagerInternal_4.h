@@ -22,9 +22,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 @interface SJRotationManager_4 (Subclass)
-- (BOOL)shouldAutorotate;
-
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler;
+
+- (void)onDeviceOrientationChanged;
 @end
 NS_ASSUME_NONNULL_END
 

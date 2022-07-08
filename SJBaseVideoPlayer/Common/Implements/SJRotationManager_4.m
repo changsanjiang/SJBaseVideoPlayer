@@ -528,10 +528,7 @@ API_AVAILABLE(ios(16.0))
             if ( _deviceOrientation != orientation ) {
                 _deviceOrientation = orientation;
                 
-                // 这里不能这样写了,  因为里面会调用到 prefrence;
-                if ( [self allowsRotation] ) {
-                    [UIViewController attemptRotationToDeviceOrientation];
-                }
+                [self onDeviceOrientationChanged];
             }
             
         }
@@ -557,6 +554,8 @@ API_AVAILABLE(ios(16.0))
 - (void)setNeedsStatusBarAppearanceUpdate {
     [_window.rootViewController setNeedsStatusBarAppearanceUpdate];
 }
+
+- (void)onDeviceOrientationChanged { }
 @end
 
 
@@ -644,6 +643,12 @@ API_AVAILABLE(ios(16.0))
             [self _rotationEnd];
         }];
     }];
+#endif
+}
+
+- (void)onDeviceOrientationChanged {
+#ifdef DEBUG
+    NSLog(@"%d - -[%@ %s]", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
 #endif
 }
 @end
