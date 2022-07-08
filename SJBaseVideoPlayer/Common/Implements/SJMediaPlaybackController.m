@@ -299,7 +299,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)refresh {
-    if ( self.currentPlayer.isPlayed && self.currentTime != 0 )
+    if ( self.currentPlayer.isPlayed && self.duration != 0 && self.currentTime != 0 )
         self.media.startPosition = self.currentTime;
     self.currentPlayer = nil;
     [self prepareToPlay];
