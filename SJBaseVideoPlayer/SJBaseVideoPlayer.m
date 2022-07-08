@@ -1726,7 +1726,7 @@ typedef struct _SJPlayerControlInfo {
 
 - (id<SJRotationManager>)rotationManager {
     if ( _rotationManager == nil ) {
-        SJRotationManager_4 *mgr = [SJRotationManager_4.alloc init];
+        SJRotationManager_4 *mgr = [SJRotationManager_4 rotationManager];
         mgr.delegate = _viewControllerManager;
         [self setRotationManager:mgr];
     }

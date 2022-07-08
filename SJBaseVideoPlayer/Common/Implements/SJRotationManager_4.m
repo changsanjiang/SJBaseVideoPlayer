@@ -125,7 +125,7 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 }
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation {
-    return UIStatusBarAnimationFade;
+    return UIStatusBarAnimationNone;
 }
 
 - (void)setNeedsStatusBarAppearanceUpdate {
@@ -282,6 +282,15 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 
 #pragma mark - manager
 
+@interface SJRotationManager_4_iOS_9_15 : SJRotationManager_4
+
+@end
+
+API_AVAILABLE(ios(16.0))
+@interface SJRotationManager_4_iOS_16_Later : SJRotationManager_4
+
+@end
+
 @interface SJRotationManager_4 ()<SJRotationFullscreenWindow_4Delegate, SJRotationFullscreenViewController_4Delegate, SJRotationFullscreenNavigationController_4Delegate>
 @property (nonatomic) UIDeviceOrientation deviceOrientation;
 @property (nonatomic, copy, nullable) void(^completionHandler)(id<SJRotationManager> mgr);
@@ -314,7 +323,14 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 @synthesize superview = _superview;
 @synthesize target = _target;
 
-- (instancetype)init {
++ (instancetype)rotationManager {
+    if ( @available(iOS 16.0, *) )
+        return [SJRotationManager_4_iOS_16_Later.alloc _init];
+    else
+        return [SJRotationManager_4_iOS_9_15.alloc _init];
+}
+
+- (instancetype)_init {
     self = [super init];
     if ( self ) {
         _autorotationSupportedOrientations = SJOrientationMaskAll;
@@ -344,7 +360,6 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
         }
         _window.sj_4_delegate = self;
         _window.rootViewController = nav;
-        _window.hidden = NO;
     }
     return self;
 }
@@ -374,45 +389,7 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 }
 
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler {
-#ifdef DEBUG
-    if ( !animated ) {
-        NSAssert(false, @"暂不支持关闭动画!");
-    }
-#endif
-    _completionHandler = completionHandler;
-    _inactivated = NO;
-    _forcedrotation = YES;
-    
-    if ( orientation == _currentOrientation ) {
-        [self _endRotation];
-        return;
-    }
-    
-    
-    if ( @available(iOS 16.0, *) ) {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
-        __weak typeof(self) _self = self;
-        UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
-        [(id)UIDevice.currentDevice setOrientation:orientation animated:YES];
-        [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
-            self->_window.hidden = NO;
-            [UIViewController attemptRotationToDeviceOrientation];
-            [self->_window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
-                __strong typeof(_self) self = _self;
-                if ( !self ) return ;
-#ifdef DEBUG
-                NSLog(@"旋转失败: %@", error);
-#endif
-                [self _endRotation];
-            }];
-        }];
-#endif
-    }
-    else {
-        [UIViewController attemptRotationToDeviceOrientation];
-        [UIDevice.currentDevice setValue:@(UIDeviceOrientationUnknown) forKey:@"orientation"];
-        [UIDevice.currentDevice setValue:@(orientation) forKey:@"orientation"];
-    }
+    // subclass
 }
 
 #pragma mark - SJRotationFullscreenWindow_4Delegate, SJRotationFullscreenViewController_4Delegate, SJRotationFullscreenNavigationController_4Delegate
@@ -449,10 +426,7 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 }
 
 - (BOOL)shouldAutorotate {
-    if ( [self allowsRotation] ) {
-        if ( !_rotating ) [self _beginRotation];
-        return YES;
-    }
+    // subclass
     return NO;
 }
 
@@ -477,8 +451,7 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
                 self->_viewController.playerSuperview.frame = (CGRect){CGPointZero, size};
             } completion:^(BOOL finished) {
                 self->_transitioning = NO;
-                [self _endRotation];
-                [UIViewController attemptRotationToDeviceOrientation];
+                [self _rotationEnd];
             }];
         }];
     }
@@ -492,15 +465,20 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
                     self->_transitioning = NO;
                     self->_target.frame = self->_superview.bounds;
                     [self->_superview addSubview:self->_target];
-                    [self _endRotation];
-                    [UIViewController attemptRotationToDeviceOrientation];
+                    [self _rotationEnd];
                 }];
             }];
         }];
     }
 }
 
-- (void)_beginRotation {
+- (void)_fixNavigationBarLayout {
+    UINavigationController *nav = [_superview lookupResponderForClass:UINavigationController.class];
+    [nav viewDidAppear:NO];
+    [nav.navigationBar layoutSubviews];
+}
+
+- (void)_rotationBegin {
     _window.hidden = NO;
     _rotating = YES;
     if ( _isFullscreenOrientation(_deviceOrientation) ) {
@@ -516,7 +494,7 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
     [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification_4 object:self];
 }
 
-- (void)_endRotation {
+- (void)_rotationEnd {
     _rotating = NO;
     _forcedrotation = NO;
     if ( ![self isFullscreen] ) _window.hidden = YES;
@@ -525,12 +503,6 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
         _completionHandler = nil;
     }
     [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification_4 object:self];
-}
-
-- (void)_fixNavigationBarLayout {
-    UINavigationController *nav = [_superview lookupResponderForClass:UINavigationController.class];
-    [nav viewDidAppear:NO];
-    [nav.navigationBar layoutSubviews];
 }
 
 #pragma mark -
@@ -556,8 +528,9 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
             if ( _deviceOrientation != orientation ) {
                 _deviceOrientation = orientation;
                 
+                // 这里不能这样写了,  因为里面会调用到 prefrence;
                 if ( [self allowsRotation] ) {
-                    [self rotate:_deviceOrientation animated:YES];
+                    [UIViewController attemptRotationToDeviceOrientation];
                 }
             }
             
@@ -604,3 +577,73 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 
 //if ( UIUserInterfaceIdiomPhone == UI_USER_INTERFACE_IDIOM() ) { }
 //else if ( UIUserInterfaceIdiomPad == UI_USER_INTERFACE_IDIOM() ) { }
+
+#pragma mark - iOS 9, 15;
+
+@implementation SJRotationManager_4_iOS_9_15
+
+- (BOOL)shouldAutorotate {
+    if ( [self allowsRotation] ) {
+        if ( !self.rotating ) [self _rotationBegin];
+        return YES;
+    }
+    return NO;
+}
+
+- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler {
+#ifdef DEBUG
+    if ( !animated ) {
+        NSAssert(false, @"暂不支持关闭动画!");
+    }
+#endif
+    self.completionHandler = completionHandler;
+    self.inactivated = NO;
+    self.forcedrotation = YES;
+    
+    if ( orientation == self.currentOrientation ) {
+        [self _rotationEnd];
+        return;
+    }
+    
+    [UIDevice.currentDevice setValue:@(UIDeviceOrientationUnknown) forKey:@"orientation"];
+    [UIDevice.currentDevice setValue:@(orientation) forKey:@"orientation"];
+}
+@end
+
+#pragma mark - iOS 16 later;
+
+@implementation SJRotationManager_4_iOS_16_Later
+- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler {
+#ifdef DEBUG
+    if ( !animated ) {
+        NSAssert(false, @"暂不支持关闭动画!");
+    }
+#endif
+    self.completionHandler = completionHandler;
+    self.inactivated = NO;
+    self.forcedrotation = YES;
+    
+    if ( orientation == self.currentOrientation ) {
+        [self _rotationEnd];
+        return;
+    }
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
+    __weak typeof(self) _self = self;
+    UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
+    self.deviceOrientation = orientation;
+    //        [self->_window.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+    [UIViewController attemptRotationToDeviceOrientation];
+    [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
+        [self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
+            __strong typeof(_self) self = _self;
+            if ( !self ) return ;
+#ifdef DEBUG
+            NSLog(@"旋转失败: %@", error);
+#endif
+            [self _rotationEnd];
+        }];
+    }];
+#endif
+}
+@end

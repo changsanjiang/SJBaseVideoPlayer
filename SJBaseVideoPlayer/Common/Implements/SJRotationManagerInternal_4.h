@@ -19,5 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIStatusBarStyle)preferredStatusBarStyle;
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated;
 @end
+
+
+@interface SJRotationManager_4 (Subclass)
+- (BOOL)shouldAutorotate;
+
+- (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler;
+@end
 NS_ASSUME_NONNULL_END
 

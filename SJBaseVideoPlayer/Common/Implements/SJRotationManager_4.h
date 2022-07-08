@@ -10,6 +10,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJRotationManager_4 : NSObject<SJRotationManager>
++ (instancetype)rotationManager;
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
 - (void)setNeedsStatusBarAppearanceUpdate;
 @end
 
