@@ -360,6 +360,9 @@ API_AVAILABLE(ios(16.0))
         }
         _window.sj_4_delegate = self;
         _window.rootViewController = nav;
+        // prepare rotation window
+        _window.hidden = NO;
+        [_window performSelectorOnMainThread:@selector(setHidden:) withObject:@(YES) waitUntilDone:NO];
     }
     return self;
 }
@@ -434,11 +437,9 @@ API_AVAILABLE(ios(16.0))
     _transitioning = YES;
     _currentOrientation = _deviceOrientation;
     
-    UIWindow *keyWindow = UIApplication.sharedApplication.keyWindow;
-    
     if ( size.width > size.height ) {
         if ( _target.superview != _viewController.playerSuperview ) {
-            CGRect frame = [_target convertRect:_target.bounds toView:keyWindow];
+            CGRect frame = [_target convertRect:_target.bounds toView:_target.window];
             _viewController.playerSuperview.frame = frame; // t1
             
             _target.frame = (CGRect){0, 0, frame.size};
@@ -446,7 +447,7 @@ API_AVAILABLE(ios(16.0))
             [_viewController.playerSuperview addSubview:_target]; // t2
         }
         
-        [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
             [UIView animateWithDuration:0.3 animations:^{
                 self->_viewController.playerSuperview.frame = (CGRect){CGPointZero, size};
             } completion:^(BOOL finished) {
@@ -456,12 +457,11 @@ API_AVAILABLE(ios(16.0))
         }];
     }
     else {
-        [self _fixNavigationBarLayout];
-        [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
             [UIView animateWithDuration:0.3 animations:^{
-                self->_viewController.playerSuperview.frame = [self->_superview convertRect:self->_superview.bounds toView:keyWindow];
+                self->_viewController.playerSuperview.frame = [self->_superview convertRect:self->_superview.bounds toView:self->_superview.window];
             } completion:^(BOOL finished) {
-                [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
+                [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
                     self->_transitioning = NO;
                     self->_target.frame = self->_superview.bounds;
                     [self->_superview addSubview:self->_target];
@@ -472,25 +472,12 @@ API_AVAILABLE(ios(16.0))
     }
 }
 
-- (void)_fixNavigationBarLayout {
-    UINavigationController *nav = [_superview lookupResponderForClass:UINavigationController.class];
-    [nav viewDidAppear:NO];
-    [nav.navigationBar layoutSubviews];
-}
-
 - (void)_rotationBegin {
     _window.hidden = NO;
     _rotating = YES;
-    if ( _isFullscreenOrientation(_deviceOrientation) ) {
-        [UIView animateWithDuration:0.0 animations:^{ } completion:^(BOOL finished) {
-            [self->_window.rootViewController setNeedsStatusBarAppearanceUpdate];
-        }];
-    }
-    else {
-        [UIView performWithoutAnimation:^{
-            [self->_window.rootViewController setNeedsStatusBarAppearanceUpdate];
-        }];
-    }
+    [UIView animateWithDuration:0.0 animations:^{ } completion:^(BOOL finished) {
+        [self->_window.rootViewController setNeedsStatusBarAppearanceUpdate];
+    }];
     [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification_4 object:self];
 }
 
@@ -632,7 +619,7 @@ API_AVAILABLE(ios(16.0))
     UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
     self.deviceOrientation = orientation;
     [UIViewController attemptRotationToDeviceOrientation];
-    [UIView animateWithDuration:0.0 animations:^{ /* nothing */ } completion:^(BOOL finished) {
+    [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
         [self _rotationBegin];
         [self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
             __strong typeof(_self) self = _self;
