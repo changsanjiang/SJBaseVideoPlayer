@@ -646,9 +646,20 @@ API_AVAILABLE(ios(16.0))
 #endif
 }
 
+- (void)setDisabledAutorotation:(BOOL)disabledAutorotation {
+    if ( disabledAutorotation != self.isDisabledAutorotation ) {
+        [super setDisabledAutorotation:disabledAutorotation];
+        [UIViewController attemptRotationToDeviceOrientation];
+    }
+}
+
 - (void)onDeviceOrientationChanged {
 #ifdef DEBUG
     NSLog(@"%d - -[%@ %s]", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
 #endif
+    if ( [self allowsRotation] ) {
+        [self _rotationBegin];
+        [UIViewController attemptRotationToDeviceOrientation];
+    }
 }
 @end
