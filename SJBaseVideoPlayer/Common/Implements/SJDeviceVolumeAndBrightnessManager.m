@@ -9,6 +9,7 @@
 #import "SJDeviceVolumeAndBrightnessManager.h"
 #import "SJBaseVideoPlayerResourceLoader.h"
 #import "SJBaseVideoPlayerConst.h"
+#import "SJPlayerView.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MPVolumeView.h>
 
@@ -214,7 +215,8 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 }
 
 - (nullable UIView *)targetView {
-    return [UIApplication.sharedApplication.keyWindow viewWithTag:SJBaseVideoPlayerPresentViewTag];
+    SJPlayerView *playerView = (SJPlayerView *)[UIApplication.sharedApplication.keyWindow viewWithTag:SJPlayerViewTag];
+    return playerView != nil ? playerView.presentView : nil;
 }
 
 - (void)_addOrRemoveSysVolumeView:(nullable UIWindow *)newWindow {

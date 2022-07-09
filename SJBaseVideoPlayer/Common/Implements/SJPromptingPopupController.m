@@ -1,11 +1,12 @@
 //
-//  SJPromptPopupController.m
+//  SJPromptingPopupController.m
 //  Pods
 //
 //  Created by 畅三江 on 2019/7/12.
 //
 
-#import "SJPromptPopupController.h"
+#import "SJPromptingPopupController.h"
+#import "SJBaseVideoPlayerConst.h"
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
 #else
@@ -16,12 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define _AnimDuration (0.4)
 
-@interface _SJPopItemContainerView : UIView
+@interface _SJItemPopupContainerView : UIView
 @property (nonatomic, strong, readonly) UILabel *titleLabel;
 @property (nonatomic, strong, readonly) UIView *customView;
 @end
 
-@implementation _SJPopItemContainerView
+@implementation _SJItemPopupContainerView
 - (instancetype)initWithFrame:(CGRect)frame contentInset:(UIEdgeInsets)contentInset {
     self = [self initWithFrame:frame];
     if (self) {
@@ -52,17 +53,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
-    if ( self ) { }
+    if ( self ) {
+        self.layer.zPosition = SJPromptingPopupViewZIndex;
+    }
     return self;
 }
 @end
 
 
-@interface SJPromptPopupController ()
-@property (nonatomic, strong, readonly) NSMutableArray<_SJPopItemContainerView *> *subviews;
+@interface SJPromptingPopupController ()
+@property (nonatomic, strong, readonly) NSMutableArray<_SJItemPopupContainerView *> *subviews;
 @end
 
-@implementation SJPromptPopupController
+@implementation SJPromptingPopupController
 @synthesize target = _target;
 @synthesize leftMargin = _leftMargin;
 @synthesize bottomMargin = _bottomMargin;
@@ -103,7 +106,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)show:(NSAttributedString *)title duration:(NSTimeInterval)duration {
-    _SJPopItemContainerView *view = [[_SJPopItemContainerView alloc] initWithFrame:CGRectZero contentInset:_contentInset];
+    _SJItemPopupContainerView *view = [[_SJItemPopupContainerView alloc] initWithFrame:CGRectZero contentInset:_contentInset];
     view.titleLabel.attributedText = title;
     [self _show:view duration:duration];
 }
@@ -113,12 +116,12 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)showCustomView:(UIView *)customView duration:(NSTimeInterval)duration {
-    _SJPopItemContainerView *view = [[_SJPopItemContainerView alloc] initWithFrame:CGRectZero customView:customView];
+    _SJItemPopupContainerView *view = [[_SJItemPopupContainerView alloc] initWithFrame:CGRectZero customView:customView];
     [self _show:view duration:duration];
 }
 
 - (BOOL)isShowingWithCustomView:(UIView *)view {
-    for ( _SJPopItemContainerView *containerView in self.subviews ) {
+    for ( _SJItemPopupContainerView *containerView in self.subviews ) {
         if ( containerView.customView == view )
             return YES;
     }
@@ -128,7 +131,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable __kindof NSArray<UIView *> *)displayingViews {
     if ( self.subviews.count != 0 ) {
         NSMutableArray *m = [NSMutableArray arrayWithCapacity:self.subviews.count];
-        for ( _SJPopItemContainerView *containerView  in self.subviews ) {
+        for ( _SJItemPopupContainerView *containerView  in self.subviews ) {
             [m addObject:containerView.customView ?: containerView.titleLabel];
         }
         return m;
@@ -141,7 +144,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)remove:(UIView *)view {
-    for ( _SJPopItemContainerView *containerView  in self.subviews ) {
+    for ( _SJItemPopupContainerView *containerView  in self.subviews ) {
         if ( containerView.customView == view || containerView.titleLabel == view ) {
             [self _removeSubview:containerView];
             break;
@@ -149,7 +152,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
-- (void)_show:(_SJPopItemContainerView *)view duration:(NSTimeInterval)duration {
+- (void)_show:(_SJItemPopupContainerView *)view duration:(NSTimeInterval)duration {
     [self _addSubview:view];
     __weak typeof(view) _view = view;
     __weak typeof(self) _self = self;
@@ -161,13 +164,13 @@ NS_ASSUME_NONNULL_BEGIN
     });
 }
 
-- (void)_addSubview:(_SJPopItemContainerView *)view {
+- (void)_addSubview:(_SJItemPopupContainerView *)view {
     CGRect bounds = self.target.bounds;
     view.frame = CGRectMake(-bounds.size.width, bounds.size.height - _bottomMargin, 0, 0);
     [self.target addSubview:view];
     [self.subviews addObject:view];
 
-    [self.subviews enumerateObjectsUsingBlock:^(_SJPopItemContainerView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.subviews enumerateObjectsUsingBlock:^(_SJItemPopupContainerView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self _remakeConstraintsAtIndex:idx];
     }];
     
@@ -176,7 +179,7 @@ NS_ASSUME_NONNULL_BEGIN
     } completion:nil];
 }
 
-- (void)_removeSubview:(_SJPopItemContainerView *)view {
+- (void)_removeSubview:(_SJItemPopupContainerView *)view {
     NSUInteger idx = [self.subviews indexOfObject:view];
     if ( idx == NSNotFound )
         return;
@@ -196,14 +199,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)_removeAllSubviews {
     if ( self.subviews.count != 0 ) {
-        NSArray<_SJPopItemContainerView *> *subviews = self.subviews.copy;
+        NSArray<_SJItemPopupContainerView *> *subviews = self.subviews.copy;
         [self.subviews removeAllObjects];
         [UIView animateWithDuration:_AnimDuration animations:^{
             for ( UIView *subview in subviews ) {
                 subview.alpha = 0.001;
             }
         } completion:^(BOOL finished) {
-            [subviews enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(_SJPopItemContainerView * _Nonnull subview, NSUInteger idx, BOOL * _Nonnull stop) {
+            [subviews enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(_SJItemPopupContainerView * _Nonnull subview, NSUInteger idx, BOOL * _Nonnull stop) {
                 [subview removeFromSuperview];
             }];
         }];
@@ -215,7 +218,7 @@ NS_ASSUME_NONNULL_BEGIN
         return;
     
     NSUInteger count = self.subviews.count;
-    _SJPopItemContainerView *view = self.subviews[idx];
+    _SJItemPopupContainerView *view = self.subviews[idx];
     [view mas_remakeConstraints:^(MASConstraintMaker *make) {
         if ( self.automaticallyAdjustsLeftInset ) {
             if ( @available(iOS 11.0, *) ) {

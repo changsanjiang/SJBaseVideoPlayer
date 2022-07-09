@@ -223,6 +223,10 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
     return NO;
 }
 
+- (void)makeKeyWindow { }
+
+- (void)makeKeyAndVisible { }
+
 #ifdef DEBUG
 - (void)dealloc {
     NSLog(@"%d \t %s", (int)__LINE__, __func__);
@@ -422,7 +426,7 @@ API_AVAILABLE(ios(16.0))
         if ( !_isSupportedOrientation(_autorotationSupportedOrientations, _deviceOrientation) ) return NO;
     }
     if ( _rotating && _transitioning ) return NO;
-    UIView *playerView = [UIApplication.sharedApplication.keyWindow viewWithTag:SJBaseVideoPlayerViewTag];
+    UIView *playerView = [UIApplication.sharedApplication.keyWindow viewWithTag:SJPlayerViewTag];
     if ( playerView == nil || playerView != _superview ) return NO;
     if ( _shouldTriggerRotation != nil && !_shouldTriggerRotation(self) ) return NO;
     return YES;
@@ -461,11 +465,31 @@ API_AVAILABLE(ios(16.0))
             [UIView animateWithDuration:0.3 animations:^{
                 self->_viewController.playerSuperview.frame = [self->_superview convertRect:self->_superview.bounds toView:self->_superview.window];
             } completion:^(BOOL finished) {
+                UIView *snapshot = [self->_target snapshotViewAfterScreenUpdates:NO];
+                snapshot.frame = self->_superview.bounds;
+                snapshot.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+                [self->_superview addSubview:snapshot];
                 [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
                     self->_transitioning = NO;
                     self->_target.frame = self->_superview.bounds;
+                    self->_target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
                     [self->_superview addSubview:self->_target];
+                    [snapshot removeFromSuperview];
                     [self _rotationEnd];
+                    
+//                            UIView *snapshot = [self.target snapshotViewAfterScreenUpdates:NO];
+//                            snapshot.frame = self.superview.bounds;
+//                            [self.superview addSubview:snapshot];
+//                            SJRunLoopTaskQueue.main.enqueue(^{
+//                                [self.superview addSubview:self.target];
+//                            }).enqueue(^{
+//                                [snapshot removeFromSuperview];
+//                                UIWindow *previousKeyWindow = self.previousKeyWindow ?: UIApplication.sharedApplication.windows.firstObject;
+//                                [previousKeyWindow makeKeyAndVisible];
+//                                self.previousKeyWindow = nil;
+//                                self.window.hidden = YES;
+//                                [self _finishTransition];
+//                            });
                 }];
             }];
         }];

@@ -13,8 +13,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSInteger const SJBaseVideoPlayerViewTag;
-extern NSInteger const SJBaseVideoPlayerPresentViewTag;
+extern NSInteger const SJPlayerViewTag;
+extern NSInteger const SJPresentViewTag;
+
+extern NSInteger const SJTextPopupViewZIndex;
+extern NSInteger const SJPromptingPopupViewZIndex;
+extern NSInteger const SJControlLayerViewZIndex;
+extern NSInteger const SJPlaceholderImageViewZIndex;
+extern NSInteger const SJDanmakuViewZIndex;
+extern NSInteger const SJWatermarkViewZIndex;
+extern NSInteger const SJSubtitleViewZIndex;
+extern NSInteger const SJPlaybackViewZIndex;
 
 // - Playback Notifications -
 

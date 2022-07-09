@@ -19,8 +19,8 @@ API_AVAILABLE(ios(13.0)) @protocol _UIViewControllerPrivateMethodsProtocol <NSOb
 
 API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationPrivate_FixSafeArea)
 - (BOOL)sj_containsPlayerView {
-    return [self.view viewWithTag:SJBaseVideoPlayerPresentViewTag] != nil ||
-           [self.view viewWithTag:SJBaseVideoPlayerViewTag] != nil;
+    return [self.view viewWithTag:SJPresentViewTag] != nil ||
+           [self.view viewWithTag:SJPlayerViewTag] != nil;
 }
 
 - (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin {
@@ -31,7 +31,7 @@ API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationPrivate_Fix
     if ( mask & SJSafeAreaInsetsMaskRight ) insets.right = 0;
     
     BOOL isFullscreen = self.view.bounds.size.width > self.view.bounds.size.height;
-    if ( ![NSStringFromClass(self.class) isEqualToString:@"SJFullscreenModeViewController"] || isFullscreen ) {
+    if ( ![NSStringFromClass(self.class) isEqualToString:@"SJRotationFullscreenViewController_4"] || isFullscreen ) {
         if ( isFullscreen || insets.top != 0 || [self sj_containsPlayerView] == NO ) {
             [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
         }

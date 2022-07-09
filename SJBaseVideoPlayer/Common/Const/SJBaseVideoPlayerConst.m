@@ -10,8 +10,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-NSInteger const SJBaseVideoPlayerViewTag = 0xFFFFFFF0;
-NSInteger const SJBaseVideoPlayerPresentViewTag = 0xFFFFFFF1;
+NSInteger const SJPlayerViewTag = 0xFFFFFFF0;
+NSInteger const SJPresentViewTag = 0xFFFFFFF1;
+
+NSInteger const SJTextPopupViewZIndex           = -10;
+NSInteger const SJPromptingPopupViewZIndex      = -20;
+NSInteger const SJControlLayerViewZIndex        = -30;
+NSInteger const SJPlaceholderImageViewZIndex    = -40;
+NSInteger const SJDanmakuViewZIndex             = -50;
+NSInteger const SJWatermarkViewZIndex           = -60;
+NSInteger const SJSubtitleViewZIndex            = -70;
+NSInteger const SJPlaybackViewZIndex            = -80;
 
 ///
 /// assetStatus 改变的通知
