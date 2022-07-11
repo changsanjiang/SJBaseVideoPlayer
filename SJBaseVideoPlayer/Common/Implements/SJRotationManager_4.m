@@ -34,12 +34,14 @@ _isSupportedOrientation(SJOrientationMask supportedOrientations, SJOrientation o
 
 
 static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRotationManagerRotationNotification_4";
+static NSNotificationName const SJRotationManagerTransitionNotification_4 = @"SJRotationManagerTransitionNotification_4";
 
 
 @interface SJRotationObserver_4 : NSObject<SJRotationManagerObserver>
 - (instancetype)initWithManager:(id<SJRotationManager>)manager;
-@property (nonatomic, copy, nullable) void(^rotationDidStartExeBlock)(id<SJRotationManager> mgr);
-@property (nonatomic, copy, nullable) void(^rotationDidEndExeBlock)(id<SJRotationManager> mgr);
+
+@property (nonatomic, copy, nullable) void(^onRotatingChanged)(id<SJRotationManager> mgr, BOOL isRotating);
+@property (nonatomic, copy, nullable) void(^onTransitioningChanged)(id<SJRotationManager> mgr, BOOL isTransitioning);
 @end
 
 @implementation SJRotationObserver_4
@@ -47,6 +49,7 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
     self = [super init];
     if ( self ) {
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(onRotation:) name:SJRotationManagerRotationNotification_4 object:manager];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(onTransition:) name:SJRotationManagerTransitionNotification_4 object:manager];
     }
     return self;
 }
@@ -57,12 +60,12 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 
 - (void)onRotation:(NSNotification *)note {
     BOOL isRotating = [(SJRotationManager_4 *)note.object isRotating];
-    if ( isRotating ) {
-        if ( _rotationDidStartExeBlock != nil ) _rotationDidStartExeBlock(note.object);
-    }
-    else {
-        if ( _rotationDidEndExeBlock != nil ) _rotationDidEndExeBlock(note.object);
-    }
+    if ( _onRotatingChanged != nil ) _onRotatingChanged(note.object, isRotating);
+}
+
+- (void)onTransition:(NSNotification *)note {
+    BOOL isTransitioning = [(SJRotationManager_4 *)note.object isTransitioning];
+    if ( _onTransitioningChanged != nil ) _onTransitioningChanged(note.object, isTransitioning);
 }
 @end
 
@@ -252,7 +255,6 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 
 - (void)_setup {
     self.frame = UIScreen.mainScreen.bounds;
-    self.windowLevel = UIWindowLevelStatusBar - 1;
 }
 
 - (void)setBackgroundColor:(nullable UIColor *)backgroundColor {}
@@ -323,6 +325,7 @@ API_AVAILABLE(ios(16.0))
 
 @property (nonatomic, getter=isForcedrotation) BOOL forcedrotation;
 @property (nonatomic, getter=isTransitioning) BOOL transitioning;
+@property (nonatomic, getter=isWindowPreparing) BOOL windowPreparing;
 
 @property (nonatomic, strong) SJRotationFullscreenWindow_4 *window;
 @property (nonatomic, strong) SJRotationFullscreenViewController_4 *viewController;
@@ -375,11 +378,23 @@ API_AVAILABLE(ios(16.0))
         }
         _window.sj_4_delegate = self;
         _window.rootViewController = nav;
-        // prepare rotation window
-        _window.hidden = NO;
-        [_window performSelectorOnMainThread:@selector(setHidden:) withObject:@(YES) waitUntilDone:NO];
+
+        [self _prepareWindowForRotation];
     }
     return self;
+}
+
+- (void)_prepareWindowForRotation {
+    _windowPreparing = YES;
+    [UIView animateWithDuration:0.0 animations:^{ /** next */ } completion:^(BOOL finished) {
+        self->_window.windowLevel = UIWindowLevelNormal - 1;
+        self->_window.hidden = NO;
+        [UIView animateWithDuration:0.0 animations:^{ /** preparing */} completion:^(BOOL finished) {
+            self->_window.hidden = YES;
+            self->_window.windowLevel = UIWindowLevelStatusBar - 1;
+            self->_windowPreparing = NO;
+        }];
+    }];
 }
 
 - (id<SJRotationManagerObserver>)getObserver {
@@ -430,6 +445,7 @@ API_AVAILABLE(ios(16.0))
 }
 
 - (BOOL)allowsRotation {
+    if ( _windowPreparing ) return NO;
     if ( _inactivated ) return NO;
     if ( _currentOrientation == (SJOrientation)_deviceOrientation ) return NO;
     if ( !_forcedrotation ) {
@@ -437,8 +453,6 @@ API_AVAILABLE(ios(16.0))
         if ( !_isSupportedOrientation(_autorotationSupportedOrientations, _deviceOrientation) ) return NO;
     }
     if ( _rotating && _transitioning ) return NO;
-    UIView *playerView = [UIApplication.sharedApplication.keyWindow viewWithTag:SJPlayerViewTag];
-    if ( playerView == nil || playerView != _superview ) return NO;
     if ( _shouldTriggerRotation != nil && !_shouldTriggerRotation(self) ) return NO;
     return YES;
 }
@@ -449,8 +463,8 @@ API_AVAILABLE(ios(16.0))
 }
 
 - (void)viewController:(SJRotationFullscreenViewController_4 *)viewController viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    _transitioning = YES;
     _currentOrientation = _deviceOrientation;
+    [self _transitionBegin];
     
     if ( size.width > size.height ) {
         if ( _target.superview != _viewController.playerSuperview ) {
@@ -466,7 +480,7 @@ API_AVAILABLE(ios(16.0))
             [UIView animateWithDuration:0.3 animations:^{
                 self->_viewController.playerSuperview.frame = (CGRect){CGPointZero, size};
             } completion:^(BOOL finished) {
-                self->_transitioning = NO;
+                [self _transitionEnd];
                 [self _rotationEnd];
             }];
         }];
@@ -485,7 +499,7 @@ API_AVAILABLE(ios(16.0))
                     self->_target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
                     [self->_superview addSubview:self->_target];
                     [snapshot removeFromSuperview];
-                    self->_transitioning = NO;
+                    [self _transitionEnd];
                     [self _rotationEnd];
                 }];
             }];
@@ -511,6 +525,16 @@ API_AVAILABLE(ios(16.0))
         _completionHandler = nil;
     }
     [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification_4 object:self];
+}
+
+- (void)_transitionBegin {
+    _transitioning = YES;
+    [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerTransitionNotification_4 object:self];
+}
+
+- (void)_transitionEnd {
+    self->_transitioning = NO;
+    [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerTransitionNotification_4 object:self];
 }
 
 #pragma mark -
@@ -625,7 +649,7 @@ API_AVAILABLE(ios(16.0))
     __weak typeof(self) _self = self;
     UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
     self.deviceOrientation = orientation;
-    [UIViewController attemptRotationToDeviceOrientation];
+    [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
     [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
         [self _rotationBegin];
         [self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
@@ -643,7 +667,7 @@ API_AVAILABLE(ios(16.0))
 - (void)setDisabledAutorotation:(BOOL)disabledAutorotation {
     if ( disabledAutorotation != self.isDisabledAutorotation ) {
         [super setDisabledAutorotation:disabledAutorotation];
-        [UIViewController attemptRotationToDeviceOrientation];
+        [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
     }
 }
 
@@ -653,7 +677,7 @@ API_AVAILABLE(ios(16.0))
 #endif
     if ( [self allowsRotation] ) {
         [self _rotationBegin];
-        [UIViewController attemptRotationToDeviceOrientation];
+        [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
     }
 }
 @end
@@ -672,7 +696,7 @@ API_AVAILABLE(ios(16.0))
         return 1 << rotationManager.currentOrientation;
     }
     
-    return UIInterfaceOrientationMaskPortrait;
+    return UIInterfaceOrientationMaskAll;
 }
 @end
 

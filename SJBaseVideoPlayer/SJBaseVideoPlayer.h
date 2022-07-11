@@ -597,7 +597,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 观察者
 ///
-///         当需要监听旋转时, 可以设置`player.rotationObserver.rotationDidStartExeBlock = ...;`
+///         当需要监听旋转时, 可以设置`player.rotationObserver.onRotatingChanged = ...;`
 ///         了解更多请前往头文件查看
 ///
 @property (nonatomic, strong, readonly) id<SJRotationManagerObserver> rotationObserver;

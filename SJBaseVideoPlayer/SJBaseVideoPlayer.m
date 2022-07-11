@@ -255,7 +255,7 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)presentViewDidLayoutSubviews:(SJVideoPlayerPresentView *)presentView {
     [self updateWatermarkViewLayout];
-    if ( self.rotationManager.isRotating ) {    
+    if ( self.rotationManager.isRotating ) {
         [UIView animateWithDuration:0.3 animations:^{
             [presentView layoutIfNeeded];
         }];
@@ -1790,46 +1790,38 @@ typedef struct _SJPlayerControlInfo {
     };
     
     _rotationManagerObserver = [rotationManager getObserver];
-    _rotationManagerObserver.rotationDidStartExeBlock = ^(id<SJRotationManager>  _Nonnull mgr) {
+    _rotationManagerObserver.onRotatingChanged = ^(id<SJRotationManager>  _Nonnull mgr, BOOL isRotating) {
         __strong typeof(_self) self = _self;
         if ( !self ) return ;
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:willRotateView:)] ) {
-            [self.controlLayerDelegate videoPlayer:self willRotateView:mgr.isFullscreen];
-        }
-        
-        [self controlLayerNeedDisappear];
-        
-//        UINavigationController *nav = [self.view lookupResponderForClass:UINavigationController.class];
-////        _updateBarsForCurrentInterfaceOrientation
-//        [nav performSelector:@selector(_updateBarsForCurrentInterfaceOrientation)];
-                
-        ///
-        /// Thanks @SuperEvilRabbit
-        /// https://github.com/changsanjiang/SJVideoPlayer/issues/58
-        ///
-//        [UIView animateWithDuration:0 animations:^{ } completion:^(BOOL finished) {
-//            if ( mgr.isFullscreen )
-//                [self needHiddenStatusBar];
-//            else
-//                [self needShowStatusBar];
-//        }];
-    };
-    
-    _rotationManagerObserver.rotationDidEndExeBlock = ^(id<SJRotationManager>  _Nonnull mgr) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return ;
-        [self.playModelObserver refreshAppearState];
-        if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:didEndRotation:)] ) {
-            [self.controlLayerDelegate videoPlayer:self didEndRotation:mgr.isFullscreen];
-        }
-        
-        if ( mgr.isFullscreen ) {
-            [self.viewControllerManager setNeedsStatusBarAppearanceUpdate];
+        if ( isRotating ) {
+            if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:willRotateView:)] ) {
+                [self.controlLayerDelegate videoPlayer:self willRotateView:mgr.isFullscreen];
+            }
+            
+            [self controlLayerNeedDisappear];
         }
         else {
-            [UIView animateWithDuration:0.25 animations:^{
+            [self.playModelObserver refreshAppearState];
+            if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:didEndRotation:)] ) {
+                [self.controlLayerDelegate videoPlayer:self didEndRotation:mgr.isFullscreen];
+            }
+            
+            if ( mgr.isFullscreen ) {
                 [self.viewControllerManager setNeedsStatusBarAppearanceUpdate];
-            }];
+            }
+            else {
+                [UIView animateWithDuration:0.25 animations:^{
+                    [self.viewControllerManager setNeedsStatusBarAppearanceUpdate];
+                }];
+            }
+        }
+    };
+    
+    _rotationManagerObserver.onTransitioningChanged = ^(id<SJRotationManager>  _Nonnull mgr, BOOL isTransitioning) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayer:onRotationTransitioningChanged:)] ) {
+            [self.controlLayerDelegate videoPlayer:self onRotationTransitioningChanged:isTransitioning];
         }
     };
 }

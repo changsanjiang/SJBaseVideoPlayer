@@ -141,6 +141,8 @@ SJPlaybackControlDelegate;
 /// 当播放器旋转完成的时候, 会回调这个方法
 /// isFull 标识是否是全屏
 - (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer didEndRotation:(BOOL)isFull;
+
+- (void)videoPlayer:(__kindof SJBaseVideoPlayer *)videoPlayer onRotationTransitioningChanged:(BOOL)isTransitioning;
 @end
 
 
