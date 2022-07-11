@@ -426,7 +426,7 @@ typedef struct _SJPlayerControlInfo {
     
     // install
     UIView *controlView = _controlLayerDataSource.controlView;
-    controlView.layer.zPosition = SJControlLayerViewZIndex;
+    controlView.layer.zPosition = SJPlayerZIndexes.shared.controlLayerViewZIndex;
     controlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     controlView.frame = self.presentView.bounds;
     [self.presentView addSubview:controlView];
@@ -464,7 +464,7 @@ typedef struct _SJPlayerControlInfo {
     _presentView.tag = SJPresentViewTag;
     _presentView.frame = _view.bounds;
     _presentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _presentView.placeholderImageView.layer.zPosition = SJPlaceholderImageViewZIndex;
+    _presentView.placeholderImageView.layer.zPosition = SJPlayerZIndexes.shared.placeholderImageViewZIndex;
     _presentView.delegate = self;
     [self _configGestureController:_presentView];
     [_view addSubview:_presentView];
@@ -734,7 +734,7 @@ typedef struct _SJPlayerControlInfo {
     if ( _playbackController.playerView.superview != self.presentView ) {
         _playbackController.playerView.frame = self.presentView.bounds;
         _playbackController.playerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        _playbackController.playerView.layer.zPosition = SJPlaybackViewZIndex;
+        _playbackController.playerView.layer.zPosition = SJPlayerZIndexes.shared.playbackViewZIndex;
         [_presentView addSubview:_playbackController.playerView];
     }
     
@@ -2119,7 +2119,7 @@ typedef struct _SJPlayerControlInfo {
     [_subtitlePopupController.view removeFromSuperview];
     _subtitlePopupController = subtitlePopupController;
     if ( subtitlePopupController != nil ) {
-        subtitlePopupController.view.layer.zPosition = SJSubtitleViewZIndex;
+        subtitlePopupController.view.layer.zPosition = SJPlayerZIndexes.shared.subtitleViewZIndex;
         [self.presentView addSubview:subtitlePopupController.view];
         [subtitlePopupController.view mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.mas_greaterThanOrEqualTo(self.subtitleHorizontalMinMargin);
@@ -2212,7 +2212,7 @@ typedef struct _SJPlayerControlInfo {
     
     _danmakuPopupController = danmakuPopupController;
     if ( danmakuPopupController != nil ) {
-        danmakuPopupController.view.layer.zPosition = SJDanmakuViewZIndex;
+        danmakuPopupController.view.layer.zPosition = SJPlayerZIndexes.shared.danmakuViewZIndex;
         [self.presentView addSubview:danmakuPopupController.view];
         [danmakuPopupController.view mas_makeConstraints:^(MASConstraintMaker *make) {
             make.top.left.right.offset(0);
@@ -2243,7 +2243,7 @@ typedef struct _SJPlayerControlInfo {
     objc_setAssociatedObject(self, @selector(watermarkView), watermarkView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     
     if ( watermarkView != nil ) {
-        watermarkView.layer.zPosition = SJWatermarkViewZIndex;
+        watermarkView.layer.zPosition = SJPlayerZIndexes.shared.watermarkViewZIndex;
         [self.presentView addSubview:watermarkView];
         [watermarkView layoutWatermarkInRect:self.presentView.bounds videoPresentationSize:self.videoPresentationSize videoGravity:self.videoGravity];
     }

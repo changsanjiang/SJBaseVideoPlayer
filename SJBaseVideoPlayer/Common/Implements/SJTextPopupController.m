@@ -106,7 +106,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIView *)contentView {
     if ( _contentView == nil ) {
         _contentView = [UIView.alloc initWithFrame:CGRectZero];
-        _contentView.layer.zPosition = SJTextPopupViewZIndex;
+        _contentView.layer.zPosition = SJPlayerZIndexes.shared.textPopupViewZIndex;
     }
     return _contentView;
 }

@@ -54,7 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if ( self ) {
-        self.layer.zPosition = SJPromptingPopupViewZIndex;
+        self.layer.zPosition = SJPlayerZIndexes.shared.promptingPopupViewZIndex;
     }
     return self;
 }
