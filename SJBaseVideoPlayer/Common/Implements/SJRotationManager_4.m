@@ -678,7 +678,7 @@ API_AVAILABLE(ios(16.0))
 
 #import <objc/message.h>
 
-API_AVAILABLE(ios(13.0)) @protocol _UIViewControllerHooks <NSObject>
+API_AVAILABLE(ios(13.0)) @protocol _UIViewControllerSafeAreaFixingHooks <NSObject>
 - (void)_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
 - (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
 @end

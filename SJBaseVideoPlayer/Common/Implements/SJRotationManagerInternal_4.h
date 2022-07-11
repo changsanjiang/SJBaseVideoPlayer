@@ -12,6 +12,8 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface SJRotationManager_4 (Internal)
 @property (nonatomic, weak, nullable) id<SJRotationManager_4Delegate> delegate;
+
+- (void)setNeedsStatusBarAppearanceUpdate;
 @end
 
 @protocol SJRotationManager_4Delegate <NSObject>

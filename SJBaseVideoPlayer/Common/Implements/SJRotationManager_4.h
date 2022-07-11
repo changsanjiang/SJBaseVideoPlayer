@@ -13,7 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)rotationManager;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
-- (void)setNeedsStatusBarAppearanceUpdate;
 @end
 
 @interface UIWindow (SJRotationControls)
