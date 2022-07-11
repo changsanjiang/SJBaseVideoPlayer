@@ -255,9 +255,11 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)presentViewDidLayoutSubviews:(SJVideoPlayerPresentView *)presentView {
     [self updateWatermarkViewLayout];
-    [UIView animateWithDuration:0.3 animations:^{
-        [presentView layoutIfNeeded];
-    }];
+    if ( self.rotationManager.isRotating ) {    
+        [UIView animateWithDuration:0.3 animations:^{
+            [presentView layoutIfNeeded];
+        }];
+    }
 }
 
 #pragma mark -
