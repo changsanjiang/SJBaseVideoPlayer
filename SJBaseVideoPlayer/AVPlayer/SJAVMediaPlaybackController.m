@@ -76,14 +76,17 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     if ( @available(iOS 14.0, *) ) {
-        if ( self.pauseWhenAppDidEnterBackground ) {
-            if ( self.media.isM3u8 && self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
-                self.needsToRefresh_fix339 = YES;
-//                [self refresh];
-//                [self pause];
-                return;
+        if ( self.media.isM3u8 ) {
+            if ( self.pauseWhenAppDidEnterBackground ||
+                 // fix: https://github.com/changsanjiang/SJVideoPlayer/issues/535
+                 self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
+                if ( self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
+                    self.needsToRefresh_fix339 = YES;
+                    return;
+                }
             }
         }
+        
     }
     
     SJAVMediaPlayerLayerView *view = self.currentPlayerView;
