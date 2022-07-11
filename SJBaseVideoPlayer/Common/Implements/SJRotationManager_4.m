@@ -567,21 +567,6 @@ API_AVAILABLE(ios(16.0))
 @end
 
 
-@implementation UIWindow (SJRotationControls)
-- (UIInterfaceOrientationMask)sj_4_supportedInterfaceOrientations {
-    if ( [self isKindOfClass:SJRotationFullscreenWindow_4.class] ) {
-        SJRotationFullscreenWindow_4 *window = (SJRotationFullscreenWindow_4 *)self;
-        SJRotationManager_4 *rotationManager = (SJRotationManager_4 *)window.sj_4_delegate;
-        if ( [rotationManager allowsRotation] ) {
-            return UIInterfaceOrientationMaskAllButUpsideDown;
-        }
-        return 1 << rotationManager.currentOrientation;
-    }
-    
-    return UIInterfaceOrientationMaskPortrait;
-}
-@end
-
 //if ( UIUserInterfaceIdiomPhone == UI_USER_INTERFACE_IDIOM() ) { }
 //else if ( UIUserInterfaceIdiomPad == UI_USER_INTERFACE_IDIOM() ) { }
 
@@ -670,6 +655,24 @@ API_AVAILABLE(ios(16.0))
         [self _rotationBegin];
         [UIViewController attemptRotationToDeviceOrientation];
     }
+}
+@end
+
+
+#pragma mark - window rotation orientations
+
+@implementation UIWindow (SJRotationControls)
+- (UIInterfaceOrientationMask)sj_4_supportedInterfaceOrientations {
+    if ( [self isKindOfClass:SJRotationFullscreenWindow_4.class] ) {
+        SJRotationFullscreenWindow_4 *window = (SJRotationFullscreenWindow_4 *)self;
+        SJRotationManager_4 *rotationManager = (SJRotationManager_4 *)window.sj_4_delegate;
+        if ( [rotationManager allowsRotation] ) {
+            return UIInterfaceOrientationMaskAllButUpsideDown;
+        }
+        return 1 << rotationManager.currentOrientation;
+    }
+    
+    return UIInterfaceOrientationMaskPortrait;
 }
 @end
 
