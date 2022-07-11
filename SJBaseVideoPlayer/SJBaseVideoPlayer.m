@@ -255,6 +255,9 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)presentViewDidLayoutSubviews:(SJVideoPlayerPresentView *)presentView {
     [self updateWatermarkViewLayout];
+    [UIView animateWithDuration:0.3 animations:^{
+        [presentView layoutIfNeeded];
+    }];
 }
 
 #pragma mark -
@@ -791,6 +794,10 @@ typedef struct _SJPlayerControlInfo {
 - (BOOL)isBuffering { return self.timeControlStatus == SJPlaybackTimeControlStatusWaitingToPlay && self.reasonForWaitingToPlay == SJWaitingToMinimizeStallsReason; }
 - (BOOL)isEvaluating { return self.timeControlStatus == SJPlaybackTimeControlStatusWaitingToPlay && self.reasonForWaitingToPlay == SJWaitingWhileEvaluatingBufferingRateReason; }
 - (BOOL)isNoAssetToPlay { return self.timeControlStatus == SJPlaybackTimeControlStatusWaitingToPlay && self.reasonForWaitingToPlay == SJWaitingWithNoAssetToPlayReason; }
+
+- (BOOL)isPlaybackFailed {
+    return self.assetStatus == SJAssetStatusFailed;
+}
 
 - (nullable SJWaitingReason)reasonForWaitingToPlay {
     return _playbackController.reasonForWaitingToPlay;

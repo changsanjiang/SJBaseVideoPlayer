@@ -93,7 +93,24 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 - (UIStatusBarStyle)preferredStatusBarStyle;
 @end
 
+@interface SJRotationFullscreenView_4 : UIView
+
+@end
+
+@implementation SJRotationFullscreenView_4
+- (UIEdgeInsets)safeAreaInsets {
+    CGSize size = self.bounds.size;
+    if ( size.width > size.height ) return [super safeAreaInsets];
+    return [UIApplication.sharedApplication.keyWindow safeAreaInsets];
+}
+@end
+
 @implementation SJRotationFullscreenViewController_4
+
+- (void)loadView {
+    self.view = [SJRotationFullscreenView_4.alloc initWithFrame:UIScreen.mainScreen.bounds];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.clipsToBounds = NO;
@@ -376,7 +393,7 @@ API_AVAILABLE(ios(16.0))
 }
 
 - (BOOL)isFullscreen {
-    return _isFullscreenOrientation(_currentOrientation);
+    return _rotating ? _isFullscreenOrientation(_deviceOrientation) : _isFullscreenOrientation(_currentOrientation);
 }
 
 - (void)rotate {
@@ -476,20 +493,6 @@ API_AVAILABLE(ios(16.0))
                     [self->_superview addSubview:self->_target];
                     [snapshot removeFromSuperview];
                     [self _rotationEnd];
-                    
-//                            UIView *snapshot = [self.target snapshotViewAfterScreenUpdates:NO];
-//                            snapshot.frame = self.superview.bounds;
-//                            [self.superview addSubview:snapshot];
-//                            SJRunLoopTaskQueue.main.enqueue(^{
-//                                [self.superview addSubview:self.target];
-//                            }).enqueue(^{
-//                                [snapshot removeFromSuperview];
-//                                UIWindow *previousKeyWindow = self.previousKeyWindow ?: UIApplication.sharedApplication.windows.firstObject;
-//                                [previousKeyWindow makeKeyAndVisible];
-//                                self.previousKeyWindow = nil;
-//                                self.window.hidden = YES;
-//                                [self _finishTransition];
-//                            });
                 }];
             }];
         }];
@@ -623,6 +626,7 @@ API_AVAILABLE(ios(16.0))
 #pragma mark - iOS 16 later;
 
 @implementation SJRotationManager_4_iOS_16_Later
+
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler {
 #ifdef DEBUG
     if ( !animated ) {

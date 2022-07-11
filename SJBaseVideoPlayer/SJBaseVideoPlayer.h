@@ -202,6 +202,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL isEvaluating;      ///< 调用了播放, 正在评估缓冲中(这个过程会进行的很快, 不需要显示loading视图)
 @property (nonatomic, readonly) BOOL isNoAssetToPlay;   ///< 调用了播放, 但未设置播放资源(设置资源后将会自动播放 )
 
+@property (nonatomic, readonly) BOOL isPlaybackFailed;                              ///< 播放失败
 @property (nonatomic, readonly) BOOL isPlaybackFinished;                            ///< 播放结束
 @property (nonatomic, readonly, nullable) SJFinishedReason finishedReason;          ///< 播放结束的reason
 
