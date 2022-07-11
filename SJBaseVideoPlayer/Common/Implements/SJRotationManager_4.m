@@ -1,6 +1,6 @@
 //
 //  SJRotationManager_4.m
-//  SJVideoPlayer_Example
+//  version_4
 //
 //  Created by 畅三江 on 2022/7/6.
 //  Copyright © 2022 changsanjiang. All rights reserved.
@@ -29,10 +29,6 @@ _isSupportedOrientation(SJOrientationMask supportedOrientations, SJOrientation o
     }
     return NO;
 }
-
-@protocol UIDevicePrivateMethods_4 <NSObject>
-- (void)setOrientation:(UIDeviceOrientation)orientation animated:(BOOL)animated;
-@end
 
 #pragma mark - observer
 
@@ -73,8 +69,6 @@ static NSNotificationName const SJRotationManagerRotationNotification_4 = @"SJRo
 #pragma mark - view controller
 
 @protocol SJRotationFullscreenViewController_4Delegate;
-
-// API_AVAILABLE 后面去掉
 
 @interface SJRotationFullscreenViewController_4 : UIViewController
 
@@ -419,7 +413,7 @@ API_AVAILABLE(ios(16.0))
 #pragma mark - SJRotationFullscreenWindow_4Delegate, SJRotationFullscreenViewController_4Delegate, SJRotationFullscreenNavigationController_4Delegate
 
 - (BOOL)window:(SJRotationFullscreenWindow_4 *)window pointInside:(CGPoint)point withEvent:(UIEvent *)event {
-    return _viewController.playerSuperview.subviews.count != 0 &&
+    return (_target.superview == _viewController.playerSuperview) &&
           [_viewController.playerSuperview pointInside:[window convertPoint:point toView:_viewController.playerSuperview] withEvent:event];
 }
 
@@ -487,11 +481,11 @@ API_AVAILABLE(ios(16.0))
                 snapshot.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
                 [self->_superview addSubview:snapshot];
                 [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
-                    self->_transitioning = NO;
                     self->_target.frame = self->_superview.bounds;
                     self->_target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
                     [self->_superview addSubview:self->_target];
                     [snapshot removeFromSuperview];
+                    self->_transitioning = NO;
                     [self _rotationEnd];
                 }];
             }];
@@ -569,7 +563,7 @@ API_AVAILABLE(ios(16.0))
     [_window.rootViewController setNeedsStatusBarAppearanceUpdate];
 }
 
-- (void)onDeviceOrientationChanged { }
+- (void)onDeviceOrientationChanged { /** subclass */ }
 @end
 
 
@@ -676,5 +670,77 @@ API_AVAILABLE(ios(16.0))
         [self _rotationBegin];
         [UIViewController attemptRotationToDeviceOrientation];
     }
+}
+@end
+
+
+#pragma mark - fix safe area
+
+#import <objc/message.h>
+
+API_AVAILABLE(ios(13.0)) @protocol _UIViewControllerHooks <NSObject>
+- (void)_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
+- (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
+@end
+
+API_AVAILABLE(ios(13.0)) @implementation SJRotationManager_4 (SJRotationSafeAreaFixing)
++ (void)initialize {
+    if ( @available(iOS 13.0, *) ) {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            Class cls = UIViewController.class;
+            NSData *data = [NSData.alloc initWithBase64EncodedString:@"X3NldENvbnRlbnRPdmVybGF5SW5zZXRzOmFuZExlZnRNYXJnaW46cmlnaHRNYXJnaW46" options:kNilOptions];
+            NSString *method = [NSString.alloc initWithData:data encoding:NSUTF8StringEncoding];
+            SEL originalSelector = NSSelectorFromString(method);
+            SEL swizzledSelector = @selector(sj_setContentOverlayInsets:andLeftMargin:rightMargin:);
+            
+            Method originalMethod = class_getInstanceMethod(cls, originalSelector);
+            Method swizzledMethod = class_getInstanceMethod(cls, swizzledSelector);
+            if ( originalMethod != NULL ) method_exchangeImplementations(originalMethod, swizzledMethod);
+        });
+    }
+}
+@end
+
+API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationSafeAreaFixing)
+- (BOOL)sj_containsPlayerView {
+    return [self.view viewWithTag:SJPresentViewTag] != nil ||
+           [self.view viewWithTag:SJPlayerViewTag] != nil;
+}
+
+- (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin {
+    SJSafeAreaInsetsMask mask = self.disabledAdjustSafeAreaInsetsMask;
+    if ( mask & SJSafeAreaInsetsMaskTop ) insets.top = 0;
+    if ( mask & SJSafeAreaInsetsMaskLeft ) insets.left = 0;
+    if ( mask & SJSafeAreaInsetsMaskBottom ) insets.bottom = 0;
+    if ( mask & SJSafeAreaInsetsMaskRight ) insets.right = 0;
+    
+    BOOL isFullscreen = self.view.bounds.size.width > self.view.bounds.size.height;
+    if ( ![self.class isKindOfClass:SJRotationFullscreenViewController_4.class] || isFullscreen ) {
+        if ( isFullscreen || insets.top != 0 || [self sj_containsPlayerView] == NO ) {
+            [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
+        }
+    }
+}
+
+- (void)setDisabledAdjustSafeAreaInsetsMask:(SJSafeAreaInsetsMask)disabledAdjustSafeAreaInsetsMask {
+    objc_setAssociatedObject(self, @selector(disabledAdjustSafeAreaInsetsMask), @(disabledAdjustSafeAreaInsetsMask), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (SJSafeAreaInsetsMask)disabledAdjustSafeAreaInsetsMask {
+    return [objc_getAssociatedObject(self, _cmd) integerValue];
+}
+@end
+
+API_AVAILABLE(ios(13.0)) @implementation UINavigationController (SJRotationSafeAreaFixing)
+- (BOOL)sj_containsPlayerView {
+    return [self.topViewController sj_containsPlayerView];
+}
+@end
+
+API_AVAILABLE(ios(13.0)) @implementation UITabBarController (SJRotationSafeAreaFixing)
+- (BOOL)sj_containsPlayerView {
+    UIViewController *vc = self.selectedIndex != NSNotFound ? self.selectedViewController : self.viewControllers.firstObject;
+    return [vc sj_containsPlayerView];
 }
 @end
