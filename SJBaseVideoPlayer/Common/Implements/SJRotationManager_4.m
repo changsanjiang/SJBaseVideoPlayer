@@ -704,8 +704,7 @@ API_AVAILABLE(ios(13.0)) @implementation SJRotationManager_4 (SJRotationSafeArea
 
 API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationSafeAreaFixing)
 - (BOOL)sj_containsPlayerView {
-    return [self.view viewWithTag:SJPresentViewTag] != nil ||
-           [self.view viewWithTag:SJPlayerViewTag] != nil;
+    return [self.view viewWithTag:SJPlayerViewTag] != nil;
 }
 
 - (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin {
