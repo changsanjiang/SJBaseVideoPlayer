@@ -565,6 +565,13 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 @property (nonatomic, getter=isFitOnScreen) BOOL fitOnScreen;
 
+///
+/// 是否仅在竖屏全屏与竖屏小屏之间切换, 不触发旋转.
+///
+///     注意: 开启后, 旋转功能将会失效.
+///
+@property (nonatomic) BOOL onlyFitOnScreen;
+
 /// Whether fullscreen or smallscreen, this method does not trigger rotation.
 /// 全屏或小屏, 此方法不触发旋转
 /// - animated : 是否动画
@@ -592,7 +599,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///         如果需要禁止自动旋转, 可以设置`player.rotationManager.disabledAutorotation = YES;`
 ///         了解更多请前往头文件查看
 ///
-@property (nonatomic, strong, null_resettable) id<SJRotationManager> rotationManager;
+@property (nonatomic, strong, nullable) id<SJRotationManager> rotationManager;
 
 ///
 /// 观察者
@@ -639,8 +646,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completion:(void (^ _Nullable)(__kindof SJBaseVideoPlayer *player))block;
 
-@property (nonatomic, readonly) BOOL isTransitioning;
-@property (nonatomic, readonly) BOOL isFullScreen;                              ///< 是否已全屏
+@property (nonatomic, readonly) BOOL isRotating;                                ///< 是否在旋转中
+@property (nonatomic, readonly) BOOL isFullscreen;                              ///< 是否已全屏
 @property (nonatomic, getter=isLockedScreen) BOOL lockedScreen;                 ///< 是否锁屏
 @property (nonatomic, readonly) UIInterfaceOrientation currentOrientation;      ///< 当前的方向
 @end

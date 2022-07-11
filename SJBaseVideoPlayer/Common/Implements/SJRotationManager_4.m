@@ -667,7 +667,9 @@ API_AVAILABLE(ios(16.0))
 - (void)setDisabledAutorotation:(BOOL)disabledAutorotation {
     if ( disabledAutorotation != self.isDisabledAutorotation ) {
         [super setDisabledAutorotation:disabledAutorotation];
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
         [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+#endif
     }
 }
 
@@ -677,7 +679,9 @@ API_AVAILABLE(ios(16.0))
 #endif
     if ( [self allowsRotation] ) {
         [self _rotationBegin];
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
         [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+#endif
     }
 }
 @end
