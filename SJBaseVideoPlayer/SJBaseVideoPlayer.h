@@ -22,7 +22,7 @@
 #import "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h"
 #import "SJGestureControllerDefines.h"
 #import "SJDeviceVolumeAndBrightnessManagerDefines.h"
-#import "SJFloatSmallViewControllerDefines.h"
+#import "SJSmallViewFloatingControllerDefines.h"
 #import "SJVideoDefinitionSwitchingInfo.h"
 #import "SJPromptingPopupControllerDefines.h"
 #import "SJPlaybackObservation.h"
@@ -725,27 +725,27 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 小浮窗控制
 ///
-/// 默认不启用, 当需要开启时, 请设置`player.floatSmallViewController.enabled = YES;`
+/// 默认不启用, 当需要开启时, 请设置`player.smallViewFloatingController.enabled = YES;`
 ///
 /// \code
 ///
 ///     // 1. 开启小浮窗控制. 滑动列表当视图消失时, 将显示小浮窗视图
-///     _player.floatSmallViewController.enabled = YES;
+///     _player.smallViewFloatingController.enabled = YES;
 ///     // 2. 设置单击小浮窗执行的block
-///     _player.floatSmallViewController.onSingleTapped = ...;
+///     _player.smallViewFloatingController.onSingleTapped = ...;
 ///     // 3. 设置双击小浮窗执行的block
-///     _player.floatSmallViewController.onDoubleTapped = ...;
+///     _player.smallViewFloatingController.onDoubleTapped = ...;
 ///
 ///     // more
-/// #import <SJBaseVideoPlayer/SJFloatSmallViewController.h>
+/// #import <SJBaseVideoPlayer/SJSmallViewFloatingController.h>
 ///
-///     SJFloatSmallViewController *floatSmallViewController = _player.floatSmallViewController;
-///     floatSmallViewController.layoutPosition = SJFloatViewLayoutPositionTopRight;
-///     floatSmallViewController.layoutInsets = UIEdgeInsetsMake(20, 12, 20, 12);
-///     floatSmallViewController.layoutSize = CGSize(300, 300 * 9 / 16.0);
+///     SJSmallViewFloatingController *smallViewFloatingController = _player.smallViewFloatingController;
+///     smallViewFloatingController.layoutPosition = SJSmallViewLayoutPositionTopRight;
+///     smallViewFloatingController.layoutInsets = UIEdgeInsetsMake(20, 12, 20, 12);
+///     smallViewFloatingController.layoutSize = CGSize(300, 300 * 9 / 16.0);
 /// \endcode
 ///
-@property (nonatomic, strong, null_resettable) id<SJFloatSmallViewController> floatSmallViewController;
+@property (nonatomic, strong, null_resettable) id<SJSmallViewFloatingController> smallViewFloatingController;
 
 ///
 /// 当开启小浮窗控制时, 播放结束后, 会默认隐藏小浮窗
