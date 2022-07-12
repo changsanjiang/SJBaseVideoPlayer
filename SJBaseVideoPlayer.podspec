@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SJBaseVideoPlayer'
-  s.version      = '3.7.0'
+  s.version      = '3.7.1'
   s.summary      = 'video player.'
   s.description  = 'https://github.com/changsanjiang/SJBaseVideoPlayer/blob/master/README.md'
   s.homepage     = 'https://github.com/changsanjiang/SJBaseVideoPlayer'
@@ -31,7 +31,7 @@ Pod::Spec.new do |s|
   
   s.subspec 'IJKPlayer' do |ss|
       ss.source_files = 'SJBaseVideoPlayer/IJKPlayer/**/*.{h,m}'
-      ss.dependency 'ijkplayerssl'
+      ss.dependency 'PodIJKPlayer'
       ss.dependency 'SJBaseVideoPlayer/Common'
   end
   

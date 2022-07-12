@@ -7,13 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#if __has_include(<IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>)
-#import <IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>
-#elif __has_include(<IJKMediaFramework/IJKMediaFramework.h>)
-#import <IJKMediaFramework/IJKMediaFramework.h>
-#else
-#import "IJKMediaFramework.h"
-#endif
+#import <PodIJKPlayer/PodIJKPlayer.h>
 #import "SJMediaPlaybackController.h"
 
 NS_ASSUME_NONNULL_BEGIN

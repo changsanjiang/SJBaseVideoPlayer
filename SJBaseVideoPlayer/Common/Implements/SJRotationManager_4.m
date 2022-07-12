@@ -30,6 +30,15 @@ _isSupportedOrientation(SJOrientationMask supportedOrientations, SJOrientation o
     return NO;
 }
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
+#else
+@protocol _SJ_IDE_InvisibleMethods <NSObject>
+- (instancetype)initWithInterfaceOrientations:(UIInterfaceOrientationMask)interfaceOrientations;
+- (void)setNeedsUpdateOfSupportedInterfaceOrientations;
+- (void)requestGeometryUpdateWithPreferences:(id)geometryPreferences errorHandler:(nullable void (^)(NSError * _Nonnull))errorHandler;
+@end
+#endif
+
 #pragma mark - observer
 
 
@@ -661,6 +670,23 @@ API_AVAILABLE(ios(16.0))
             [self _rotationEnd];
         }];
     }];
+#else
+    __weak typeof(self) _self = self;
+    Class cls = NSClassFromString(@"UIWindowSceneGeometryPreferencesIOS");
+    id preferences = [[cls alloc] initWithInterfaceOrientations:1 << orientation];
+    self.deviceOrientation = orientation;
+    [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+    [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
+        [self _rotationBegin];
+        [(id)self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
+            __strong typeof(_self) self = _self;
+            if ( !self ) return ;
+#ifdef DEBUG
+            NSLog(@"旋转失败: %@", error);
+#endif
+            [self _rotationEnd];
+        }];
+    }];
 #endif
 }
 
@@ -669,6 +695,8 @@ API_AVAILABLE(ios(16.0))
         [super setDisabledAutorotation:disabledAutorotation];
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
         [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+#else
+        [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
 #endif
     }
 }
@@ -681,6 +709,8 @@ API_AVAILABLE(ios(16.0))
         [self _rotationBegin];
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
         [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+#else
+        [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
 #endif
     }
 }
