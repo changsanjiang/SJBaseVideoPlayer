@@ -308,6 +308,63 @@ static NSNotificationName const SJRotationManagerTransitionNotification_4 = @"SJ
 
 #pragma mark - manager
 
+@interface SJRotationTransitionController : NSObject
+- (void)viewController:(SJRotationFullscreenViewController_4 *)viewController transitionToSize:(CGSize)size target:(UIView *)target superview:(UIView *)superview complete:(void(^)(void))block;
+@end
+
+@implementation SJRotationTransitionController
+- (void)viewController:(SJRotationFullscreenViewController_4 *)viewController transitionToSize:(CGSize)size target:(UIView *)target superview:(UIView *)superview complete:(void(^)(void))block {
+    __weak typeof(self) _self = self;
+    if ( size.width > size.height ) {
+        if ( target.superview != viewController.playerSuperview ) {
+            CGRect frame = [target convertRect:target.bounds toView:target.window];
+            viewController.playerSuperview.frame = frame; // t1
+            
+            target.frame = (CGRect){0, 0, frame.size};
+            target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            [viewController.playerSuperview addSubview:target]; // t2
+        }
+        
+        [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
+            [UIView animateWithDuration:0.3 animations:^{
+                __strong typeof(_self) self = _self;
+                if ( !self ) return ;
+                viewController.playerSuperview.frame = (CGRect){CGPointZero, size};
+            } completion:^(BOOL finished) {
+                __strong typeof(_self) self = _self;
+                if ( !self ) return ;
+                block();
+            }];
+        }];
+    }
+    else {
+        [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
+            [UIView animateWithDuration:0.3 animations:^{
+                __strong typeof(_self) self = _self;
+                if ( !self ) return ;
+                viewController.playerSuperview.frame = [superview convertRect:superview.bounds toView:superview.window];
+            } completion:^(BOOL finished) {
+                __strong typeof(_self) self = _self;
+                if ( !self ) return ;
+                UIView *snapshot = [target snapshotViewAfterScreenUpdates:NO];
+                snapshot.frame = superview.bounds;
+                snapshot.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+                [superview addSubview:snapshot];
+                [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
+                    [snapshot removeFromSuperview];
+                    __strong typeof(_self) self = _self;
+                    if ( !self ) return ;
+                    target.frame = superview.bounds;
+                    target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+                    [superview addSubview:target];
+                    block();
+                }];
+            }];
+        }];
+    }
+}
+@end
+
 @interface SJRotationManager_4_iOS_9_15 : SJRotationManager_4
 
 @end
@@ -339,6 +396,8 @@ API_AVAILABLE(ios(16.0))
 @property (nonatomic, strong) SJRotationFullscreenWindow_4 *window;
 @property (nonatomic, strong) SJRotationFullscreenViewController_4 *viewController;
 @property (nonatomic, weak, nullable) id<SJRotationManager_4Delegate> delegate;
+
+@property (nonatomic, strong) SJRotationTransitionController *transitionController;
 @end
 
 @implementation SJRotationManager_4
@@ -475,49 +534,19 @@ API_AVAILABLE(ios(16.0))
     _currentOrientation = _deviceOrientation;
     [self _transitionBegin];
     
-    if ( size.width > size.height ) {
-        if ( _target.superview != _viewController.playerSuperview ) {
-            CGRect frame = [_target convertRect:_target.bounds toView:_target.window];
-            _viewController.playerSuperview.frame = frame; // t1
-            
-            _target.frame = (CGRect){0, 0, frame.size};
-            _target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            [_viewController.playerSuperview addSubview:_target]; // t2
-        }
-        
-        [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
-            [UIView animateWithDuration:0.3 animations:^{
-                self->_viewController.playerSuperview.frame = (CGRect){CGPointZero, size};
-            } completion:^(BOOL finished) {
-                [self _transitionEnd];
-                [self _rotationEnd];
-            }];
-        }];
-    }
-    else {
-        [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
-            [UIView animateWithDuration:0.3 animations:^{
-                self->_viewController.playerSuperview.frame = [self->_superview convertRect:self->_superview.bounds toView:self->_superview.window];
-            } completion:^(BOOL finished) {
-                UIView *snapshot = [self->_target snapshotViewAfterScreenUpdates:NO];
-                snapshot.frame = self->_superview.bounds;
-                snapshot.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                [self->_superview addSubview:snapshot];
-                [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
-                    self->_target.frame = self->_superview.bounds;
-                    self->_target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                    [self->_superview addSubview:self->_target];
-                    [snapshot removeFromSuperview];
-                    [self _transitionEnd];
-                    [self _rotationEnd];
-                }];
-            }];
-        }];
-    }
+    _transitionController = [SJRotationTransitionController.alloc init];
+    __weak typeof(self) _self = self;
+    [_transitionController viewController:viewController transitionToSize:size target:_target superview:_superview complete:^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        [self _transitionEnd];
+        [self _rotationEnd];
+    }];
 }
 
 - (void)_rotationBegin {
-    _window.hidden = NO;
+    if ( _rotating ) return;
+    if ( _window.isHidden ) _window.hidden = NO;
     _rotating = YES;
     [UIView animateWithDuration:0.0 animations:^{ } completion:^(BOOL finished) {
         [self->_window.rootViewController setNeedsStatusBarAppearanceUpdate];
@@ -528,7 +557,7 @@ API_AVAILABLE(ios(16.0))
 - (void)_rotationEnd {
     _rotating = NO;
     _forcedrotation = NO;
-    if ( ![self isFullscreen] ) _window.hidden = YES;
+    if ( !_window.isHidden && ![self isFullscreen] ) _window.hidden = YES;
     if ( _completionHandler ) {
         _completionHandler(self);
         _completionHandler = nil;
@@ -639,6 +668,14 @@ API_AVAILABLE(ios(16.0))
 
 @implementation SJRotationManager_4_iOS_16_Later
 
+- (instancetype)_init {
+    self = [super _init];
+    if ( self ) {
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_onApplicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+    }
+    return self;
+}
+
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler {
 #ifdef DEBUG
     if ( !animated ) {
@@ -653,52 +690,32 @@ API_AVAILABLE(ios(16.0))
         [self _rotationEnd];
         return;
     }
-    
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
-    __weak typeof(self) _self = self;
-    UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
+
     self.deviceOrientation = orientation;
-    [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+    [self setNeedsUpdateOfSupportedInterfaceOrientations];
     [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
         [self _rotationBegin];
-        [self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
+        __weak typeof(self) _self = self;
+        [self requestGeometryUpdateWithOrientation:orientation errorHandler:^(NSError *error) {
             __strong typeof(_self) self = _self;
             if ( !self ) return ;
 #ifdef DEBUG
             NSLog(@"旋转失败: %@", error);
 #endif
-            [self _rotationEnd];
+            [self performSelectorOnMainThread:@selector(_rotationEnd) withObject:nil waitUntilDone:NO];
         }];
     }];
-#else
-    __weak typeof(self) _self = self;
-    Class cls = NSClassFromString(@"UIWindowSceneGeometryPreferencesIOS");
-    id preferences = [[cls alloc] initWithInterfaceOrientations:1 << orientation];
-    self.deviceOrientation = orientation;
-    [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
-    [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
-        [self _rotationBegin];
-        [(id)self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:^(NSError * _Nonnull error) {
-            __strong typeof(_self) self = _self;
-            if ( !self ) return ;
-#ifdef DEBUG
-            NSLog(@"旋转失败: %@", error);
-#endif
-            [self _rotationEnd];
-        }];
-    }];
-#endif
 }
 
 - (void)setDisabledAutorotation:(BOOL)disabledAutorotation {
     if ( disabledAutorotation != self.isDisabledAutorotation ) {
         [super setDisabledAutorotation:disabledAutorotation];
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
-        [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
-#else
-        [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
-#endif
+        [self setNeedsUpdateOfSupportedInterfaceOrientations];
     }
+}
+
+- (void)_onApplicationWillEnterForeground:(NSNotification *)note {
+    [self setNeedsUpdateOfSupportedInterfaceOrientations];
 }
 
 - (void)onDeviceOrientationChanged {
@@ -707,12 +724,29 @@ API_AVAILABLE(ios(16.0))
 #endif
     if ( [self allowsRotation] ) {
         [self _rotationBegin];
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
-        [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
-#else
-        [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
-#endif
+        [self setNeedsUpdateOfSupportedInterfaceOrientations];
     }
+}
+
+- (void)setNeedsUpdateOfSupportedInterfaceOrientations {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
+//    [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+//    [self.window.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+    [UIViewController attemptRotationToDeviceOrientation];
+#else
+    [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+    [(id)self.window setNeedsUpdateOfSupportedInterfaceOrientations];
+#endif
+}
+
+- (void)requestGeometryUpdateWithOrientation:(UIInterfaceOrientation)orientation errorHandler:(nullable void (^)(NSError *error))errorHandler {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
+    UIWindowSceneGeometryPreferencesIOS *preferences = [UIWindowSceneGeometryPreferencesIOS.alloc initWithInterfaceOrientations:1 << orientation];
+#else
+    Class cls = NSClassFromString(@"UIWindowSceneGeometryPreferencesIOS");
+    id preferences = [[cls alloc] initWithInterfaceOrientations:1 << orientation];
+#endif
+    [(id)self.window.windowScene requestGeometryUpdateWithPreferences:preferences errorHandler:errorHandler];
 }
 @end
 
