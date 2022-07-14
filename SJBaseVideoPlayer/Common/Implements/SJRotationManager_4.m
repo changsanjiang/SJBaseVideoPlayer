@@ -95,6 +95,7 @@ static NSNotificationName const SJRotationManagerTransitionNotification_4 = @"SJ
 - (BOOL)shouldAutorotate;
 - (BOOL)prefersStatusBarHidden;
 - (UIStatusBarStyle)preferredStatusBarStyle;
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator API_DEPRECATED("-UIWindow: window:onSizeChanged:", ios(9.0, 16.0));
 @end
 
 @interface SJRotationFullscreenView_4 : UIView
@@ -147,6 +148,12 @@ static NSNotificationName const SJRotationManagerTransitionNotification_4 = @"SJ
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation {
     return UIStatusBarAnimationNone;
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    if ( @available(iOS 16.0, *) ) return;
+    [_sj_4_delegate viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 @end
 
@@ -209,7 +216,7 @@ static NSNotificationName const SJRotationManagerTransitionNotification_4 = @"SJ
 
 @protocol SJRotationFullscreenWindow_4Delegate <NSObject>
 - (BOOL)window:(SJRotationFullscreenWindow_4 *)window pointInside:(CGPoint)point withEvent:(UIEvent *_Nullable)event;
-- (void)window:(SJRotationFullscreenWindow_4 *)window onSizeChanged:(CGSize)size;
+- (void)window:(SJRotationFullscreenWindow_4 *)window onSizeChanged:(CGSize)size API_AVAILABLE(ios(16.0));
 @end
 
 
@@ -267,14 +274,14 @@ static NSNotificationName const SJRotationManagerTransitionNotification_4 = @"SJ
 - (void)setBounds:(CGRect)bounds {
     if ( !CGRectEqualToRect(bounds, self.bounds) ) {
         [super setBounds:bounds];
-        [_sj_4_delegate window:self onSizeChanged:bounds.size];
+        if ( @available(iOS 16.0, *) ) [_sj_4_delegate window:self onSizeChanged:bounds.size];
     }
 }
 
 - (void)setFrame:(CGRect)frame {
     if ( !CGRectEqualToRect(frame, self.frame) ) {
         [super setFrame:frame];
-        [_sj_4_delegate window:self onSizeChanged:frame.size];
+        if ( @available(iOS 16.0, *) ) [_sj_4_delegate window:self onSizeChanged:frame.size];
     }
 }
 
@@ -307,11 +314,6 @@ static NSNotificationName const SJRotationManagerTransitionNotification_4 = @"SJ
 @end
 
 #pragma mark - manager
-
-@protocol SJRotationTransitionController <NSObject>
-- (void)viewController:(SJRotationFullscreenViewController_4 *)viewController transitionToSize:(CGSize)size target:(UIView *)target superview:(UIView *)superview complete:(void(^)(void))block;
-@end
-
 
 @interface SJRotationManager_4_iOS_9_15 : SJRotationManager_4
 
@@ -494,14 +496,32 @@ API_AVAILABLE(ios(16.0))
     return NO;
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator API_DEPRECATED("-UIWindow: window:onSizeChanged:", ios(9.0, 16.0)) {
+    if ( !_rotating ) return;
+    [self _transitionBegin];
+    __weak typeof(self) _self = self;
+    [self transitionToSize:size complete:^{
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        [self _transitionEnd];
+        [self _rotationEnd];
+    }];
+}
+
 - (void)transitionToSize:(CGSize)size complete:(void(^)(void))block {
     // subclass
 }
 
 - (void)_rotationBegin {
     if ( _rotating ) return;
-    _rotating = YES;
-    if ( _window.isHidden ) _window.hidden = NO;
+    if ( @available(iOS 16.0, *) ) {
+        _rotating = YES;
+        if ( _window.isHidden ) _window.hidden = NO;
+    }
+    else {
+        if ( _window.isHidden ) _window.hidden = NO;
+        _rotating = YES;
+    }
     _currentOrientation = _deviceOrientation;
     [UIView animateWithDuration:0.0 animations:^{ } completion:^(BOOL finished) {
         [self->_window.rootViewController setNeedsStatusBarAppearanceUpdate];
