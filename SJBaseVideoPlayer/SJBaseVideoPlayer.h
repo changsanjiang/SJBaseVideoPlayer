@@ -91,7 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 ///         default value is YES
 ///
-@property (nonatomic) BOOL hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
+@property (nonatomic) BOOL automaticallyHidesPlaceholderImageView;
 
 ///
 /// 将要隐藏占位图时, 延迟多少秒才去隐藏
@@ -234,10 +234,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// 关于后台播放视频, 引用自: https://juejin.im/post/5a38e1a0f265da4327185a26
 ///
 /// 当您想在后台播放视频时:
-/// 1. 需要设置 videoPlayer.pauseWhenAppDidEnterBackground = NO; (该值默认为YES, 即App进入后台默认暂停).
+/// 1. 需要设置 videoPlayer.pausedInBackground = NO; (该值默认为YES, 即App进入后台默认暂停).
 /// 2. 前往 `TARGETS` -> `Capability` -> enable `Background Modes` -> select this mode `Audio, AirPlay, and Picture in Picture`
 ///
-@property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
+@property (nonatomic, getter=isPausedInBackground) BOOL pausedInBackground; ///< 进入后台是否暂停;
 @property (nonatomic) BOOL autoplayWhenSetNewAsset;                    ///< 设置新的资源后, 是否自动调用播放. 默认为 YES
 @property (nonatomic) BOOL resumePlaybackWhenAppDidEnterForeground;    ///< 进入前台时, 是否恢复播放. 默认为 NO
 @property (nonatomic) BOOL resumePlaybackWhenPlayerHasFinishedSeeking; ///< 当`seekToTime:`操作完成后, 是否恢复播放. 默认为 YES
@@ -759,7 +759,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// - default value is YES.
 ///
-@property (nonatomic) BOOL pauseWhenScrollDisappeared;
+@property (nonatomic) BOOL pausedWhenScrollDisappeared;
 
 ///
 /// 滚动进入时, 是否恢复播放. 默认为YES

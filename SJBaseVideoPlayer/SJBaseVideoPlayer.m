@@ -60,13 +60,13 @@ typedef struct _SJPlayerControlInfo {
     } gestureController;
 
     struct {
-        BOOL needToHiddenWhenPlayerIsReadyForDisplay;
+        BOOL automaticallyHides;
         NSTimeInterval delayHidden;
     } placeholder;
     
     struct {
         BOOL isScrollAppeared;
-        BOOL pauseWhenScrollDisappeared;
+        BOOL pausedWhenScrollDisappeared;
         BOOL hiddenPlayerViewWhenScrollDisappeared;
         BOOL resumePlaybackWhenScrollAppeared;
     } scrollControl;
@@ -193,9 +193,9 @@ typedef struct _SJPlayerControlInfo {
     self = [super init];
     if ( !self ) return nil;
     _controlInfo = (_SJPlayerControlInfo *)calloc(1, sizeof(struct _SJPlayerControlInfo));
-    _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay = YES;
+    _controlInfo->placeholder.automaticallyHides = YES;
     _controlInfo->placeholder.delayHidden = 0.8;
-    _controlInfo->scrollControl.pauseWhenScrollDisappeared = YES;
+    _controlInfo->scrollControl.pausedWhenScrollDisappeared = YES;
     _controlInfo->scrollControl.hiddenPlayerViewWhenScrollDisappeared = YES;
     _controlInfo->scrollControl.resumePlaybackWhenScrollAppeared = YES;
     _controlInfo->playbackControl.autoplayWhenSetNewAsset = YES;
@@ -708,7 +708,7 @@ typedef struct _SJPlayerControlInfo {
 
 - (void)_showOrHiddenPlaceholderImageViewIfNeeded {
     if ( _playbackController.isReadyForDisplay ) {
-        if ( _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay ) {
+        if ( _controlInfo->placeholder.automaticallyHides ) {
             NSTimeInterval delay = _URLAsset.original != nil ? 0 : _controlInfo->placeholder.delayHidden;
             BOOL animated = _URLAsset.original == nil;
             [self.presentView hidePlaceholderImageViewAnimated:animated delay:delay];
@@ -877,11 +877,11 @@ typedef struct _SJPlayerControlInfo {
     return _presentView;
 }
 
-- (void)setHiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay:(BOOL)isHidden {
-    _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay = isHidden;
+- (void)setAutomaticallyHidesPlaceholderImageView:(BOOL)isHidden {
+    _controlInfo->placeholder.automaticallyHides = isHidden;
 }
-- (BOOL)hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay {
-    return _controlInfo->placeholder.needToHiddenWhenPlayerIsReadyForDisplay;
+- (BOOL)automaticallyHidesPlaceholderImageView {
+    return _controlInfo->placeholder.automaticallyHides;
 }
 
 
@@ -1095,11 +1095,11 @@ typedef struct _SJPlayerControlInfo {
 }
 
 - (void)_tryToPlayIfNeeded {
-    if ( self.registrar.state == SJVideoPlayerAppState_Background && self.pauseWhenAppDidEnterBackground )
+    if ( self.registrar.state == SJVideoPlayerAppState_Background && self.isPausedInBackground )
         return;
     if ( _controlInfo->playbackControl.autoplayWhenSetNewAsset == NO )
         return;
-    if ( self.isPlayOnScrollView && self.isScrollAppeared == NO && self.pauseWhenScrollDisappeared )
+    if ( self.isPlayOnScrollView && self.isScrollAppeared == NO && self.pausedWhenScrollDisappeared )
         return;
     
     [self play];
@@ -1149,10 +1149,10 @@ typedef struct _SJPlayerControlInfo {
     return _controlInfo->playbackControl.autoplayWhenSetNewAsset;
 }
 
-- (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
-    self.playbackController.pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
+- (void)setPausedInBackground:(BOOL)pausedInBackground {
+    self.playbackController.pauseWhenAppDidEnterBackground = pausedInBackground;
 }
-- (BOOL)pauseWhenAppDidEnterBackground {
+- (BOOL)isPausedInBackground {
     return self.playbackController.pauseWhenAppDidEnterBackground;
 }
 
@@ -1186,7 +1186,7 @@ typedef struct _SJPlayerControlInfo {
     if ( self.canPlayAnAsset && !self.canPlayAnAsset(self) )
         return;
     
-    if ( self.registrar.state == SJVideoPlayerAppState_Background && self.pauseWhenAppDidEnterBackground ) return;
+    if ( self.registrar.state == SJVideoPlayerAppState_Background && self.isPausedInBackground ) return;
 
     _controlInfo->playbackControl.isUserPaused = NO;
     
@@ -2100,11 +2100,11 @@ typedef struct _SJPlayerControlInfo {
     return _controlInfo->floatSmallViewControl.hiddenFloatSmallViewWhenPlaybackFinished;
 }
 
-- (void)setPauseWhenScrollDisappeared:(BOOL)pauseWhenScrollDisappeared {
-    _controlInfo->scrollControl.pauseWhenScrollDisappeared = pauseWhenScrollDisappeared;
+- (void)setPausedWhenScrollDisappeared:(BOOL)pausedWhenScrollDisappeared {
+    _controlInfo->scrollControl.pausedWhenScrollDisappeared = pausedWhenScrollDisappeared;
 }
-- (BOOL)pauseWhenScrollDisappeared {
-    return _controlInfo->scrollControl.pauseWhenScrollDisappeared;
+- (BOOL)pausedWhenScrollDisappeared {
+    return _controlInfo->scrollControl.pausedWhenScrollDisappeared;
 }
 
 - (void)setHiddenViewWhenScrollDisappeared:(BOOL)hiddenViewWhenScrollDisappeared {
@@ -2353,7 +2353,7 @@ typedef struct _SJPlayerControlInfo {
     if ( _smallViewFloatingController.isEnabled ) {
         [_smallViewFloatingController show];
     }
-    else if ( _controlInfo->scrollControl.pauseWhenScrollDisappeared ) {
+    else if ( _controlInfo->scrollControl.pausedWhenScrollDisappeared ) {
         [self pause];
     }
     
