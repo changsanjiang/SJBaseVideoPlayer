@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "SJRotationManager_4.h"
 
 @interface AppDelegate ()
 
@@ -19,6 +20,6 @@
 }
 
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
-    return UIInterfaceOrientationMaskAll;
+    return window.sj_4_supportedInterfaceOrientations;
 }
 @end

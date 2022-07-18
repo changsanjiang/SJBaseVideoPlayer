@@ -40,7 +40,7 @@
     
     _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:[NSURL URLWithString:@"https://dh2.v.netease.com/2017/cg/fxtpty.mp4"]];
     
-    _player.pauseWhenAppDidEnterBackground = NO;
+    _player.pausedInBackground = NO;
     
 //    [_player rotation];
     
