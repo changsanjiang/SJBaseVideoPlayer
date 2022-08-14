@@ -8,8 +8,7 @@
 
 #import "SJBaseVideoPlayer.h"
 #import <objc/message.h>
-#import "SJRotationManager_4.h"
-#import "SJRotationManagerInternal_4.h"
+#import "SJRotationManager.h"
 #import "SJDeviceVolumeAndBrightnessManager.h"
 #import "SJVideoPlayerRegistrar.h"
 #import "SJVideoPlayerPresentView.h"
@@ -692,9 +691,9 @@ typedef struct _SJPlayerControlInfo {
     _viewControllerManager.presentView = self.presentView;
     _viewControllerManager.lockedScreen = self.isLockedScreen;
     
-    if ( [_rotationManager isKindOfClass:SJRotationManager_4.class] ) {
-        SJRotationManager_4 *mgr = _rotationManager;
-        mgr.delegate = _viewControllerManager;
+    if ( [_rotationManager isKindOfClass:SJRotationManager.class] ) {
+        SJRotationManager *mgr = _rotationManager;
+        mgr.actionForwarder = _viewControllerManager;
     }
 }
 
@@ -1859,8 +1858,8 @@ typedef struct _SJPlayerControlInfo {
 
 - (nullable id<SJRotationManager>)rotationManager {
     if ( _rotationManager == nil && !self.onlyFitOnScreen ) {
-        SJRotationManager_4 *defaultManager = [SJRotationManager_4 rotationManager];
-        defaultManager.delegate = self.viewControllerManager;
+        SJRotationManager *defaultManager = [SJRotationManager rotationManager];
+        defaultManager.actionForwarder = self.viewControllerManager;
         [self _setupRotationManager:defaultManager];
     }
     return _rotationManager;
