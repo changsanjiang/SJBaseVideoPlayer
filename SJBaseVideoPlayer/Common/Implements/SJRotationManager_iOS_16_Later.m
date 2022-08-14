@@ -64,6 +64,8 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
     UIWindow *sourceWindow = self.superview.window;
     CGRect sourceFrame = [self.superview convertRect:self.superview.bounds toView:sourceWindow];
     
+    NSLog(@"%@, - %@", NSStringFromCGRect(self.superview.superview.frame), NSStringFromUIEdgeInsets(sourceWindow.safeAreaInsets));
+    
     // prepare
     CGRect screenBounds = UIScreen.mainScreen.bounds;
     CGFloat maxSize = MAX(screenBounds.size.width, screenBounds.size.height);
@@ -102,6 +104,9 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
     // bounds & center
     switch ( toOrientation ) {
         case SJOrientation_Portrait: {
+            
+            NSLog(@"%@", NSStringFromCGRect(sourceFrame));
+            
             rotationBounds = (CGRect){ CGPointZero, sourceFrame.size };
             rotationCenter = (CGPoint){
                 sourceFrame.origin.x + rotationBounds.size.width * 0.5,
@@ -187,13 +192,6 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
             if ( completionHandler != nil ) completionHandler(self);
         }];
     }];
-}
-
-- (void)rotationBegin {
-    [super rotationBegin];
-//    [UIView animateWithDuration:0.0 animations:^{ } completion:^(BOOL finished) {
-//        [self.window.rootViewController setNeedsStatusBarAppearanceUpdate];
-//    }];
 }
 
 - (void)setNeedsUpdateOfSupportedInterfaceOrientations {

@@ -55,10 +55,10 @@ typedef NS_OPTIONS(NSUInteger, SJSafeAreaInsetsMask) {
     SJSafeAreaInsetsMaskHorizontal = SJSafeAreaInsetsMaskLeft | SJSafeAreaInsetsMaskRight,
     SJSafeAreaInsetsMaskVertical = SJSafeAreaInsetsMaskTop | SJSafeAreaInsetsMaskRight,
     SJSafeAreaInsetsMaskAll = SJSafeAreaInsetsMaskHorizontal | SJSafeAreaInsetsMaskVertical
-} NS_AVAILABLE_IOS(13.0);
+} API_DEPRECATED("deprecated!", ios(13.0, 16.0)) ;
 
 
-API_AVAILABLE(ios(13.0)) @interface UIViewController (SJRotationSafeAreaFixing)
+API_DEPRECATED("deprecated!", ios(13.0, 16.0)) @interface UIViewController (SJRotationSafeAreaFixing)
 /// 禁止调整哪些方向的安全区
 @property (nonatomic) SJSafeAreaInsetsMask disabledAdjustSafeAreaInsetsMask;
 @end

@@ -36,6 +36,7 @@
             self->_active = YES;
         };
         _active = UIApplication.sharedApplication.applicationState == UIApplicationStateActive;
+        [self _observeNotifies];
     }
     return self;
 }
@@ -307,13 +308,16 @@
 #import <objc/message.h>
 #import "SJBaseVideoPlayerConst.h"
 
-API_AVAILABLE(ios(13.0)) @protocol _UIViewControllerSafeAreaFixingHooks <NSObject>
+API_DEPRECATED("deprecated!", ios(13.0, 16.0)) @protocol _UIViewControllerSafeAreaFixingHooks <NSObject>
 - (void)_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
 - (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
 @end
 
-API_AVAILABLE(ios(13.0)) @implementation SJRotationManager (SJRotationSafeAreaFixing)
+API_DEPRECATED("deprecated!", ios(13.0, 16.0)) @implementation SJRotationManager (SJRotationSafeAreaFixing)
 + (void)initialize {
+    if ( @available(iOS 16.0, *) )
+        return;
+    
     if ( @available(iOS 13.0, *) ) {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
@@ -331,11 +335,7 @@ API_AVAILABLE(ios(13.0)) @implementation SJRotationManager (SJRotationSafeAreaFi
 }
 @end
 
-API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationSafeAreaFixing)
-- (BOOL)sj_containsPlayerView {
-    return [self.view viewWithTag:SJPlayerViewTag] != nil || [self.view viewWithTag:SJPresentViewTag];
-}
-
+API_DEPRECATED("deprecated!", ios(13.0, 16.0)) @implementation UIViewController (SJRotationSafeAreaFixing)
 - (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin {
     SJSafeAreaInsetsMask mask = self.disabledAdjustSafeAreaInsetsMask;
     if ( mask & SJSafeAreaInsetsMaskTop ) insets.top = 0;
@@ -343,11 +343,24 @@ API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationSafeAreaFix
     if ( mask & SJSafeAreaInsetsMaskBottom ) insets.bottom = 0;
     if ( mask & SJSafeAreaInsetsMaskRight ) insets.right = 0;
     
-    BOOL isFullscreen = self.view.bounds.size.width > self.view.bounds.size.height;
-    if ( ![self.class isKindOfClass:SJRotationFullscreenViewController.class] || isFullscreen ) {
-        if ( isFullscreen || insets.top != 0 || [self sj_containsPlayerView] == NO ) {
+//    BOOL isFullscreen = self.view.bounds.size.width > self.view.bounds.size.height;
+//    if ( ![self.class isKindOfClass:SJRotationFullscreenViewController.class] || isFullscreen ) {
+//        if ( isFullscreen || insets.top != 0 || [self sj_containsPlayerView] == NO ) {
+//            [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
+//        }
+//    }
+    
+    UIWindow *keyWindow = UIApplication.sharedApplication.keyWindow;
+    UIWindow *otherWindow = self.view.window;
+    if ( [keyWindow isKindOfClass:SJRotationFullscreenWindow.class] && otherWindow != nil ) {
+        SJRotationManager *manager = ((SJRotationFullscreenWindow *)keyWindow).rotationManager;
+        UIWindow *superviewWindow = manager.superview.window;
+        if ( superviewWindow != otherWindow ) {
             [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
         }
+    }
+    else {
+        [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
     }
 }
 
@@ -357,18 +370,5 @@ API_AVAILABLE(ios(13.0)) @implementation UIViewController (SJRotationSafeAreaFix
 
 - (SJSafeAreaInsetsMask)disabledAdjustSafeAreaInsetsMask {
     return [objc_getAssociatedObject(self, _cmd) integerValue];
-}
-@end
-
-API_AVAILABLE(ios(13.0)) @implementation UINavigationController (SJRotationSafeAreaFixing)
-- (BOOL)sj_containsPlayerView {
-    return [self.topViewController sj_containsPlayerView];
-}
-@end
-
-API_AVAILABLE(ios(13.0)) @implementation UITabBarController (SJRotationSafeAreaFixing)
-- (BOOL)sj_containsPlayerView {
-    UIViewController *vc = self.selectedIndex != NSNotFound ? self.selectedViewController : self.viewControllers.firstObject;
-    return [vc sj_containsPlayerView];
 }
 @end

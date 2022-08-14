@@ -7,11 +7,10 @@
 //
 
 #import "SJRotationManager_iOS_9_15.h"
-#import "SJBaseVideoPlayerConst.h"
-#import "UIView+SJBaseVideoPlayerExtended.h"
 #import "SJRotationFullscreenViewController.h"
 #import "SJRotationManagerInternal.h"
 #import "SJRotationDefines.h"
+#import "UIView+SJBaseVideoPlayerExtended.h"
 @class SJRotationFullscreenViewController_iOS_9_15;
 
 API_DEPRECATED("deprecated!", ios(9.0, 16.0)) @protocol SJRotationFullscreenViewControllerDelegate_iOS_9_15 <SJRotationFullscreenViewControllerDelegate>
@@ -125,22 +124,21 @@ API_DEPRECATED("deprecated!", ios(9.0, 16.0)) @interface SJRotationFullscreenVie
 
 - (void)rotationFullscreenViewController:(SJRotationFullscreenViewController_iOS_9_15 *)viewController viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [self transitionBegin];
-    UIView *sourceView = self.target;
-    UIView *sourceSuperview = self.superview;
-    UIView *targetSuperview = self.rotationFullscreenViewController.playerSuperview;
-    if ( size.width > size.height ) {
-        if ( sourceView.superview != targetSuperview ) {
-            CGRect frame = [sourceView convertRect:sourceView.bounds toView:sourceView.window];
-            targetSuperview.frame = frame; // t1
+    if ( self.currentOrientation != SJOrientation_Portrait ) {
+        if ( self.target.superview != self.rotationFullscreenViewController.playerSuperview ) {
+            CGRect frame = [self.target convertRect:self.target.bounds toView:self.target.window];
+            self.rotationFullscreenViewController.playerSuperview.frame = frame; // t1
             
-            sourceView.frame = (CGRect){0, 0, frame.size};
-            sourceView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            [targetSuperview addSubview:sourceView]; // t2
+            self.target.frame = (CGRect){0, 0, frame.size};
+            self.target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            [self.rotationFullscreenViewController.playerSuperview addSubview:self.target]; // t2
+            [self.target layoutIfNeeded];
         }
         
         [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
             [UIView animateWithDuration:0.3 animations:^{
-                targetSuperview.frame = (CGRect){CGPointZero, size};
+                self.rotationFullscreenViewController.playerSuperview.frame = (CGRect){CGPointZero, size};
+                [self.target layoutIfNeeded];
             } completion:^(BOOL finished) {
                 [self transitionEnd];
                 [self rotationEnd];
@@ -148,18 +146,21 @@ API_DEPRECATED("deprecated!", ios(9.0, 16.0)) @interface SJRotationFullscreenVie
         }];
     }
     else {
+        [self _fixNavigationBarLayout];
         [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
             [UIView animateWithDuration:0.3 animations:^{
-                targetSuperview.frame = [sourceSuperview convertRect:sourceSuperview.bounds toView:sourceSuperview.window];
+                self.rotationFullscreenViewController.playerSuperview.frame = [self.superview convertRect:self.superview.bounds toView:self.superview.window];
+                [self.target layoutIfNeeded];
             } completion:^(BOOL finished) {
-                UIView *snapshot = [sourceView snapshotViewAfterScreenUpdates:NO];
-                snapshot.frame = sourceSuperview.bounds;
+                UIView *snapshot = [self.target snapshotViewAfterScreenUpdates:NO];
+                snapshot.frame = self.superview.bounds;
                 snapshot.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                [sourceSuperview addSubview:snapshot];
+                [self.superview addSubview:snapshot];
                 [UIView animateWithDuration:0.0 animations:^{ /* preparing */ } completion:^(BOOL finished) {
-                    sourceView.frame = sourceSuperview.bounds;
-                    sourceView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-                    [sourceSuperview addSubview:sourceView];
+                    self.target.frame = self.superview.bounds;
+                    self.target.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+                    [self.superview addSubview:self.target];
+                    [self.target layoutIfNeeded];
                     [snapshot removeFromSuperview];
                     [self transitionEnd];
                     [self rotationEnd];
@@ -168,4 +169,13 @@ API_DEPRECATED("deprecated!", ios(9.0, 16.0)) @interface SJRotationFullscreenVie
         }];
     }
 }
+
+- (void)_fixNavigationBarLayout {
+    if ( self.currentOrientation == SJOrientation_Portrait ) {
+        UINavigationController *nav = [self.superview lookupResponderForClass:UINavigationController.class];
+        [nav viewDidAppear:NO];
+        [nav.navigationBar layoutSubviews];
+    }
+}
+
 @end
