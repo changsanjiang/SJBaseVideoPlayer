@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SJRotationManager.h""
+#import "SJRotationManager.h"
 @protocol SJRotationFullscreenWindowDelegate;
 
 NS_ASSUME_NONNULL_BEGIN
