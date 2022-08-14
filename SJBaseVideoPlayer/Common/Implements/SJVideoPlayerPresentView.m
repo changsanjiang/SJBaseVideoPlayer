@@ -433,6 +433,6 @@
 }
 
 - (BOOL)_isGestureSupported:(SJPlayerGestureTypeMask)type {
-    return (_supportedGestureTypes & type) == type;
+    return _supportedGestureTypes & type;
 }
 @end

@@ -7,7 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#if __has_include(<IJKMediaFramework/IJKMediaFramework.h>)
+#import <IJKMediaFramework/IJKMediaFramework.h>
+#else
 #import <PodIJKPlayer/PodIJKPlayer.h>
+#endif
 #import "SJMediaPlaybackController.h"
 
 NS_ASSUME_NONNULL_BEGIN
