@@ -31,8 +31,8 @@ typedef NS_OPTIONS(NSUInteger, SJPlayerGestureTypeMask) {
     SJPlayerGestureTypeMask_Pinch       = 1 << SJPlayerGestureType_Pinch,
     SJPlayerGestureTypeMask_LongPress   = 1 << SJPlayerGestureType_LongPress,
     
-    SJPlayerGestureTypeMask_Pan_H       = SJPlayerGestureTypeMask_Pan | 0, // 水平方向
-    SJPlayerGestureTypeMask_Pan_V       = SJPlayerGestureTypeMask_Pan | 1, // 垂直方向
+    SJPlayerGestureTypeMask_Pan_H       = SJPlayerGestureTypeMask_Pan | 0x100, // 水平方向
+    SJPlayerGestureTypeMask_Pan_V       = SJPlayerGestureTypeMask_Pan | 0x200, // 垂直方向
     
     SJPlayerGestureTypeMask_Default = SJPlayerGestureTypeMask_SingleTap | SJPlayerGestureTypeMask_DoubleTap | SJPlayerGestureTypeMask_Pan | SJPlayerGestureTypeMask_Pinch,
     SJPlayerGestureTypeMask_All = SJPlayerGestureTypeMask_Default | SJPlayerGestureTypeMask_LongPress,

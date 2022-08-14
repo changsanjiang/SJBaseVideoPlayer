@@ -168,7 +168,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 + (NSString *)version {
-    return @"v3.7.2";
+    return @"v3.7.3";
 }
 
 - (void)setVideoGravity:(SJVideoGravity)videoGravity {
@@ -2353,7 +2353,14 @@ typedef struct _SJPlayerControlInfo {
         [_smallViewFloatingController show];
     }
     else if ( _controlInfo->scrollControl.pausedWhenScrollDisappeared ) {
-        [self pause];
+        if (@available(iOS 14.0, *)) {
+            if ( _playbackController.pictureInPictureStatus != SJPictureInPictureStatusRunning ) {
+                [self pause];
+            }
+        }
+        else {
+            [self pause];
+        }
     }
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerWillDisappearInScrollView:)] ) {
