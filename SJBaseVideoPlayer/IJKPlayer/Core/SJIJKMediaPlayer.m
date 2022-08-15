@@ -1,16 +1,19 @@
 //
 //  SJIJKMediaPlayer.m
-//  SJVideoPlayer_Example
+//  SJBaseVideoPlayer.common-IJKPlayer
 //
-//  Created by BlueDancer on 2019/10/12.
-//  Copyright © 2019 changsanjiang. All rights reserved.
+//  Created by 畅三江 on 2022/8/15.
 //
 
 #import "SJIJKMediaPlayer.h"
+#if __has_include(<IJKMediaFramework/IJKMediaFramework.h>)
+#import <IJKMediaFramework/IJKMediaFramework.h>
+#else
+#import <PodIJKPlayer/PodIJKPlayer.h>
+#endif
 #import "NSTimer+SJAssetAdd.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
 NSErrorDomain const SJIJKMediaPlayerErrorDomain = @"SJIJKMediaPlayerErrorDomain";
 
 typedef struct {
@@ -20,6 +23,7 @@ typedef struct {
 
 
 @interface SJIJKMediaPlayer ()
+@property (nonatomic, strong) IJKFFMoviePlayerController *player;
 @property (nonatomic, strong, nullable) NSError *error;
 @property (nonatomic) SJIJKMediaPlaybackFinishedInfo playbackFinishedInfo;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
@@ -60,34 +64,35 @@ typedef struct {
 }
 
 - (instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition options:(nonnull IJKFFOptions *)ops {
-    self = [super initWithContentURL:URL withOptions:ops];
+    self = [super init];
     if ( self ) {
         _volume = 1;
         _rate = 1;
         _URL = URL;
         _startPosition = startPosition;
         _needsSeekToStartPosition = startPosition != 0;
-        
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_preparedToPlayDidChange:) name:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification object:self];
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_playbackDidFinish:) name:IJKMPMoviePlayerPlaybackDidFinishNotification object:self];
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_playbackStateDidChange:) name:IJKMPMoviePlayerPlaybackStateDidChangeNotification object:self];
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_loadStateDidChange:) name:IJKMPMoviePlayerLoadStateDidChangeNotification object:self];
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_naturalSizeAvailable:) name:IJKMPMovieNaturalSizeAvailableNotification object:self];
-        
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_didSeekComplete:) name:IJKMPMoviePlayerDidSeekCompleteNotification object:self];
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_seekRenderingStart:) name:IJKMPMoviePlayerSeekAudioStartNotification object:self];
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_seekRenderingStart:) name:IJKMPMoviePlayerSeekVideoStartNotification object:self];
+        _assetStatus = SJAssetStatusPreparing;
 
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_firstVideoFrameRendered:) name:IJKMPMoviePlayerFirstVideoFrameRenderedNotification object:self];
+        _player = [IJKFFMoviePlayerController.alloc initWithContentURL:URL withOptions:ops];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_preparedToPlayDidChange:) name:IJKMPMediaPlaybackIsPreparedToPlayDidChangeNotification object:_player];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_playbackDidFinish:) name:IJKMPMoviePlayerPlaybackDidFinishNotification object:_player];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_playbackStateDidChange:) name:IJKMPMoviePlayerPlaybackStateDidChangeNotification object:_player];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_loadStateDidChange:) name:IJKMPMoviePlayerLoadStateDidChangeNotification object:_player];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_naturalSizeAvailable:) name:IJKMPMovieNaturalSizeAvailableNotification object:_player];
+        
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_didSeekComplete:) name:IJKMPMoviePlayerDidSeekCompleteNotification object:_player];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_seekRenderingStart:) name:IJKMPMoviePlayerSeekAudioStartNotification object:_player];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_seekRenderingStart:) name:IJKMPMoviePlayerSeekVideoStartNotification object:_player];
+
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_firstVideoFrameRendered:) name:IJKMPMoviePlayerFirstVideoFrameRenderedNotification object:_player];
         
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_audioSessionInterruption:) name:AVAudioSessionInterruptionNotification object:nil];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_audioSessionRouteChange:) name:AVAudioSessionRouteChangeNotification object:nil];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_willEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
         
-        [self setPauseInBackground:NO];
-        self.shouldAutoplay = NO;
-        self.assetStatus = SJAssetStatusPreparing;
-        [self prepareToPlay];
+        [_player setPauseInBackground:NO];
+        [_player setShouldAutoplay:NO];
+        [_player prepareToPlay];
     }
     return self;
 }
@@ -97,7 +102,9 @@ typedef struct {
     NSLog(@"%d \t %s", (int)__LINE__, __func__);
 #endif
     [_refreshTimer invalidate];
-    [self.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
+    [_player.view performSelectorOnMainThread:@selector(removeFromSuperview) withObject:nil waitUntilDone:YES];
+    [_player stop];
+    [_player shutdown];
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
@@ -107,7 +114,7 @@ typedef struct {
     [self seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
         __strong typeof(_self) self = _self;
         if ( !self ) return;
-        if ( self.playbackState != IJKMPMoviePlaybackStatePlaying )
+        if ( self.player.playbackState != IJKMPMoviePlaybackStatePlaying )
             [self play];
         
         [self _postNotification:SJMediaPlayerDidReplayNotification];
@@ -131,25 +138,25 @@ typedef struct {
         self.reasonForWaitingToPlay = SJWaitingWhileEvaluatingBufferingRateReason;
         self.timeControlStatus = SJPlaybackTimeControlStatusWaitingToPlay;
         
-        [super play];
+        [_player play];
     }
     
-    self.playbackRate = _rate;
+    _player.playbackRate = _rate;
 }
 
 - (void)pause {
     self.reasonForWaitingToPlay = nil;
     self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
     
-    [super pause];
-    self.playbackRate = 0;
+    [_player pause];
+    _player.playbackRate = 0;
 }
 
 - (void)stop {
     self.reasonForWaitingToPlay = nil;
     self.timeControlStatus = SJPlaybackTimeControlStatusPaused;
-    [super stop];
-    [self shutdown];
+    [_player stop];
+    [_player shutdown];
 
 //    https://github.com/bilibili/ijkplayer/blob/cced91e3ae3730f5c63f3605b00d25eafcf5b97b/ios/IJKMediaPlayer/IJKMediaPlayer/IJKFFMoviePlayerController.m#L434
 //
@@ -207,17 +214,17 @@ typedef struct {
     if ( isPlaybackEnded ) {
         [self play];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.05 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            self.currentPlaybackTime = secs;
+            self.player.currentPlaybackTime = secs;
         });
     }
     else {
-        self.currentPlaybackTime = secs;
+        self.player.currentPlaybackTime = secs;
         [self play];
     }
 }
 
 - (nullable UIImage *)screenshot {
-    return self.thumbnailImageAtCurrentTime;
+    return _player.thumbnailImageAtCurrentTime;
 }
 
 - (nullable NSError *)error {
@@ -226,25 +233,46 @@ typedef struct {
 
 #pragma mark -
 
+- (UIView *)view {
+    return _player.view;
+}
+
+@synthesize videoGravity = _videoGravity;
+- (void)setVideoGravity:(SJVideoGravity)videoGravity {
+    _videoGravity = videoGravity;
+    IJKMPMovieScalingMode mode = IJKMPMovieScalingModeNone;
+    if ( videoGravity == AVLayerVideoGravityResize )
+        mode = IJKMPMovieScalingModeFill;
+    else if ( videoGravity == AVLayerVideoGravityResizeAspect )
+        mode = IJKMPMovieScalingModeAspectFit;
+    else if ( videoGravity == AVLayerVideoGravityResizeAspectFill )
+        mode = IJKMPMovieScalingModeAspectFill;
+    _player.scalingMode = mode;
+}
+ 
+- (SJVideoGravity)videoGravity {
+    return _videoGravity ? : AVLayerVideoGravityResizeAspect;
+}
+
 - (void)setRate:(float)rate {
     _rate = rate;
     if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused )
-        self.playbackRate = rate;
+        _player.playbackRate = rate;
 }
 
 - (void)setVolume:(float)volume {
     _volume = volume;
-    self.playbackVolume = _muted ? 0 : _volume;
+    _player.playbackVolume = _muted ? 0 : _volume;
 }
 
 - (void)setMuted:(BOOL)muted {
     _muted = muted;
-    self.playbackVolume = _muted ? 0 : _volume;
+    _player.playbackVolume = _muted ? 0 : _volume;
 }
 
 - (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
     _pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
-    [self setPauseInBackground:pauseWhenAppDidEnterBackground];
+    [_player setPauseInBackground:pauseWhenAppDidEnterBackground];
 }
 
 - (void)setIsPlaybackFinished:(BOOL)isPlaybackFinished {
@@ -264,11 +292,15 @@ typedef struct {
         else if ( self.finishedReason == SJFinishedReasonToTrialEndPosition )
             return self.trialEndPosition;
     }
-    return self.currentPlaybackTime;
+    return _player.currentPlaybackTime;
+}
+
+- (NSTimeInterval)duration {
+    return _player.duration;
 }
 
 - (NSTimeInterval)playableDuration {
-    NSTimeInterval playableDuration = [super playableDuration];
+    NSTimeInterval playableDuration = [_player playableDuration];
     if ( self.trialEndPosition != 0 && playableDuration >= self.trialEndPosition ) {
         return self.trialEndPosition;
     }
@@ -281,7 +313,7 @@ typedef struct {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self _toEvaluating];
         [self _postNotification:SJMediaPlayerDurationDidChangeNotification];
-        if ( self.isPreparedToPlay && self.assetStatus == SJAssetStatusReadyToPlay && self.needsSeekToStartPosition ) {
+        if ( self.player.isPreparedToPlay && self.assetStatus == SJAssetStatusReadyToPlay && self.needsSeekToStartPosition ) {
             self.needsSeekToStartPosition = NO;
             [self seekToTime:CMTimeMakeWithSeconds(self.startPosition, NSEC_PER_SEC) completionHandler:nil];
         }
@@ -359,7 +391,7 @@ typedef struct {
     if ( _playbackFinishedInfo.isFinished && _playbackFinishedInfo.reason == IJKMPMovieFinishReasonPlaybackError ) {
         status = SJAssetStatusFailed;
     }
-    else if ( self.isPreparedToPlay ) {
+    else if ( _player.isPreparedToPlay ) {
         status = SJAssetStatusReadyToPlay;
     }
     
@@ -396,11 +428,11 @@ typedef struct {
     if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) {
         SJPlaybackTimeControlStatus status = self.timeControlStatus;
         SJWaitingReason _Nullable  reason = self.reasonForWaitingToPlay;
-        if ( self.loadState & IJKMPMovieLoadStateStalled ) {
+        if ( _player.loadState & IJKMPMovieLoadStateStalled ) {
             reason = SJWaitingToMinimizeStallsReason;
             status = SJPlaybackTimeControlStatusWaitingToPlay;
         }
-        else if ( self.loadState & IJKMPMovieLoadStatePlayable ) {
+        else if ( _player.loadState & IJKMPMovieLoadStatePlayable ) {
             reason = nil;
             status = SJPlaybackTimeControlStatusPlaying;
         }
@@ -414,15 +446,15 @@ typedef struct {
     // resume playback
     if ( self.assetStatus == SJAssetStatusReadyToPlay ) {
         if ( self.timeControlStatus != SJPlaybackTimeControlStatusPaused &&
-             self.playbackState == IJKMPMoviePlaybackStatePaused ) {
-            [super play];
+            _player.playbackState == IJKMPMoviePlaybackStatePaused ) {
+            [_player play];
         }
     }
 }
 
 - (void)_updatePresentationSize {
     CGSize oldSize = self.presentationSize;
-    CGSize newSize = self.naturalSize;
+    CGSize newSize = _player.naturalSize;
     if ( !CGSizeEqualToSize(oldSize, newSize) ) {
         _presentationSize = newSize;
         [self _postNotification:SJMediaPlayerPresentationSizeDidChangeNotification];

@@ -32,21 +32,12 @@
     [NSNotificationCenter.defaultCenter postNotificationName:SJMediaPlayerViewReadyForDisplayNotification object:self];
 }
 
-@synthesize videoGravity = _videoGravity;
 - (void)setVideoGravity:(SJVideoGravity)videoGravity {
-    _videoGravity = videoGravity;
-    IJKMPMovieScalingMode mode = IJKMPMovieScalingModeNone;
-    if ( videoGravity == AVLayerVideoGravityResize )
-        mode = IJKMPMovieScalingModeFill;
-    else if ( videoGravity == AVLayerVideoGravityResizeAspect )
-        mode = IJKMPMovieScalingModeAspectFit;
-    else if ( videoGravity == AVLayerVideoGravityResizeAspectFill )
-        mode = IJKMPMovieScalingModeAspectFill;
-    _player.scalingMode = mode;
+    _player.videoGravity = videoGravity;
 }
- 
+
 - (SJVideoGravity)videoGravity {
-    return _videoGravity ? : AVLayerVideoGravityResizeAspect;
+    return _player.videoGravity;
 }
 
 - (BOOL)isReadyForDisplay {

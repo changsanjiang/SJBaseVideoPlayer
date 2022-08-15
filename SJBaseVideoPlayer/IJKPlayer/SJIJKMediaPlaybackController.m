@@ -15,6 +15,12 @@
 #import "SJRunLoopTaskQueue.h"
 #endif
 
+#if __has_include(<IJKMediaFramework/IJKMediaFramework.h>)
+#import <IJKMediaFramework/IJKMediaFramework.h>
+#else
+#import <PodIJKPlayer/PodIJKPlayer.h>
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 @interface SJIJKMediaPlaybackController ()
 
@@ -22,15 +28,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation SJIJKMediaPlaybackController
 @dynamic currentPlayer;
-
-- (void)dealloc {
-    [self.currentPlayer stop];
-}
-
-- (void)stop {
-    [self.currentPlayer stop];
-    [super stop];
-}
 
 - (IJKFFOptions *)options {
     if ( _options == nil ) _options = IJKFFOptions.optionsByDefault;

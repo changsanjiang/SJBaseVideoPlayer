@@ -1,23 +1,17 @@
 //
 //  SJIJKMediaPlayer.h
-//  SJVideoPlayer_Example
+//  SJBaseVideoPlayer.common-IJKPlayer
 //
-//  Created by BlueDancer on 2019/10/12.
-//  Copyright © 2019 changsanjiang. All rights reserved.
+//  Created by 畅三江 on 2022/8/15.
 //
 
-#import <Foundation/Foundation.h>
-#if __has_include(<IJKMediaFramework/IJKMediaFramework.h>)
-#import <IJKMediaFramework/IJKMediaFramework.h>
-#else
-#import <PodIJKPlayer/PodIJKPlayer.h>
-#endif
 #import "SJMediaPlaybackController.h"
+@class IJKFFOptions;
 
 NS_ASSUME_NONNULL_BEGIN
 FOUNDATION_EXTERN NSErrorDomain const SJIJKMediaPlayerErrorDomain;
 
-@interface SJIJKMediaPlayer : IJKFFMoviePlayerController<SJMediaPlayer>
+@interface SJIJKMediaPlayer : NSObject<SJMediaPlayer>
 - (instancetype)initWithURL:(NSURL *)URL startPosition:(NSTimeInterval)startPosition options:(IJKFFOptions *)ops;
 
 @property (nonatomic, readonly, strong) NSURL *URL;
@@ -27,5 +21,9 @@ FOUNDATION_EXTERN NSErrorDomain const SJIJKMediaPlayerErrorDomain;
 @property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 
 @property (nonatomic, readonly) BOOL firstVideoFrameRendered;
+
+@property (nonatomic, readonly) UIView *view;
+
+@property (nonatomic) SJVideoGravity videoGravity;
 @end
 NS_ASSUME_NONNULL_END
