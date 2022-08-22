@@ -745,7 +745,7 @@ typedef struct _SJPlayerControlInfo {
                     break;
                 case SJPanGestureMovingDirection_V: {
                     if ( self.isPlayOnScrollView ) {
-                        if ( !self.isFitOnScreen && !self.isRotating )
+                        if ( !self.isFullscreen && !self.isFitOnScreen )
                             return NO;
                     }
                     switch ( control.triggeredPosition ) {

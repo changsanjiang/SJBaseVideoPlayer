@@ -198,8 +198,13 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
     [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
     [self.window.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
 #else
-    [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
-    [(id)self.window.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+    if ( [self.window.rootViewController respondsToSelector:@selector(setNeedsUpdateOfSupportedInterfaceOrientations)] ) {
+        [(id)UIApplication.sharedApplication.keyWindow.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+        [(id)self.window.rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+    }
+    else {
+        [UIViewController attemptRotationToDeviceOrientation];
+    }
 #endif
 }
 @end
