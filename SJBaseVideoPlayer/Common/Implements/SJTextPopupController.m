@@ -1,12 +1,13 @@
 //
-//  SJPrompt.m
-//  SJPromptProject
+//  SJTextPopupController.m
+//  SJTextPopupControllerProject
 //
 //  Created by 畅三江 on 2017/9/26.
 //  Copyright © 2017年 changsanjiang. All rights reserved.
 //
 
-#import "SJPrompt.h"
+#import "SJTextPopupController.h"
+#import "SJBaseVideoPlayerConst.h"
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
 #else
@@ -14,13 +15,13 @@
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJPrompt ()
+@interface SJTextPopupController ()
 @property (nonatomic, strong, readonly) UIView *contentView;
 @property (nonatomic, strong, readonly) UILabel *label;
 @property (nonatomic, copy, nullable) void(^completionHandler)(void);
 @end
 
-@implementation SJPrompt
+@implementation SJTextPopupController
 @synthesize contentInset = _contentInset;
 @synthesize maxLayoutWidth = _maxLayoutWidth;
 @synthesize target = _target;
@@ -53,10 +54,13 @@ NS_ASSUME_NONNULL_BEGIN
         if ( self.contentView.superview != self.target ) {
             [self.target addSubview:self.contentView];
             self.contentView.center = CGPointMake(CGRectGetWidth(bounds) * 0.5, CGRectGetHeight(bounds) * 0.5);
-            [self.contentView addSubview:self.label];
             [self.contentView mas_makeConstraints:^(MASConstraintMaker *make) {
                 make.center.offset(0);
             }];
+        }
+        
+        if ( self.label.superview == nil ) {
+            [self.contentView addSubview:self.label];
         }
         
         self.label.preferredMaxLayoutWidth = self.maxLayoutWidth ? : CGRectGetWidth(bounds) * 0.6;
@@ -105,6 +109,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIView *)contentView {
     if ( _contentView == nil ) {
         _contentView = [UIView.alloc initWithFrame:CGRectZero];
+        _contentView.layer.zPosition = SJPlayerZIndexes.shared.textPopupViewZIndex;
     }
     return _contentView;
 }

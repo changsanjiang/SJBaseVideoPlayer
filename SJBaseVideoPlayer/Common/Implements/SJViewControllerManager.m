@@ -7,6 +7,7 @@
 
 #import "SJViewControllerManager.h"
 #import "UIView+SJBaseVideoPlayerExtended.h"
+#import "SJRotationManagerInternal.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @interface SJViewControllerManager ()
@@ -28,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ( _tmpHiddenStatusBar ) return YES;
     if ( _lockedScreen ) return YES;
     if ( _controlLayerAppearManager.isAppeared ) return NO;
-    if ( _rotationManager.isTransitioning ) return NO;
+    if ( _rotationManager.isRotating ) return NO;
     if ( _fitOnScreenManager.isTransitioning ) return NO;
     
     // 全屏时, 使状态栏根据控制层显示或隐藏
@@ -36,9 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
         return !_controlLayerAppearManager.isAppeared;
     return NO;
 }
-
 - (UIStatusBarStyle)preferredStatusBarStyle {
-    if ( _rotationManager.isTransitioning || _fitOnScreenManager.isTransitioning )
+    if ( _rotationManager.isRotating || _fitOnScreenManager.isTransitioning )
         return UIStatusBarStyleLightContent;
     
     // 全屏时, 使状态栏变成白色
@@ -46,6 +46,18 @@ NS_ASSUME_NONNULL_BEGIN
         return UIStatusBarStyleLightContent;
     return UIStatusBarStyleDefault;
 }
+- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    __weak typeof(self) _self = self;
+    [_rotationManager rotate:SJOrientation_Portrait animated:YES completionHandler:^(id<SJRotationManager>  _Nonnull mgr) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        UINavigationController *nav = [self->_presentView lookupResponderForClass:UINavigationController.class];
+        if ( nav != nil ) {
+            [nav pushViewController:viewController animated:animated];
+        }
+    }];
+}
+  
 
 - (void)viewDidAppear {
     _viewDisappeared = NO;
@@ -57,15 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)viewDidDisappear {
     
-}
-
-- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    UINavigationController *nav = [_presentView lookupResponderForClass:UINavigationController.class];
-    if ( nav == nil ) return;
-    [_rotationManager rotate:SJOrientation_Portrait animated:YES completionHandler:^(id<SJRotationManager>  _Nonnull mgr) {
-        [nav pushViewController:viewController animated:animated];
-    }];
-}
+} 
 
 - (void)showStatusBar {
     if ( _tmpShowStatusBar ) return;
@@ -87,6 +91,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setNeedsStatusBarAppearanceUpdate {
     [UIApplication.sharedApplication.keyWindow.rootViewController setNeedsStatusBarAppearanceUpdate];
+    
+    if ( [_rotationManager isKindOfClass:SJRotationManager.class] && _rotationManager.isFullscreen ) {
+        SJRotationManager *rotationManager = (id)_rotationManager;
+        [rotationManager.window.rootViewController setNeedsStatusBarAppearanceUpdate];
+    }
 }
+
 @end
 NS_ASSUME_NONNULL_END

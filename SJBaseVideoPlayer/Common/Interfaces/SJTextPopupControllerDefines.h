@@ -1,16 +1,16 @@
 //
-//  SJPromptDefines.h
+//  SJTextPopupControllerDefines.h
 //  Pods
 //
 //  Created by 畅三江 on 2019/9/15.
 //
 
-#ifndef SJPromptDefines_h
-#define SJPromptDefines_h
+#ifndef SJTextPopupControllerDefines_h
+#define SJTextPopupControllerDefines_h
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
-@protocol SJPromptProtocol <NSObject>
+@protocol SJTextPopupController <NSObject>
 - (void)show:(NSAttributedString *)title;
 - (void)show:(NSAttributedString *)title duration:(NSTimeInterval)duration;
 - (void)show:(NSAttributedString *)title duration:(NSTimeInterval)duration completionHandler:(nullable void(^)(void))completionHandler;
@@ -26,4 +26,4 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, nullable) UIView *target;
 @end
 NS_ASSUME_NONNULL_END
-#endif /* SJPromptDefines_h */
+#endif /* SJTextPopupControllerDefines_h */

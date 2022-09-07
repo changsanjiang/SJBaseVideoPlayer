@@ -122,12 +122,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setView:(nullable UIView<SJMediaPlayerView> *)view {
     if ( _view ) [_view removeFromSuperview];
     _view = view;
-    if ( view != nil ) [self addSubview:view];
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    _view.frame = self.bounds;
+    if ( view != nil ) {
+        view.frame = self.bounds;
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:view];
+    }
 }
 @end
 
@@ -143,6 +142,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation SJMediaPlaybackController
+@synthesize canStartPictureInPictureAutomaticallyFromInline = _canStartPictureInPictureAutomaticallyFromInline;
 @synthesize requiresLinearPlaybackInPictureInPicture = _requiresLinearPlaybackInPictureInPicture;
 @synthesize pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
 @synthesize periodicTimeInterval = _periodicTimeInterval;
@@ -241,6 +241,12 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 }
 
+- (void)cancelPictureInPicture API_AVAILABLE(ios(14.0)) {
+#ifdef DEBUG
+    NSLog(@"%@ 暂不支持画中画", NSStringFromClass(self.class));
+#endif
+}
+
 #pragma mark -
 
 - (void)pause {
@@ -300,7 +306,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)refresh {
-    if ( self.currentPlayer.isPlayed && self.currentTime != 0 )
+    if ( self.currentPlayer.isPlayed && self.duration != 0 && self.currentTime != 0 )
         self.media.startPosition = self.currentTime;
     self.currentPlayer = nil;
     [self prepareToPlay];

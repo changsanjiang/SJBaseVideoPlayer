@@ -9,6 +9,7 @@
 #import "SJDeviceVolumeAndBrightnessManager.h"
 #import "SJBaseVideoPlayerResourceLoader.h"
 #import "SJBaseVideoPlayerConst.h"
+#import "SJPlayerView.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MPVolumeView.h>
 
@@ -214,7 +215,7 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 }
 
 - (nullable UIView *)targetView {
-    return [UIApplication.sharedApplication.keyWindow viewWithTag:SJBaseVideoPlayerPresentViewTag];
+    return [UIApplication.sharedApplication.keyWindow viewWithTag:SJPresentViewTag];
 }
 
 - (void)_addOrRemoveSysVolumeView:(nullable UIWindow *)newWindow {
@@ -230,8 +231,13 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 #pragma mark - volume
 
 - (void)_volumeDidChange {
-    [self _refreshDataForVolumeView];
-    [self _showVolumeViewIfNeeded];
+    if ( NSThread.currentThread.isMainThread ) {
+        [self _refreshDataForVolumeView];
+        [self _showVolumeViewIfNeeded];
+    }
+    else {
+        [self performSelectorOnMainThread:@selector(_volumeDidChange) withObject:nil waitUntilDone:NO modes:@[NSRunLoopCommonModes]];
+    }
 }
 
 @synthesize volume = _volume;

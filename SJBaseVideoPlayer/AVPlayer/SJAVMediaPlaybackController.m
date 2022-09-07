@@ -32,6 +32,9 @@ NS_ASSUME_NONNULL_BEGIN
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_rateDidChange:) name:SJMediaPlayerRateDidChangeNotification object:nil];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_volumeDidChange:) name:SJMediaPlayerVolumeDidChangeNotification object:nil];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_mutedDidChange:) name:SJMediaPlayerMutedDidChangeNotification object:nil];
+        if (@available(iOS 14.2, *)) {
+            [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_av_assetStatusDidChange:) name:SJMediaPlayerAssetStatusDidChangeNotification object:nil];
+        }
     }
     return self;
 }
@@ -76,14 +79,17 @@ NS_ASSUME_NONNULL_BEGIN
     }
     
     if ( @available(iOS 14.0, *) ) {
-        if ( self.pauseWhenAppDidEnterBackground ) {
-            if ( self.media.isM3u8 && self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
-                self.needsToRefresh_fix339 = YES;
-//                [self refresh];
-//                [self pause];
-                return;
+        if ( self.media.isM3u8 ) {
+            if ( self.pauseWhenAppDidEnterBackground ||
+                 // fix: https://github.com/changsanjiang/SJVideoPlayer/issues/535
+                 self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
+                if ( self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
+                    self.needsToRefresh_fix339 = YES;
+                    return;
+                }
             }
         }
+        
     }
     
     SJAVMediaPlayerLayerView *view = self.currentPlayerView;
@@ -147,12 +153,25 @@ NS_ASSUME_NONNULL_BEGIN
     return _pictureInPictureController.status;
 }
 
+- (void)setCanStartPictureInPictureAutomaticallyFromInline:(BOOL)canStartPictureInPictureAutomaticallyFromInline API_AVAILABLE(ios(14.2)) {
+    [super setCanStartPictureInPictureAutomaticallyFromInline:canStartPictureInPictureAutomaticallyFromInline];
+    _pictureInPictureController.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline;
+    if ( canStartPictureInPictureAutomaticallyFromInline ) [self prepareForPictureInPicture];
+}
+
+- (void)prepareForPictureInPicture API_AVAILABLE(ios(14.0)) {
+    if ( _pictureInPictureController == nil && self.assetStatus == SJAssetStatusReadyToPlay ) {
+        _pictureInPictureController = [SJAVPictureInPictureController.alloc initWithLayer:self.currentPlayerView.layer delegate:self];
+        _pictureInPictureController.requiresLinearPlayback = self.requiresLinearPlaybackInPictureInPicture;
+        if (@available(iOS 14.2, *)) {
+            _pictureInPictureController.canStartPictureInPictureAutomaticallyFromInline = self.canStartPictureInPictureAutomaticallyFromInline;
+        }
+    }
+}
+
 - (void)startPictureInPicture API_AVAILABLE(ios(14.0)) {
     if ( self.currentPlayerView != nil ) {
-        if ( _pictureInPictureController == nil ) {
-            _pictureInPictureController = [SJAVPictureInPictureController.alloc initWithLayer:self.currentPlayerView.layer delegate:self];
-            _pictureInPictureController.requiresLinearPlayback = self.requiresLinearPlaybackInPictureInPicture;
-        }
+        [self prepareForPictureInPicture];
         [_pictureInPictureController startPictureInPicture];
     }
 }
@@ -276,6 +295,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)_av_mutedDidChange:(NSNotification *)note {
     if ( self.currentPlayer == note.object && self.isMuted != self.currentPlayer.isMuted ) {
         self.muted = self.currentPlayer.isMuted;
+    }
+}
+
+- (void)_av_assetStatusDidChange:(NSNotification *)note API_AVAILABLE(ios(14.2)) {
+    if ( self.currentPlayer == note.object && self.canStartPictureInPictureAutomaticallyFromInline && self.assetStatus == SJAssetStatusReadyToPlay ) {
+        [self prepareForPictureInPicture];
     }
 }
 

@@ -20,16 +20,16 @@
 #import "SJFlipTransitionManagerDefines.h"
 #import "SJVideoPlayerPlaybackControllerDefines.h"
 #import "SJVideoPlayerURLAsset+SJAVMediaPlaybackAdd.h"
-#import "SJPlayerGestureControlDefines.h"
+#import "SJGestureControllerDefines.h"
 #import "SJDeviceVolumeAndBrightnessManagerDefines.h"
-#import "SJFloatSmallViewControllerDefines.h"
+#import "SJSmallViewFloatingControllerDefines.h"
 #import "SJVideoDefinitionSwitchingInfo.h"
-#import "SJPromptPopupControllerDefines.h"
+#import "SJPromptingPopupControllerDefines.h"
 #import "SJPlaybackObservation.h"
 #import "SJVideoPlayerPresentViewDefines.h"
-#import "SJSubtitlesPromptControllerDefines.h"
-#import "SJBarrageQueueControllerDefines.h"
-#import "SJPromptDefines.h"
+#import "SJSubtitlePopupControllerDefines.h"
+#import "SJDanmakuPopupControllerDefines.h"
+#import "SJTextPopupControllerDefines.h"
 #import "SJWatermarkViewDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -59,7 +59,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
-@interface SJBaseVideoPlayer (SJAVAudioSessionExtended)
+@interface SJBaseVideoPlayer (AudioSession)
 ///
 /// 每次执行play的时候是否设置 AVAudioSession
 ///
@@ -91,7 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 ///         default value is YES
 ///
-@property (nonatomic) BOOL hiddenPlaceholderImageViewWhenPlayerIsReadyForDisplay;
+@property (nonatomic) BOOL automaticallyHidesPlaceholderImageView;
 
 ///
 /// 将要隐藏占位图时, 延迟多少秒才去隐藏
@@ -128,7 +128,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - 播放控制
 
-@interface SJBaseVideoPlayer (PlayControl)<SJVideoPlayerPlaybackControllerDelegate>
+@interface SJBaseVideoPlayer (Playback)<SJVideoPlayerPlaybackControllerDelegate>
 
 ///
 /// 播放控制
@@ -202,6 +202,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL isEvaluating;      ///< 调用了播放, 正在评估缓冲中(这个过程会进行的很快, 不需要显示loading视图)
 @property (nonatomic, readonly) BOOL isNoAssetToPlay;   ///< 调用了播放, 但未设置播放资源(设置资源后将会自动播放 )
 
+@property (nonatomic, readonly) BOOL isPlaybackFailed;                              ///< 播放失败
 @property (nonatomic, readonly) BOOL isPlaybackFinished;                            ///< 播放结束
 @property (nonatomic, readonly, nullable) SJFinishedReason finishedReason;          ///< 播放结束的reason
 
@@ -233,10 +234,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// 关于后台播放视频, 引用自: https://juejin.im/post/5a38e1a0f265da4327185a26
 ///
 /// 当您想在后台播放视频时:
-/// 1. 需要设置 videoPlayer.pauseWhenAppDidEnterBackground = NO; (该值默认为YES, 即App进入后台默认暂停).
+/// 1. 需要设置 videoPlayer.pausedInBackground = NO; (该值默认为YES, 即App进入后台默认暂停).
 /// 2. 前往 `TARGETS` -> `Capability` -> enable `Background Modes` -> select this mode `Audio, AirPlay, and Picture in Picture`
 ///
-@property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
+@property (nonatomic, getter=isPausedInBackground) BOOL pausedInBackground; ///< 进入后台是否暂停;
 @property (nonatomic) BOOL autoplayWhenSetNewAsset;                    ///< 设置新的资源后, 是否自动调用播放. 默认为 YES
 @property (nonatomic) BOOL resumePlaybackWhenAppDidEnterForeground;    ///< 进入前台时, 是否恢复播放. 默认为 NO
 @property (nonatomic) BOOL resumePlaybackWhenPlayerHasFinishedSeeking; ///< 当`seekToTime:`操作完成后, 是否恢复播放. 默认为 YES
@@ -390,21 +391,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - 弹出提示文本
 
-@interface SJBaseVideoPlayer (PromptControl)
+@interface SJBaseVideoPlayer (Popup)
 
 ///
 /// 中心弹出文本提示
 ///
 ///         了解更多请前往协议头文件查看
 ///
-@property (nonatomic, strong, null_resettable) id<SJPromptProtocol> prompt;
+@property (nonatomic, strong, null_resettable) id<SJTextPopupController> textPopupController;
 
 ///
 /// 左下角弹出提示
 ///
 ///         了解更多请前往协议头文件查看
 ///
-@property (nonatomic, strong, null_resettable) id<SJPromptPopupController> promptPopupController;
+@property (nonatomic, strong, null_resettable) id<SJPromptingPopupController> promptingPopupController;
 @end
 
 
@@ -433,17 +434,17 @@ NS_ASSUME_NONNULL_BEGIN
  
  LongPressGesture
  长按手势
- 当用户长按播放器时, 将加速播放. 该手势默认不会启用, 如需开启请设置`player.gestureControl.supportedGestureTypes = SJPlayerGestureTypeMask_LongPress | 其他支持的手势;`
+ 当用户长按播放器时, 将加速播放. 该手势默认不会启用, 如需开启请设置`player.gestureController.supportedGestureTypes = SJPlayerGestureTypeMask_LongPress | 其他支持的手势;`
  */
-@interface SJBaseVideoPlayer (GestureControl)
+@interface SJBaseVideoPlayer (Gesture)
 
 ///
 /// 手势控制
 ///
-///         如果想自己设置支持的手势类型, 可以`player.gestureControl.supportedGestureTypes = SJPlayerGestureTypeMask_SingleTap | 其他支持的手势;`
+///         如果想自己设置支持的手势类型, 可以`player.gestureController.supportedGestureTypes = SJPlayerGestureTypeMask_SingleTap | 其他支持的手势;`
 ///         了解更多请前往头文件查看
 ///
-@property (nonatomic, strong, readonly) id<SJPlayerGestureControl> gestureControl;
+@property (nonatomic, strong, readonly) id<SJGestureController> gestureController;
 
 ///
 /// 是否可以触发某个手势
@@ -492,7 +493,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 观察者
 ///
-///         当需要监听控制层的显示和隐藏时, 可以设置`player.controlLayerAppearObserver.appearStateDidChangeExeBlock = ...;`
+///         当需要监听控制层的显示和隐藏时, 可以设置`player.controlLayerAppearObserver.onAppearChanged = ...;`
 ///
 @property (nonatomic, strong, readonly) id<SJControlLayerAppearManagerObserver> controlLayerAppearObserver;
 
@@ -564,6 +565,13 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 @property (nonatomic, getter=isFitOnScreen) BOOL fitOnScreen;
 
+///
+/// 是否仅在竖屏全屏与竖屏小屏之间切换, 不触发旋转.
+///
+///     注意: 开启后, 旋转功能将会失效.
+///
+@property (nonatomic) BOOL onlyFitOnScreen;
+
 /// Whether fullscreen or smallscreen, this method does not trigger rotation.
 /// 全屏或小屏, 此方法不触发旋转
 /// - animated : 是否动画
@@ -591,12 +599,12 @@ NS_ASSUME_NONNULL_BEGIN
 ///         如果需要禁止自动旋转, 可以设置`player.rotationManager.disabledAutorotation = YES;`
 ///         了解更多请前往头文件查看
 ///
-@property (nonatomic, strong, null_resettable) id<SJRotationManager> rotationManager;
+@property (nonatomic, strong, nullable) id<SJRotationManager> rotationManager;
 
 ///
 /// 观察者
 ///
-///         当需要监听旋转时, 可以设置`player.rotationObserver.rotationDidStartExeBlock = ...;`
+///         当需要监听旋转时, 可以设置`player.rotationObserver.onRotatingChanged = ...;`
 ///         了解更多请前往头文件查看
 ///
 @property (nonatomic, strong, readonly) id<SJRotationManagerObserver> rotationObserver;
@@ -638,8 +646,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completion:(void (^ _Nullable)(__kindof SJBaseVideoPlayer *player))block;
 
-@property (nonatomic, readonly) BOOL isTransitioning;
-@property (nonatomic, readonly) BOOL isFullScreen;                              ///< 是否已全屏
+@property (nonatomic, readonly) BOOL isRotating;                                ///< 是否在旋转中
+@property (nonatomic, readonly) BOOL isFullscreen;                              ///< 是否已全屏
 @property (nonatomic, getter=isLockedScreen) BOOL lockedScreen;                 ///< 是否锁屏
 @property (nonatomic, readonly) UIInterfaceOrientation currentOrientation;      ///< 当前的方向
 @end
@@ -717,27 +725,27 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// 小浮窗控制
 ///
-/// 默认不启用, 当需要开启时, 请设置`player.floatSmallViewController.enabled = YES;`
+/// 默认不启用, 当需要开启时, 请设置`player.smallViewFloatingController.enabled = YES;`
 ///
 /// \code
 ///
 ///     // 1. 开启小浮窗控制. 滑动列表当视图消失时, 将显示小浮窗视图
-///     _player.floatSmallViewController.enabled = YES;
+///     _player.smallViewFloatingController.enabled = YES;
 ///     // 2. 设置单击小浮窗执行的block
-///     _player.floatSmallViewController.singleTappedOnTheFloatViewExeBlock = ...;
+///     _player.smallViewFloatingController.onSingleTapped = ...;
 ///     // 3. 设置双击小浮窗执行的block
-///     _player.floatSmallViewController.doubleTappedOnTheFloatViewExeBlock = ...;
+///     _player.smallViewFloatingController.onDoubleTapped = ...;
 ///
 ///     // more
-/// #import <SJBaseVideoPlayer/SJFloatSmallViewController.h>
+/// #import <SJBaseVideoPlayer/SJSmallViewFloatingController.h>
 ///
-///     SJFloatSmallViewController *floatSmallViewController = _player.floatSmallViewController;
-///     floatSmallViewController.layoutPosition = SJFloatViewLayoutPositionTopRight;
-///     floatSmallViewController.layoutInsets = UIEdgeInsetsMake(20, 12, 20, 12);
-///     floatSmallViewController.layoutSize = CGSize(300, 300 * 9 / 16.0);
+///     SJSmallViewFloatingController *smallViewFloatingController = _player.smallViewFloatingController;
+///     smallViewFloatingController.layoutPosition = SJSmallViewLayoutPositionTopRight;
+///     smallViewFloatingController.layoutInsets = UIEdgeInsetsMake(20, 12, 20, 12);
+///     smallViewFloatingController.layoutSize = CGSize(300, 300 * 9 / 16.0);
 /// \endcode
 ///
-@property (nonatomic, strong, null_resettable) id<SJFloatSmallViewController> floatSmallViewController;
+@property (nonatomic, strong, null_resettable) id<SJSmallViewFloatingController> smallViewFloatingController;
 
 ///
 /// 当开启小浮窗控制时, 播放结束后, 会默认隐藏小浮窗
@@ -751,7 +759,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// - default value is YES.
 ///
-@property (nonatomic) BOOL pauseWhenScrollDisappeared;
+@property (nonatomic) BOOL pausedWhenScrollDisappeared;
 
 ///
 /// 滚动进入时, 是否恢复播放. 默认为YES
@@ -788,7 +796,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - 字幕
 
-@interface SJBaseVideoPlayer (Subtitles)
+@interface SJBaseVideoPlayer (Subtitle)
 ///
 /// 字幕管理
 ///
@@ -808,13 +816,13 @@ NS_ASSUME_NONNULL_BEGIN
 ///     // 以下是更多设置
 ///     _player.subtitleBottomMargin = 22.0;
 ///     _player.subtitleHorizontalMinMargin = 22.0;
-///     _player.subtitlesPromptController.view.backgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
-///     _player.subtitlesPromptController.view.layer.cornerRadius = 5;
-///     _player.subtitlesPromptController.contentInsets = UIEdgeInsetsMake(12, 22, 12, 22);
+///     _player.subtitlePopupController.view.backgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
+///     _player.subtitlePopupController.view.layer.cornerRadius = 5;
+///     _player.subtitlePopupController.contentInsets = UIEdgeInsetsMake(12, 22, 12, 22);
 ///
 /// \endcode
 ///
-@property (nonatomic, strong, null_resettable) id<SJSubtitlesPromptController> subtitlesPromptController;
+@property (nonatomic, strong, null_resettable) id<SJSubtitlePopupController> subtitlePopupController;
 
 ///
 /// 字幕底部间距
@@ -834,17 +842,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - 弹幕
 
-@interface SJBaseVideoPlayer (Barrages)
+@interface SJBaseVideoPlayer (Danmaku)
 
 ///
 /// 弹幕控制
 ///
 /// \code
 ///
-/// #import <SJBaseVideoPlayer/SJBarrageItem.h>
+/// #import <SJBaseVideoPlayer/SJDanmakuItem.h>
 ///
 ///     // 创建一条弹幕
-///     SJBarrageItem *item = [SJBarrageItem.alloc initWithContent:[NSAttributedString sj_UIKitText:^(id<SJUIKitTextMakerProtocol>  _Nonnull make) {
+///     SJDanmakuItem *item = [SJDanmakuItem.alloc initWithContent:[NSAttributedString sj_UIKitText:^(id<SJUIKitTextMakerProtocol>  _Nonnull make) {
 ///         make.append( @"我是一条弹幕消息" );
 ///         make.font([UIFont boldSystemFontOfSize:16]);
 ///         make.textColor(UIColor.whiteColor);
@@ -855,11 +863,11 @@ NS_ASSUME_NONNULL_BEGIN
 ///     }]];
 ///
 ///     // 发送一条弹幕, 弹幕将自动显示
-///     [self.player.barrageQueueController enqueue:item];
+///     [self.player.danmakuPopupController enqueue:item];
 ///
 /// \endcode
 ///
-@property (nonatomic, strong, null_resettable) id<SJBarrageQueueController> barrageQueueController;
+@property (nonatomic, strong, null_resettable) id<SJDanmakuPopupController> danmakuPopupController;
 @end
 
 

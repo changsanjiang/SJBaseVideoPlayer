@@ -1,12 +1,12 @@
 //
-//  SJPlayerGestureControlDefines.h
+//  SJGestureControllerDefines.h
 //  Pods
 //
 //  Created by 畅三江 on 2019/1/3.
 //
 
-#ifndef SJPlayerGestureControlProtocol_h
-#define SJPlayerGestureControlProtocol_h
+#ifndef SJGestureControllerProtocol_h
+#define SJGestureControllerProtocol_h
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -25,14 +25,15 @@ typedef NS_ENUM(NSUInteger, SJPlayerGestureType) {
 
 typedef NS_OPTIONS(NSUInteger, SJPlayerGestureTypeMask) {
     SJPlayerGestureTypeMask_None,
-    SJPlayerGestureTypeMask_SingleTap   = 1 << 0,
-    SJPlayerGestureTypeMask_DoubleTap   = 1 << 1,
-    SJPlayerGestureTypeMask_Pan_H       = 1 << 2, // 水平方向
-    SJPlayerGestureTypeMask_Pan_V       = 1 << 3, // 垂直方向
-    SJPlayerGestureTypeMask_Pinch       = 1 << 4,
-    SJPlayerGestureTypeMask_LongPress   = 1 << 5,
+    SJPlayerGestureTypeMask_SingleTap   = 1 << SJPlayerGestureType_SingleTap,
+    SJPlayerGestureTypeMask_DoubleTap   = 1 << SJPlayerGestureType_DoubleTap,
+    SJPlayerGestureTypeMask_Pan_H       = 0x100, // 水平方向
+    SJPlayerGestureTypeMask_Pan_V       = 0x200, // 垂直方向
+    SJPlayerGestureTypeMask_Pan         = SJPlayerGestureTypeMask_Pan_H | SJPlayerGestureTypeMask_Pan_V,
+    SJPlayerGestureTypeMask_Pinch       = 1 << SJPlayerGestureType_Pinch,
+    SJPlayerGestureTypeMask_LongPress   = 1 << SJPlayerGestureType_LongPress,
     
-    SJPlayerGestureTypeMask_Pan = SJPlayerGestureTypeMask_Pan_H | SJPlayerGestureTypeMask_Pan_V,
+    
     SJPlayerGestureTypeMask_Default = SJPlayerGestureTypeMask_SingleTap | SJPlayerGestureTypeMask_DoubleTap | SJPlayerGestureTypeMask_Pan | SJPlayerGestureTypeMask_Pinch,
     SJPlayerGestureTypeMask_All = SJPlayerGestureTypeMask_Default | SJPlayerGestureTypeMask_LongPress,
 };
@@ -63,14 +64,14 @@ typedef NS_ENUM(NSUInteger, SJLongPressGestureRecognizerState) {
     SJLongPressGestureRecognizerStateEnded,
 };
 
-@protocol SJPlayerGestureControl <NSObject>
+@protocol SJGestureController <NSObject>
 @property (nonatomic) SJPlayerGestureTypeMask supportedGestureTypes; ///< default value is .Default
-@property (nonatomic, copy, nullable) BOOL(^gestureRecognizerShouldTrigger)(id<SJPlayerGestureControl> control, SJPlayerGestureType type, CGPoint location);
-@property (nonatomic, copy, nullable) void(^singleTapHandler)(id<SJPlayerGestureControl> control, CGPoint location);
-@property (nonatomic, copy, nullable) void(^doubleTapHandler)(id<SJPlayerGestureControl> control, CGPoint location);
-@property (nonatomic, copy, nullable) void(^panHandler)(id<SJPlayerGestureControl> control, SJPanGestureTriggeredPosition position, SJPanGestureMovingDirection direction, SJPanGestureRecognizerState state, CGPoint translate);
-@property (nonatomic, copy, nullable) void(^pinchHandler)(id<SJPlayerGestureControl> control, CGFloat scale);
-@property (nonatomic, copy, nullable) void(^longPressHandler)(id<SJPlayerGestureControl> control, SJLongPressGestureRecognizerState state);
+@property (nonatomic, copy, nullable) BOOL(^gestureRecognizerShouldTrigger)(id<SJGestureController> control, SJPlayerGestureType type, CGPoint location);
+@property (nonatomic, copy, nullable) void(^singleTapHandler)(id<SJGestureController> control, CGPoint location);
+@property (nonatomic, copy, nullable) void(^doubleTapHandler)(id<SJGestureController> control, CGPoint location);
+@property (nonatomic, copy, nullable) void(^panHandler)(id<SJGestureController> control, SJPanGestureTriggeredPosition position, SJPanGestureMovingDirection direction, SJPanGestureRecognizerState state, CGPoint translate);
+@property (nonatomic, copy, nullable) void(^pinchHandler)(id<SJGestureController> control, CGFloat scale);
+@property (nonatomic, copy, nullable) void(^longPressHandler)(id<SJGestureController> control, SJLongPressGestureRecognizerState state);
 
 - (void)cancelGesture:(SJPlayerGestureType)type;
 - (UIGestureRecognizerState)stateOfGesture:(SJPlayerGestureType)type;
@@ -80,4 +81,4 @@ typedef NS_ENUM(NSUInteger, SJLongPressGestureRecognizerState) {
 @end
 NS_ASSUME_NONNULL_END
 
-#endif /* SJPlayerGestureControlProtocol_h */
+#endif /* SJGestureControllerProtocol_h */

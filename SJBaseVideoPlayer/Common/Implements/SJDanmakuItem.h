@@ -1,15 +1,15 @@
 //
-//  SJBarrageItem.h
+//  SJDanmakuItem.h
 //  Pods
 //
 //  Created by 畅三江 on 2019/11/12.
 //
 
 #import <Foundation/Foundation.h>
-#import "SJBarrageQueueControllerDefines.h"
+#import "SJDanmakuPopupControllerDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJBarrageItem : NSObject<SJBarrageItem>
+@interface SJDanmakuItem : NSObject<SJDanmakuItem>
 - (instancetype)initWithContent:(NSAttributedString *)content;
 - (instancetype)initWithCustomView:(__kindof UIView *)customView;
 

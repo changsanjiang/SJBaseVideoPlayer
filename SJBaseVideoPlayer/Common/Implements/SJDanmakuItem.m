@@ -1,14 +1,14 @@
 //
-//  SJBarrageItem.m
+//  SJDanmakuItem.m
 //  Pods
 //
 //  Created by 畅三江 on 2019/11/12.
 //
 
-#import "SJBarrageItem.h"
+#import "SJDanmakuItem.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@implementation SJBarrageItem
+@implementation SJDanmakuItem
 - (instancetype)initWithContent:(NSAttributedString *)content {
     self = [super init];
     if ( self ) {

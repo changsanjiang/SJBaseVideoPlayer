@@ -1,16 +1,16 @@
 //
-//  SJPromptPopupController.h
+//  SJPromptingPopupController.h
 //  Pods
 //
 //  Created by 畅三江 on 2019/7/12.
 //
 
-#ifndef SJPromptPopupControllerProtocol_h
-#define SJPromptPopupControllerProtocol_h
+#ifndef SJPromptingPopupControllerProtocol_h
+#define SJPromptingPopupControllerProtocol_h
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
-@protocol SJPromptPopupController <NSObject>
+@protocol SJPromptingPopupController <NSObject>
 @property (nonatomic) UIEdgeInsets contentInset; ///< default value is UIEdgeInsetsMake(12, 22, 12, 22);
 - (void)show:(NSAttributedString *)title;
 - (void)show:(NSAttributedString *)title duration:(NSTimeInterval)duration;
@@ -36,4 +36,4 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 NS_ASSUME_NONNULL_END
 
-#endif /* SJPromptPopupControllerProtocol_h */
+#endif /* SJPromptingPopupControllerProtocol_h */

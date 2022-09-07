@@ -13,7 +13,7 @@
 #import "SJRotationManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJViewControllerManager : NSObject<SJViewControllerManager, SJRotationManagerDelegate>
+@interface SJViewControllerManager : NSObject<SJViewControllerManager, SJRotationActionForwarder>
 @property (nonatomic, weak, nullable) id<SJFitOnScreenManager> fitOnScreenManager;
 @property (nonatomic, weak, nullable) id<SJRotationManager> rotationManager;
 @property (nonatomic, weak, nullable) id<SJControlLayerAppearManager> controlLayerAppearManager;

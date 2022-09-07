@@ -219,14 +219,10 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 
 - (void)replay {
     _isReplayed = YES;
-    __weak typeof(self) _self = self;
-    [self seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
-        __strong typeof(_self) self = _self;
-        if ( !self ) return;
-        if ( self.playerStatus != AVPStatusStarted ) [self play];
-        [self _toEvaluating];
-        [self _postNotification:SJMediaPlayerDidReplayNotification];
-    }];
+    [self seekToTime:kCMTimeZero completionHandler:nil];
+    [self play];
+    [self _toEvaluating];
+    [self _postNotification:SJMediaPlayerDidReplayNotification];
 }
 - (void)report {
     [self _postNotification:SJMediaPlayerAssetStatusDidChangeNotification];
@@ -375,6 +371,7 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
     self.isPlaybackFinished = NO;
     _seekingInfo.time = time;
     _seekingInfo.isSeeking = YES;
+    _playerStatus = AVPStatusPrepared;
 }
 
 - (void)_didEndSeeking:(BOOL)finished {
@@ -440,6 +437,10 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
             status = SJPlaybackTimeControlStatusWaitingToPlay;
         }
         else if ( self.eventType == AVPEventLoadingEnd ) {
+            reason = nil;
+            status = SJPlaybackTimeControlStatusPlaying;
+        }
+        else if ( self.playerStatus == AVPStatusStarted ) {
             reason = nil;
             status = SJPlaybackTimeControlStatusPlaying;
         }

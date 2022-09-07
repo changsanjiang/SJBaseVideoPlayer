@@ -2,303 +2,41 @@
 //  SJRotationManager.m
 //  SJVideoPlayer_Example
 //
-//  Created by 畅三江 on 2019/7/13.
-//  Copyright © 2019 changsanjiang. All rights reserved.
+//  Created by 畅三江 on 2022/8/13.
+//  Copyright © 2022 changsanjiang. All rights reserved.
 //
 
 #import "SJRotationManager.h"
+#import "SJRotationManagerInternal.h"
+#import "SJRotationObserver.h"
+#import "SJRotationManager_iOS_16_Later.h"
+#import "SJRotationManager_iOS_9_15.h"
+#import "SJRotationFullscreenNavigationController.h"
+#import "SJRotationFullscreenWindow.h"
+#import "SJRotationDefines.h"
 #import "SJTimerControl.h"
-#import "UIView+SJBaseVideoPlayerExtended.h"
+#import <objc/message.h>
 
-#if __has_include(<SJUIKit/SJRunLoopTaskQueue.h>)
-#import <SJUIKit/SJRunLoopTaskQueue.h>
-#else
-#import "SJRunLoopTaskQueue.h"
-#endif
-
-
-@class SJFullscreenModeViewController, SJFullscreenModeNavigationController;
-
-NS_ASSUME_NONNULL_BEGIN
-@protocol SJFullscreenModeViewControllerDelegate <NSObject>
-- (UIView *)target;
-- (CGRect)targetOriginFrame;
-- (BOOL)prefersStatusBarHidden;
-- (UIStatusBarStyle)preferredStatusBarStyle;
-
-- (BOOL)shouldAutorotateToOrientation:(UIDeviceOrientation)orientation;
-- (void)fullscreenModeViewController:(SJFullscreenModeViewController *)vc willRotateToOrientation:(UIDeviceOrientation)orientation;
-- (void)fullscreenModeViewController:(SJFullscreenModeViewController *)vc didRotateFromOrientation:(UIDeviceOrientation)orientation;
+@interface SJRotationActivation : NSObject
+@property (nonatomic, readonly, getter=isActive) BOOL active;
+- (void)forceActive;
 @end
 
-@interface SJFullscreenModeViewController : UIViewController
-@property (nonatomic, weak, nullable) id<SJFullscreenModeViewControllerDelegate> delegate;
-@property (nonatomic) UIDeviceOrientation currentOrientation;
-@property (nonatomic, readonly) BOOL isFullscreen;
-@property (nonatomic, readonly, getter=isRotating) BOOL rotating;
-@property (nonatomic) BOOL disableAnimations;
-@end
-
-@implementation SJFullscreenModeViewController
+@implementation SJRotationActivation {
+    SJTimerControl *_timer;
+}
 - (instancetype)init {
     self = [super init];
     if ( self ) {
-        _currentOrientation = UIDeviceOrientationPortrait;
-    }
-    return self;
-}
-
-- (BOOL)shouldAutorotate {
-    return [self.delegate shouldAutorotateToOrientation:UIDevice.currentDevice.orientation];
-}
-
-- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    if ( self.presentedViewController != nil )
-        return 1 << _currentOrientation;
-    return UIInterfaceOrientationMaskAll;
-}
-
-//- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
-//    return UIInterfaceOrientationPortrait;
-//}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-    if ( self.navigationController.view.window == nil || self.navigationController.view.window.isHidden ) {
-        [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-        return;
-    }
-
-    _rotating = YES;
-    
-    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
-    UIDeviceOrientation new = UIDevice.currentDevice.orientation;
-    UIDeviceOrientation old = _currentOrientation;
-    
-    if ( new == UIDeviceOrientationLandscapeLeft ||
-         new == UIDeviceOrientationLandscapeRight ) {
-        if ( self.delegate.target.superview != self.view ) {
-            [self.view addSubview:self.delegate.target];
-        }
-    }
-    
-    if ( old == UIDeviceOrientationPortrait ) {
-        self.delegate.target.frame = self.delegate.targetOriginFrame;
-    }
-    
-    _currentOrientation = new;
-
-    [self.delegate fullscreenModeViewController:self willRotateToOrientation:_currentOrientation];
-    
-    BOOL isFullscreen = size.width > size.height;
-    
-    if ( self.disableAnimations ) {
-        [CATransaction begin];
-        [CATransaction setDisableActions:YES];
-    }
-    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> _Nonnull context) {
-        if ( isFullscreen )
-            self.delegate.target.frame = CGRectMake(0, 0, size.width, size.height);
-        else
-            self.delegate.target.frame = self.delegate.targetOriginFrame;
-        
-        [self.delegate.target layoutIfNeeded];
-    } completion:^(id<UIViewControllerTransitionCoordinatorContext> _Nonnull context) {
-        if ( self.disableAnimations )
-            [CATransaction commit];
-        self->_rotating = NO;
-        [self.delegate fullscreenModeViewController:self didRotateFromOrientation:self.currentOrientation];
-    }];
-}
-
-- (BOOL)isFullscreen {
-    return _currentOrientation == UIDeviceOrientationLandscapeLeft || _currentOrientation == UIDeviceOrientationLandscapeRight;
-}
-
-- (BOOL)prefersStatusBarHidden {
-    return self.delegate.prefersStatusBarHidden;
-}
-
-- (UIStatusBarStyle)preferredStatusBarStyle {
-    return self.delegate.preferredStatusBarStyle;
-}
-
-- (BOOL)prefersHomeIndicatorAutoHidden {
-    return YES;
-}
-
-- (void)setNeedsStatusBarAppearanceUpdate {
-    [super setNeedsStatusBarAppearanceUpdate];
-}
-@end
-
-
-@protocol SJFullscreenModeNavigationControllerDelegate <NSObject>
-- (void)vc_forwardPushViewController:(UIViewController *)viewController animated:(BOOL)animated;
-@end
-
-@interface SJFullscreenModeNavigationController : UINavigationController
-@property (nonatomic, weak, nullable) id<SJFullscreenModeNavigationControllerDelegate> sj_delegate;
-@end
-
-@implementation SJFullscreenModeNavigationController
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    self.navigationBarHidden = YES;
-}
-
-- (void)setNavigationBarHidden:(BOOL)navigationBarHidden {
-    [super setNavigationBarHidden:YES];
-}
-
-- (void)setNavigationBarHidden:(BOOL)hidden animated:(BOOL)animated {
-    [super setNavigationBarHidden:YES animated:animated];
-}
-
-- (BOOL)shouldAutorotate {
-    return self.topViewController.shouldAutorotate;
-}
-- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return self.topViewController.supportedInterfaceOrientations;
-}
-- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
-    return self.topViewController.preferredInterfaceOrientationForPresentation;
-}
-- (nullable UIViewController *)childViewControllerForStatusBarStyle {
-    return self.topViewController;
-}
-- (nullable UIViewController *)childViewControllerForStatusBarHidden {
-    return self.topViewController;
-}
-- (BOOL)prefersHomeIndicatorAutoHidden {
-    return YES;
-}
-- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    if ( [viewController isKindOfClass:SJFullscreenModeViewController.class] ) {
-        [super pushViewController:viewController animated:animated];
-    }
-    else if ( [self.sj_delegate respondsToSelector:@selector(vc_forwardPushViewController:animated:)] ) {
-        [self.sj_delegate vc_forwardPushViewController:viewController animated:animated];
-    }
-}
-@end
-
-#pragma mark -
-
-@interface SJFullscreenModeWindow : UIWindow
-@property (nonatomic, strong, nullable) SJFullscreenModeNavigationController *rootViewController;
-@property (nonatomic, strong, readonly) SJFullscreenModeViewController *fullscreenModeViewController;
-@end
-
-@implementation SJFullscreenModeWindow
-@dynamic rootViewController;
-
-#ifdef DEBUG
-- (void)dealloc {
-    NSLog(@"%d \t %s", (int)__LINE__, __func__);
-}
-#endif
-
-- (void)setBackgroundColor:(nullable UIColor *)backgroundColor {}
-
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if ( !self ) return nil;
-    self.windowLevel = UIWindowLevelNormal;
-    _fullscreenModeViewController = SJFullscreenModeViewController.new;
-    self.rootViewController = [[SJFullscreenModeNavigationController alloc] initWithRootViewController:_fullscreenModeViewController];
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
-    if ( @available(iOS 13.0, *) ) {
-        if ( self.windowScene == nil )
-            self.windowScene = UIApplication.sharedApplication.keyWindow.windowScene;
-    }
-#endif
-    self.hidden = YES;
-    return self;
-}
-
-- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *_Nullable)event {
-    return YES;
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    
-    static CGRect bounds;
-    
-    // 如果是大屏转大屏 就不需要修改了
-    
-    if ( !CGRectEqualToRect(bounds, self.bounds) ) {
-        
-        UIView *superview = self;
-        if ( @available(iOS 13.0, *) ) {
-            superview = self.subviews.firstObject;
-        }
-
-        [UIView performWithoutAnimation:^{
-            for ( UIView *view in superview.subviews ) {
-                if ( view != self.rootViewController.view && [view isMemberOfClass:UIView.class] ) {
-                    view.backgroundColor = UIColor.clearColor;
-                    for ( UIView *subview in view.subviews ) {
-                        subview.backgroundColor = UIColor.clearColor;
-                    }
-                }
-                
-            }
-        }];
-    }
-    
-    bounds = self.bounds;
-    self.rootViewController.view.frame = bounds;
-}
-@end
-
-
-
-static NSNotificationName const SJRotationManagerTransitioningValueDidChangeNotification = @"SJRotationManagerTransitioningValueDidChangeNotification";
-
-@interface SJRotationManagerObserver : NSObject<SJRotationManagerObserver>
-- (instancetype)initWithRotationManager:(SJRotationManager *)mgr;
-@end
-
-@interface SJRotationManager ()<SJFullscreenModeViewControllerDelegate, SJFullscreenModeNavigationControllerDelegate>
-@property (nonatomic, strong, readonly) SJFullscreenModeWindow *window;
-@property (nonatomic, weak, nullable) UIWindow *previousKeyWindow;
-
-@property (nonatomic, getter=isForcedRotation) BOOL forcedRotation;
-@property (nonatomic, getter=isTransitioning) BOOL transitioning;
-@property (nonatomic) UIDeviceOrientation deviceOrientation;
-@property (nonatomic) SJOrientation currentOrientation;
-
-///
-/// 默认为活跃状态
-///
-///     进入后台时, 将设置状态为不活跃状态, 此时将不会触发自动旋转
-///     进入前台时, 两秒后将恢复为活跃状态, 两秒之后才能开始响应自动旋转
-///
-///     主动调用旋转时, 将直接激活为活跃状态
-///
-@property (nonatomic, getter=isInactivated) BOOL inactivated;
-@property (nonatomic, strong, readonly) SJTimerControl *timerControl;
-@end
-
-@implementation SJRotationManager {
-    void(^_Nullable _completionHandler)(id<SJRotationManager> mgr);
-}
-
-@synthesize autorotationSupportedOrientations = _autorotationSupportedOrientations;
-@synthesize shouldTriggerRotation = _shouldTriggerRotation;
-@synthesize disabledAutorotation = _disabledAutorotation;
-@synthesize superview = _superview;
-@synthesize target = _target;
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        _currentOrientation = SJOrientation_Portrait;
-        _autorotationSupportedOrientations = SJOrientationMaskAll;
+        __weak typeof(self) _self = self;
+        _timer = [SJTimerControl.alloc init];
+        _timer.exeBlock = ^(SJTimerControl * _Nonnull control) {
+            __strong typeof(_self) self = _self;
+            if ( !self ) return ;
+            self->_active = YES;
+        };
+        _active = UIApplication.sharedApplication.applicationState == UIApplicationStateActive;
         [self _observeNotifies];
-        [self performSelectorOnMainThread:@selector(_setupWindow) withObject:nil waitUntilDone:NO];
     }
     return self;
 }
@@ -307,101 +45,173 @@ static NSNotificationName const SJRotationManagerTransitioningValueDidChangeNoti
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
-- (void)_setupWindow {
-    self->_window = [SJFullscreenModeWindow new];
-    self->_window.fullscreenModeViewController.delegate = self;
-    self->_window.rootViewController.sj_delegate = self;
-    self->_window.frame = UIScreen.mainScreen.bounds;
-    if ( @available(iOS 9.0, *) ) {
-        [self->_window.rootViewController loadViewIfNeeded];
-    }
-    else {
-        [self->_window.rootViewController loadView];
-        [self->_window.rootViewController viewDidLoad];
-    }
-}
-
 - (void)_observeNotifies {
-    UIDevice *device = UIDevice.currentDevice;
-    if ( !device.isGeneratingDeviceOrientationNotifications ) {
-        [device beginGeneratingDeviceOrientationNotifications];
-    }
-    
-    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(deviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:device];
-    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(willResignActive) name:UIApplicationWillResignActiveNotification object:nil];
-    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(didBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_onApplicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_onApplicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
 }
 
-- (void)deviceOrientationDidChange:(NSNotification *)note {
-    UIDeviceOrientation orientation = UIDevice.currentDevice.orientation;
-    switch ( orientation ) {
-        case UIDeviceOrientationPortraitUpsideDown:
-        case UIDeviceOrientationPortrait:
-        case UIDeviceOrientationLandscapeLeft:
-        case UIDeviceOrientationLandscapeRight: {
-            _deviceOrientation = orientation;
+- (void)forceActive {
+    if ( !_active ) {
+        _active = YES;
+        [_timer interrupt];
+    }
+}
+
+- (void)_onApplicationWillResignActive:(NSNotification *)note {
+    [_timer interrupt];
+    _active = NO;
+}
+
+- (void)_onApplicationDidBecomeActive:(NSNotification *)note {
+    [_timer resume];
+}
+@end
+
+@interface SJRotationManager ()<SJRotationFullscreenWindowDelegate, SJRotationFullscreenNavigationControllerDelegate, SJRotationFullscreenViewControllerDelegate> {
+    SJRotationFullscreenWindow *_window;
+    BOOL _windowPreparing;
+    SJRotationActivation *_rotationActivation;
+    SJOrientation _deviceOrientation;
+    BOOL _forcedRotation;
+}
+@property (nonatomic) SJOrientation currentOrientation;
+@end
+
+@implementation SJRotationManager
+
++ (UIInterfaceOrientationMask)supportedInterfaceOrientationsForWindow:(nullable UIWindow *)window {
+    if ( [window isKindOfClass:SJRotationFullscreenWindow.class] ) {
+        SJRotationManager *manager = ((SJRotationFullscreenWindow *)window).rotationManager;
+        if ( manager != nil ) {
+            return [manager supportedInterfaceOrientationsForWindow:window];
         }
-            break;
-        default: break;
     }
+    return UIInterfaceOrientationMaskAll;
 }
 
-- (void)willResignActive {
-    [self.timerControl clear];
-    _inactivated = YES;
++ (instancetype)rotationManager {
+    if ( @available(iOS 16.0, *) )
+        return [SJRotationManager_iOS_16_Later.alloc _init];
+    else
+        return [SJRotationManager_iOS_9_15.alloc _init];
 }
 
-- (void)didBecomeActive {
-    [self.timerControl start];
+- (instancetype)_init {
+    self = [super init];
+    if ( self ) {
+        _autorotationSupportedOrientations = SJOrientationMaskAll;
+        _currentOrientation = SJOrientation_Portrait;
+        _deviceOrientation = SJOrientation_Portrait;
+        _rotationActivation = [SJRotationActivation.alloc init];
+        // 先注册通知, 再做准备, 保证通知回调先执行;
+        [self _observeDeviceOrientation];
+        [self _prepareWindowForRotation];
+    }
+    return self;
+}
+
+- (void)dealloc {
+#ifdef DEBUG
+    NSLog(@"%d - -[%@ %s]", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
+#endif
+    [_window setHidden:YES];
+    [NSNotificationCenter.defaultCenter removeObserver:self];
+}
+
+- (id<SJRotationManagerObserver>)getObserver {
+    return [SJRotationObserver.alloc initWithManager:self];
+}
+
+- (UIWindow *)window {
+    return _window;
+}
+
+- (BOOL)isForcedRotation {
+    return _forcedRotation;
+}
+
+- (SJOrientation)deviceOrientation {
+    return _deviceOrientation;
+}
+
+- (BOOL)allowsRotation {
+    if ( _windowPreparing ) return NO;
+    if ( !_rotationActivation.isActive ) return NO;
+    if ( _rotating && !_transitioning ) return YES;
+    if ( _currentOrientation == _deviceOrientation ) return NO;
+    if ( !_forcedRotation ) {
+        if ( _disabledAutorotation ) return NO;
+        if ( !SJRotationIsSupportedOrientation(_deviceOrientation, _autorotationSupportedOrientations) ) return NO;
+    }
+    if ( _rotating && _transitioning ) return NO;
+    if ( _shouldTriggerRotation != nil && !_shouldTriggerRotation(self) ) return NO;
+    return YES;
+}
+
+- (void)rotationBegin {
+    _rotating = YES;
+    [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification object:self];
+}
+
+- (void)rotationEnd {
+    _rotating = NO;
+    _forcedRotation = NO;
+    [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerRotationNotification object:self];
+}
+
+- (void)transitionBegin {
+    _transitioning = YES;
+    [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerTransitionNotification object:self];
+}
+
+- (void)transitionEnd {
+    _transitioning = NO;
+    [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerTransitionNotification object:self];
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass.", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientationsForWindow:(nullable UIWindow *)window {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass.", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (__kindof SJRotationFullscreenViewController *)rotationFullscreenViewController {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass.", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)rotateToOrientation:(SJOrientation)orientation animated:(BOOL)animated complete:(void (^)(SJRotationManager * _Nonnull))completionHandler {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass.", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)onDeviceOrientationChanged:(SJOrientation)deviceOrientation {
+    
 }
 
 #pragma mark -
 
 - (BOOL)isFullscreen {
-    return _currentOrientation == (NSInteger)UIDeviceOrientationLandscapeLeft ||
-           _currentOrientation == (NSInteger)UIDeviceOrientationLandscapeRight;
-}
-
-- (id<SJRotationManagerObserver>)getObserver {
-    return [[SJRotationManagerObserver alloc] initWithRotationManager:self];
+    return SJRotationIsFullscreenOrientation(_currentOrientation);
 }
 
 - (void)rotate {
-    if ( ![self _isSupported:SJOrientation_LandscapeLeft] &&
-         ![self _isSupported:SJOrientation_LandscapeRight] ) {
-        if ( self.isFullscreen )
-            [self rotate:SJOrientation_Portrait animated:YES];
-        else
-            [self rotate:SJOrientation_LandscapeLeft animated:YES];
-        return;
+    SJOrientation orientation;
+    if ( SJRotationIsFullscreenOrientation(_currentOrientation) ) {
+        orientation = SJOrientation_Portrait;
     }
-    
-    if ( self.isFullscreen && [self _isSupported:SJOrientation_Portrait] ) {
-        [self rotate:SJOrientation_Portrait animated:YES];
-        return;
+    else {
+        orientation = SJRotationIsFullscreenOrientation(_deviceOrientation) ? _deviceOrientation : SJOrientation_LandscapeLeft;
     }
-    
-    
-    if ( [self _isSupported:SJOrientation_LandscapeLeft] &&
-         [self _isSupported:SJOrientation_LandscapeRight] ) {
-        SJOrientation orientation = (NSInteger)_deviceOrientation;
-        if ( self.window.fullscreenModeViewController.currentOrientation == SJOrientation_Portrait )
-            orientation = SJOrientation_LandscapeLeft;
-        [self rotate:orientation animated:YES];
-        return;
-    }
-    
-    if ( [self _isSupported:SJOrientation_LandscapeLeft] &&
-        ![self _isSupported:SJOrientation_LandscapeRight] ) {
-        [self rotate:SJOrientation_LandscapeLeft animated:YES];
-        return;
-    }
-    
-    if ( ![self _isSupported:SJOrientation_LandscapeLeft] &&
-          [self _isSupported:SJOrientation_LandscapeRight] ) {
-        [self rotate:SJOrientation_LandscapeRight animated:YES];
-        return;
-    }
+    [self rotate:orientation animated:YES];
 }
 
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated {
@@ -409,192 +219,156 @@ static NSNotificationName const SJRotationManagerTransitioningValueDidChangeNoti
 }
 
 - (void)rotate:(SJOrientation)orientation animated:(BOOL)animated completionHandler:(nullable void(^)(id<SJRotationManager> mgr))completionHandler {
-    _completionHandler = completionHandler;
-    if ( orientation == (NSInteger)self.window.fullscreenModeViewController.currentOrientation ) {
-        [self _finishTransition];
+    SJOrientation fromOrientation = self.currentOrientation;
+    SJOrientation toOrientation = orientation;
+    if ( fromOrientation == toOrientation ) {
+        if ( completionHandler != nil ) completionHandler(self);
         return;
     }
-    
-    _inactivated = NO;
+
     _forcedRotation = YES;
-    _window.fullscreenModeViewController.disableAnimations = !animated;
-    [UIDevice.currentDevice setValue:@(UIDeviceOrientationUnknown) forKey:@"orientation"];
-    [UIDevice.currentDevice setValue:@(orientation) forKey:@"orientation"];
+    _deviceOrientation = orientation;
+    [_rotationActivation forceActive];
+    [self rotateToOrientation:orientation animated:animated complete:completionHandler];
+}
+
+#pragma mark - SJRotationFullscreenWindowDelegate, SJRotationFullscreenNavigationControllerDelegate, SJRotationFullscreenViewControllerDelegate
+
+- (BOOL)window:(SJRotationFullscreenWindow *)window pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+    return [self pointInside:point withEvent:event];
+}
+
+- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    [_actionForwarder pushViewController:viewController animated:animated];
+}
+
+- (BOOL)prefersStatusBarHiddenForRotationFullscreenViewController:(SJRotationFullscreenViewController *)viewController {
+    return _rotating ? SJRotationIsFullscreenOrientation(_deviceOrientation) : [_actionForwarder prefersStatusBarHidden];
+}
+- (UIStatusBarStyle)preferredStatusBarStyleForRotationFullscreenViewController:(SJRotationFullscreenViewController *)viewController {
+    return [_actionForwarder preferredStatusBarStyle];
 }
 
 #pragma mark -
 
-- (CGRect)targetOriginFrame {
-    if ( self.superview.window == nil )
-        return CGRectZero;
-    return [self.superview convertRect:self.superview.bounds toView:self.superview.window];
-}
-
-- (BOOL)prefersStatusBarHidden {
-    return self.delegate.prefersStatusBarHidden;
-}
-
-- (UIStatusBarStyle)preferredStatusBarStyle {
-    return self.delegate.preferredStatusBarStyle;
-}
-
-- (void)vc_forwardPushViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    [self.delegate pushViewController:viewController animated:animated];
-}
-
-#pragma mark -
-
-- (BOOL)shouldAutorotateToOrientation:(UIDeviceOrientation)orientation {
-    if ( _inactivated )
-        return NO;
-    
-    if ( orientation == (NSInteger)_window.fullscreenModeViewController.currentOrientation )
-        return NO;
-    
-    if ( self.isDisabledAutorotation && !_forcedRotation )
-        return NO;
-    
-    if ( self.isTransitioning && _window.fullscreenModeViewController.isRotating )
-        return NO;
-    
-    if ( !_forcedRotation ) {
-        if ( ![self _isSupported:(NSInteger)orientation] )
-            return NO;
+- (void)_prepareWindowForRotation {
+    if ( @available(iOS 13.0, *) ) {
+        _window = [SJRotationFullscreenWindow.alloc initWithWindowScene:UIApplication.sharedApplication.keyWindow.windowScene ?: (UIWindowScene *)UIApplication.sharedApplication.connectedScenes.anyObject delegate:self];
     }
-    
-    if ( _shouldTriggerRotation && !_shouldTriggerRotation(self) )
-        return NO;
-    
-    self.currentOrientation = (NSInteger)orientation;
-    
-    if ( self.isTransitioning == NO )
-        [self _beginTransition];
-    
-    if ( orientation == UIDeviceOrientationLandscapeLeft ||
-         orientation == UIDeviceOrientationLandscapeRight ) {
-        UIWindow *keyWindow = UIApplication.sharedApplication.keyWindow;
-        if ( keyWindow != self.window && self.previousKeyWindow != keyWindow ) {
-            self.previousKeyWindow = UIApplication.sharedApplication.keyWindow;
+    else {
+        _window = [SJRotationFullscreenWindow.alloc initWithFrame:UIScreen.mainScreen.bounds delegate:self];
+    }
+    _window.rotationManager = self;
+    SJRotationFullscreenViewController *fullscreenViewController = [self rotationFullscreenViewController];
+    fullscreenViewController.delegate = self;
+    SJRotationFullscreenNavigationController *rootViewController = [SJRotationFullscreenNavigationController.alloc initWithRootViewController:fullscreenViewController delegate:self];
+    _window.rootViewController = rootViewController;
+    _windowPreparing = YES;
+    [UIView animateWithDuration:0.0 animations:^{ /** next */ } completion:^(BOOL finished) {
+        self->_window.windowLevel = UIWindowLevelNormal - 1;
+        self->_window.hidden = NO;
+        [UIView animateWithDuration:0.0 animations:^{ /** preparing */} completion:^(BOOL finished) {
+            self->_window.hidden = YES;
+            self->_window.windowLevel = UIWindowLevelStatusBar - 1;
+            self->_windowPreparing = NO;
+        }];
+    }];
+}
+
+- (void)_observeDeviceOrientation {
+    UIDevice *device = UIDevice.currentDevice;
+    if ( !device.isGeneratingDeviceOrientationNotifications ) {
+        [device beginGeneratingDeviceOrientationNotifications];
+    }
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_onDeviceOrientationChangedWithNote:) name:UIDeviceOrientationDidChangeNotification object:device];
+}
+
+- (void)_onDeviceOrientationChangedWithNote:(NSNotification *)note {
+    NSInteger orientation = UIDevice.currentDevice.orientation;
+    switch ( orientation ) {
+        case UIDeviceOrientationPortrait:
+        case UIDeviceOrientationLandscapeLeft:
+        case UIDeviceOrientationLandscapeRight: {
+            if ( _deviceOrientation != orientation ) {
+                _deviceOrientation = orientation;
+                
+                [self onDeviceOrientationChanged:orientation];
+            }
+            
         }
-        if ( self.window.isKeyWindow == NO )
-            [self.window makeKeyAndVisible];
-    }
-    return YES;
-}
-
-- (void)fullscreenModeViewController:(SJFullscreenModeViewController *)vc willRotateToOrientation:(UIDeviceOrientation)orientation {
-    if ( orientation == UIDeviceOrientationPortrait || orientation == UIDeviceOrientationPortraitUpsideDown ) {
-        [self performSelector:@selector(_fixNavigationBarLayout) onThread:NSThread.mainThread withObject:@(NO) waitUntilDone:NO];
+            break;
+        default: break;
     }
 }
+@end
 
-- (void)_fixNavigationBarLayout {
-    UINavigationController *nav = [self.superview lookupResponderForClass:UINavigationController.class];
-    [nav viewDidAppear:NO];
-    [nav.navigationBar layoutSubviews];
-}
 
-- (void)fullscreenModeViewController:(SJFullscreenModeViewController *)vc didRotateFromOrientation:(UIDeviceOrientation)orientation {
-    if ( !vc.isFullscreen ) {
-        UIView *snapshot = [self.target snapshotViewAfterScreenUpdates:NO];
-        snapshot.frame = self.superview.bounds;
-        [self.superview addSubview:snapshot];
-        SJRunLoopTaskQueue.main.enqueue(^{
-            [self.superview addSubview:self.target];
-        }).enqueue(^{
-            [snapshot removeFromSuperview];
-            UIWindow *previousKeyWindow = self.previousKeyWindow ?: UIApplication.sharedApplication.windows.firstObject;
-            [previousKeyWindow makeKeyAndVisible];
-            self.previousKeyWindow = nil;
-            self.window.hidden = YES;
-            [self _finishTransition];
+#pragma mark - fix safe area
+
+#import <objc/message.h>
+#import "SJBaseVideoPlayerConst.h"
+
+API_DEPRECATED("deprecated!", ios(13.0, 16.0)) @protocol _UIViewControllerSafeAreaFixingHooks <NSObject>
+- (void)_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
+- (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin;
+@end
+
+API_DEPRECATED("deprecated!", ios(13.0, 16.0)) @implementation SJRotationManager (SJRotationSafeAreaFixing)
++ (void)initialize {
+    if ( @available(iOS 16.0, *) )
+        return;
+    
+    if ( @available(iOS 13.0, *) ) {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            Class cls = UIViewController.class;
+            NSData *data = [NSData.alloc initWithBase64EncodedString:@"X3NldENvbnRlbnRPdmVybGF5SW5zZXRzOmFuZExlZnRNYXJnaW46cmlnaHRNYXJnaW46" options:kNilOptions];
+            NSString *method = [NSString.alloc initWithData:data encoding:NSUTF8StringEncoding];
+            SEL originalSelector = NSSelectorFromString(method);
+            SEL swizzledSelector = @selector(sj_setContentOverlayInsets:andLeftMargin:rightMargin:);
+            
+            Method originalMethod = class_getInstanceMethod(cls, originalSelector);
+            Method swizzledMethod = class_getInstanceMethod(cls, swizzledSelector);
+            if ( originalMethod != NULL ) method_exchangeImplementations(originalMethod, swizzledMethod);
         });
     }
-    else {
-        [self _finishTransition];
-    }
-    
-}
-
-- (void)_beginTransition {
-    self.transitioning = YES;
-    if ( !_forcedRotation ) _window.fullscreenModeViewController.disableAnimations = NO; // 自动旋转时, 默认触发动画
-}
-
-- (void)_finishTransition {
-    self.forcedRotation = NO;
-    self.transitioning = NO;
-    
-    if ( _completionHandler )
-        _completionHandler(self);
-    
-    _completionHandler = nil;
-}
-
-- (BOOL)_isSupported:(SJOrientation)orientation {
-    switch ( orientation ) {
-        case SJOrientation_Portrait:
-            return _autorotationSupportedOrientations & SJOrientationMaskPortrait;
-        case SJOrientation_LandscapeLeft:
-            return _autorotationSupportedOrientations & SJOrientationMaskLandscapeLeft;
-        case SJOrientation_LandscapeRight:
-            return _autorotationSupportedOrientations & SJOrientationMaskLandscapeRight;
-    }
-    return NO;
-}
-
-#pragma mark -
-- (void)setTransitioning:(BOOL)transitioning {
-    _transitioning = transitioning;
-    [NSNotificationCenter.defaultCenter postNotificationName:SJRotationManagerTransitioningValueDidChangeNotification object:self];
-}
-
-@synthesize timerControl = _timerControl;
-- (SJTimerControl *)timerControl {
-    if ( _timerControl == nil ) {
-        _timerControl = [SJTimerControl.alloc init];
-        _timerControl.interval = 2;
-        __weak typeof(self) _self = self;
-        _timerControl.exeBlock = ^(SJTimerControl * _Nonnull control) {
-            __strong typeof(_self) self = _self;
-            if ( !self ) return;
-            self.inactivated = NO;
-        };
-    }
-    return _timerControl;
 }
 @end
 
-@implementation SJRotationManagerObserver {
-    __weak SJRotationManager *_Nullable _mgr;
-}
-@synthesize rotationDidStartExeBlock = _rotationDidStartExeBlock;
-@synthesize rotationDidEndExeBlock = _rotationDidEndExeBlock;
-
-- (instancetype)initWithRotationManager:(SJRotationManager *)mgr {
-    self = [super init];
-    if ( !self )
-        return nil;
-    _mgr = mgr;
-    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(transitioningValueDidChange:) name:SJRotationManagerTransitioningValueDidChangeNotification object:mgr];
-    return self;
-}
-
-- (void)dealloc {
-    [NSNotificationCenter.defaultCenter removeObserver:self];
-}
-
-- (void)transitioningValueDidChange:(NSNotification *)note {
-    if ( _mgr == nil ) return;
-    SJRotationManager *mgr = note.object;
-    if ( mgr.isTransitioning ) {
-        if ( _rotationDidStartExeBlock )
-            _rotationDidStartExeBlock(mgr);
+API_DEPRECATED("deprecated!", ios(13.0, 16.0)) @implementation UIViewController (SJRotationSafeAreaFixing)
+- (void)sj_setContentOverlayInsets:(UIEdgeInsets)insets andLeftMargin:(CGFloat)leftMargin rightMargin:(CGFloat)rightMargin {
+    SJSafeAreaInsetsMask mask = self.disabledAdjustSafeAreaInsetsMask;
+    if ( mask & SJSafeAreaInsetsMaskTop ) insets.top = 0;
+    if ( mask & SJSafeAreaInsetsMaskLeft ) insets.left = 0;
+    if ( mask & SJSafeAreaInsetsMaskBottom ) insets.bottom = 0;
+    if ( mask & SJSafeAreaInsetsMaskRight ) insets.right = 0;
+    
+//    BOOL isFullscreen = self.view.bounds.size.width > self.view.bounds.size.height;
+//    if ( ![self.class isKindOfClass:SJRotationFullscreenViewController.class] || isFullscreen ) {
+//        if ( isFullscreen || insets.top != 0 || [self sj_containsPlayerView] == NO ) {
+//            [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
+//        }
+//    }
+    
+    UIWindow *keyWindow = UIApplication.sharedApplication.keyWindow;
+    UIWindow *otherWindow = self.view.window;
+    if ( [keyWindow isKindOfClass:SJRotationFullscreenWindow.class] && otherWindow != nil ) {
+        SJRotationManager *manager = ((SJRotationFullscreenWindow *)keyWindow).rotationManager;
+        UIWindow *superviewWindow = manager.superview.window;
+        if ( superviewWindow != otherWindow ) {
+            [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
+        }
     }
     else {
-        if ( _rotationDidEndExeBlock )
-            _rotationDidEndExeBlock(mgr);
+        [self sj_setContentOverlayInsets:insets andLeftMargin:leftMargin rightMargin:rightMargin];
     }
 }
+
+- (void)setDisabledAdjustSafeAreaInsetsMask:(SJSafeAreaInsetsMask)disabledAdjustSafeAreaInsetsMask {
+    objc_setAssociatedObject(self, @selector(disabledAdjustSafeAreaInsetsMask), @(disabledAdjustSafeAreaInsetsMask), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (SJSafeAreaInsetsMask)disabledAdjustSafeAreaInsetsMask {
+    return [objc_getAssociatedObject(self, _cmd) integerValue];
+}
 @end
-NS_ASSUME_NONNULL_END

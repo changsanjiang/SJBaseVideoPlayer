@@ -1,48 +1,48 @@
 PODS:
   - Masonry (1.1.0)
-  - SJBaseVideoPlayer (3.6.5):
+  - SJBaseVideoPlayer (3.7.3.3):
     - Masonry
-    - SJBaseVideoPlayer/AVPlayer (= 3.6.5)
-    - SJBaseVideoPlayer/Common (= 3.6.5)
+    - SJBaseVideoPlayer/AVPlayer (= 3.7.3.3)
+    - SJBaseVideoPlayer/Common (= 3.7.3.3)
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/AVPlayer (3.6.5):
+  - SJBaseVideoPlayer/AVPlayer (3.7.3.3):
     - Masonry
     - SJBaseVideoPlayer/Common
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/Common (3.6.5):
+  - SJBaseVideoPlayer/Common (3.7.3.3):
     - Masonry
     - SJBaseVideoPlayer/ResourceLoader
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJBaseVideoPlayer/ResourceLoader (3.6.5):
+  - SJBaseVideoPlayer/ResourceLoader (3.7.3.3):
     - Masonry
     - SJUIKit/AttributesFactory (>= 0.0.0.38)
     - SJUIKit/ObserverHelper
     - SJUIKit/Queues
     - SJUIKit/SQLite3
-  - SJUIKit/AttributesFactory (0.0.0.52):
-    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.52)
-    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.52)
-  - SJUIKit/AttributesFactory/Deprecated (0.0.0.52)
-  - SJUIKit/AttributesFactory/UIKitText (0.0.0.52)
-  - SJUIKit/ObserverHelper (0.0.0.52)
-  - SJUIKit/Queues (0.0.0.52)
-  - SJUIKit/SQLite3 (0.0.0.52):
-    - SJUIKit/SQLite3/Core (= 0.0.0.52)
-    - SJUIKit/SQLite3/Protocol (= 0.0.0.52)
+  - SJUIKit/AttributesFactory (0.0.0.58):
+    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.58)
+    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.58)
+  - SJUIKit/AttributesFactory/Deprecated (0.0.0.58)
+  - SJUIKit/AttributesFactory/UIKitText (0.0.0.58)
+  - SJUIKit/ObserverHelper (0.0.0.58)
+  - SJUIKit/Queues (0.0.0.58)
+  - SJUIKit/SQLite3 (0.0.0.58):
+    - SJUIKit/SQLite3/Core (= 0.0.0.58)
+    - SJUIKit/SQLite3/Protocol (= 0.0.0.58)
     - YYModel
-  - SJUIKit/SQLite3/Core (0.0.0.52):
+  - SJUIKit/SQLite3/Core (0.0.0.58):
     - SJUIKit/SQLite3/Protocol
     - YYModel
-  - SJUIKit/SQLite3/Protocol (0.0.0.52):
+  - SJUIKit/SQLite3/Protocol (0.0.0.58):
     - YYModel
   - YYModel (1.0.4)
 
@@ -61,10 +61,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  SJBaseVideoPlayer: 23762dd5433a6f37d6214ae8a9ba267ebee69577
-  SJUIKit: 8246b1001e616b0dbd090309fd58cdd609ae3fd4
+  SJBaseVideoPlayer: aa49220d94217dd72d62f8704a760e9fb5070cdc
+  SJUIKit: 86d5b16f8b8b17274ef8805acf965e4014629e15
   YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
 
 PODFILE CHECKSUM: af18d3f9e923a1fcd0dc86334f1af0fb8e60d852
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.3

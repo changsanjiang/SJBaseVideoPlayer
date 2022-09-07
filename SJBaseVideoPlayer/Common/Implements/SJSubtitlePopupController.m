@@ -1,11 +1,11 @@
 //
-//  SJSubtitlesPromptController.m
+//  SJSubtitlePopupController.m
 //  SJBaseVideoPlayer
 //
 //  Created by 畅三江 on 2019/11/8.
 //
 
-#import "SJSubtitlesPromptController.h"
+#import "SJSubtitlePopupController.h"
 #if __has_include(<Masonry/Masonry.h>)
 #import <Masonry/Masonry.h>
 #else
@@ -13,12 +13,12 @@
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJSubtitlesPromptController ()
+@interface SJSubtitlePopupController ()
 @property (nonatomic, strong, readonly) UIView *containerView;
 @property (nonatomic, strong, readonly) UILabel *subtitleLabel;
 @end
 
-@implementation SJSubtitlesPromptController
+@implementation SJSubtitlePopupController
 @synthesize subtitles = _subtitles;
 @synthesize numberOfLines = _numberOfLines;
 @synthesize contentInsets = _contentInsets;

@@ -1,12 +1,12 @@
 //
-//  SJSubtitlesPromptControllerDefines.h
+//  SJSubtitlePopupControllerDefines.h
 //  Pods
 //
 //  Created by 畅三江 on 2019/11/8.
 //
 
-#ifndef SJSubtitlesPromptControllerDefines_h
-#define SJSubtitlesPromptControllerDefines_h
+#ifndef SJSubtitlePopupControllerDefines_h
+#define SJSubtitlePopupControllerDefines_h
 #include <Foundation/Foundation.h>
 @protocol SJSubtitleItem;
 @class UIColor;
@@ -27,7 +27,7 @@ SJTimeRangeContainsTime(NSTimeInterval time, SJTimeRange range) {
     return (!(time < range.start) && (time - range.start) < range.duration) ? YES : NO;
 }
 
-@protocol SJSubtitlesPromptController <NSObject>
+@protocol SJSubtitlePopupController <NSObject>
 
 ///
 /// 设置未来将要显示的字幕
@@ -47,11 +47,12 @@ SJTimeRangeContainsTime(NSTimeInterval time, SJTimeRange range) {
 ///
 @property (nonatomic) UIEdgeInsets contentInsets;
 
+@property (nonatomic, strong, readonly) UIView *view;
+
 ///
 /// 以下属性由播放器维护, 开发者无需设置
 ///
 @property (nonatomic) NSTimeInterval currentTime;
-@property (nonatomic, strong, readonly) UIView *view;
 @end
 
 
@@ -65,4 +66,4 @@ SJTimeRangeContainsTime(NSTimeInterval time, SJTimeRange range) {
 @end
 NS_ASSUME_NONNULL_END
 
-#endif /* SJSubtitlesPromptControllerDefines_h */
+#endif /* SJSubtitlePopupControllerDefines_h */

@@ -1,16 +1,16 @@
 //
-//  SJSubtitlesPromptController.h
+//  SJSubtitlePopupController.h
 //  SJBaseVideoPlayer
 //
 //  Created by 畅三江 on 2019/11/8.
 //
 
 #import <Foundation/Foundation.h>
-#import "SJSubtitlesPromptControllerDefines.h"
+#import "SJSubtitlePopupControllerDefines.h"
 #import "SJSubtitleItem.h"
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJSubtitlesPromptController : NSObject<SJSubtitlesPromptController>
+@interface SJSubtitlePopupController : NSObject<SJSubtitlePopupController>
 
 ///
 /// 设置未来将要显示的字幕

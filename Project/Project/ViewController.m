@@ -19,6 +19,10 @@
 - (BOOL)shouldAutorotate {
     return NO;
 }
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskPortrait;
+}
  
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -40,13 +44,12 @@
     
     _player.URLAsset = [[SJVideoPlayerURLAsset alloc] initWithURL:[NSURL URLWithString:@"https://dh2.v.netease.com/2017/cg/fxtpty.mp4"]];
     
-    _player.pauseWhenAppDidEnterBackground = NO;
+    _player.pausedInBackground = NO;
     
 //    [_player rotation];
     
     // Do any additional setup after loading the view, typically from a nib.
 }
-
 - (IBAction)playVideo:(id)sender {
     _player.assetURL = [NSURL URLWithString:@"https://dh2.v.netease.com/2017/cg/fxtpty.mp4"];
 }
@@ -67,5 +70,8 @@
 }
 - (IBAction)add:(id)sender {
     [_player seekToTime:_player.currentTime +15 completionHandler:nil];
+}
+- (IBAction)rotate:(id)sender {
+    [_player rotate];
 }
 @end
