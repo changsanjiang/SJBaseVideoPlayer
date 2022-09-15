@@ -8,6 +8,7 @@
 
 #import "SJAliMediaPlayer.h"
 #import <AliyunPlayer/AliyunPlayer.h>
+#import <AliyunPlayer/AliPlayerPictureInPictureDelegate.h>
 
 NS_ASSUME_NONNULL_BEGIN
 NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain";
@@ -100,7 +101,7 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 @property (nonatomic) SJAssetStatus assetStatus;
 @property (nonatomic) CGSize presentationSize;
 
-@property (nonatomic, strong, nullable) AliPlayer *player;
+@property (nonatomic, strong, readonly) AliPlayer *player;
 @property (nonatomic) AVPStatus playerStatus;
 @property (nonatomic) AVPEventType eventType;
 
@@ -112,7 +113,6 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 @end
 
 @implementation SJAliMediaPlayer
-@synthesize pauseWhenAppDidEnterBackground = _pauseWhenAppDidEnterBackground;
 @synthesize playableDuration = _playableDuration;
 @synthesize isPlayed = _isPlayed;
 @synthesize isReplayed = _isReplayed;
@@ -130,7 +130,6 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
         _player = AliPlayer.alloc.init;
         _player.delegate = (id)_delegateProxy;
         _player.playerView = UIView.new;
-        _pauseWhenAppDidEnterBackground = YES;
         _seekMode = AVP_SEEKMODE_INACCURATE;
         _needsSeekToStartPosition = time != 0;
         
@@ -154,8 +153,6 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
         }
         
         [_player prepare];
-
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(applicationDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     }
     return self;
 }
@@ -164,7 +161,6 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 #ifdef DEBUG
     NSLog(@"%d \t %s", (int)__LINE__, __func__);
 #endif
-    [NSNotificationCenter.defaultCenter removeObserver:self];
     [_player destroy];
 }
 
@@ -560,10 +556,6 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
             return _trialEndPosition;
     }
     return _seekingInfo.isSeeking ? CMTimeGetSeconds(_seekingInfo.time) : _currentTime;
-}
-
-- (void)applicationDidEnterBackground {
-    if ( self.pauseWhenAppDidEnterBackground ) [self pause];
 }
 
 - (BOOL)isPlayedToTrialEndPosition {

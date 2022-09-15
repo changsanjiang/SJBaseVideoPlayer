@@ -168,7 +168,7 @@ typedef struct _SJPlayerControlInfo {
 }
 
 + (NSString *)version {
-    return @"v3.7.3.4";
+    return @"v3.7.4";
 }
 
 - (void)setVideoGravity:(SJVideoGravity)videoGravity {
@@ -1353,7 +1353,7 @@ typedef struct _SJPlayerControlInfo {
 - (void)playbackController:(id<SJVideoPlayerPlaybackController>)controller timeControlStatusDidChange:(SJPlaybackTimeControlStatus)status {
     
     BOOL isBuffering = self.isBuffering || self.assetStatus == SJAssetStatusPreparing;
-    isBuffering ? [self.reachability startRefresh] : [self.reachability stopRefresh];
+    isBuffering && !self.URLAsset.mediaURL.isFileURL ? [self.reachability startRefresh] : [self.reachability stopRefresh];
     
     if ( [self.controlLayerDelegate respondsToSelector:@selector(videoPlayerPlaybackStatusDidChange:)] ) {
         [self.controlLayerDelegate videoPlayerPlaybackStatusDidChange:self];

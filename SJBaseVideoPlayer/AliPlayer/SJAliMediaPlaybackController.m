@@ -10,6 +10,7 @@
 #import "SJAliMediaPlayer.h"
 #import "SJAliMediaPlayerLayerView.h"
 #import "SJVideoPlayerURLAsset+SJAliMediaPlaybackAdd.h"
+#import "SJAliPictureInPictureController.h"
 
 #if __has_include(<SJUIKit/SJRunLoopTaskQueue.h>)
 #import <SJUIKit/SJRunLoopTaskQueue.h>
@@ -18,8 +19,9 @@
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJAliMediaPlaybackController ()
+@interface SJAliMediaPlaybackController ()<SJPictureInPictureControllerDelegate>
 @property (nonatomic, strong, nullable) SJVideoPlayerURLAsset *avpTrackMedia;
+@property (nonatomic, strong, nullable) SJAliPictureInPictureController *pictureInPictureController API_AVAILABLE(ios(15.0));
 @end
 
 @implementation SJAliMediaPlaybackController
@@ -30,6 +32,10 @@ NS_ASSUME_NONNULL_BEGIN
         _seekMode = AVP_SEEKMODE_INACCURATE;
         
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_onTrackReadyWithNote:) name:SJAliMediaPlayerOnTrackReadyNotification object:nil];
+        
+        if (@available(iOS 15.0, *)) {
+            [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(_ali_assetStatusDidChange:) name:SJMediaPlayerAssetStatusDidChangeNotification object:nil];
+        }
     }
     return self;
 }
@@ -42,7 +48,6 @@ NS_ASSUME_NONNULL_BEGIN
             if ( !self ) return;
             SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:media.source config:media.avpConfig cacheConfig:media.avpCacheConfig startPosition:media.startPosition];
             player.seekMode = self.seekMode;
-            player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
             if ( completionHandler ) completionHandler(player);
         });
     }
@@ -52,13 +57,36 @@ NS_ASSUME_NONNULL_BEGIN
     return [SJAliMediaPlayerLayerView.alloc initWithPlayer:player];
 }
 
-- (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
-    [super setPauseWhenAppDidEnterBackground:pauseWhenAppDidEnterBackground];
-}
-
 - (void)setSeekMode:(AVPSeekMode)seekMode {
     _seekMode = seekMode;
     self.currentPlayer.seekMode = seekMode;
+}
+
+- (void)refresh {
+    if ( @available(iOS 15.0, *) ) {
+        [self cancelPictureInPicture];
+    }
+    [super refresh];
+}
+
+- (void)stop {
+    if ( @available(iOS 15.0, *) ) {
+        [self cancelPictureInPicture];
+    }
+    [super stop];
+}
+
+- (void)receivedApplicationDidEnterBackgroundNotification {
+    if ( @available(iOS 15.0, *) ) {
+//        if ( _pictureInPictureController.status == SJPictureInPictureStatusStarting ||
+//             _pictureInPictureController.status == SJPictureInPictureStatusRunning ) {
+//            return;
+//        }
+        if ( _pictureInPictureController != nil )
+            return;
+    }
+    
+    [super receivedApplicationDidEnterBackgroundNotification];
 }
 
 #pragma mark -
@@ -81,6 +109,62 @@ NS_ASSUME_NONNULL_BEGIN
     NSLog(@"%d \t %s \t 未实现该方法!", (int)__LINE__, __func__);
 #endif
     return SJPlaybackTypeUnknown;
+}
+
+#pragma mark - PiP
+
+- (void)_ali_assetStatusDidChange:(NSNotification *)note API_AVAILABLE(ios(15.0)) {
+    if ( self.currentPlayer == note.object && self.canStartPictureInPictureAutomaticallyFromInline && self.assetStatus == SJAssetStatusReadyToPlay ) {
+        [self prepareForPictureInPicture];
+    }
+}
+
+- (BOOL)isPictureInPictureSupported API_AVAILABLE(ios(14.0)) {
+    if ( @available(iOS 15.0, *) ) return SJAliPictureInPictureController.isPictureInPictureSupported;
+    return NO;
+}
+
+- (void)setCanStartPictureInPictureAutomaticallyFromInline:(BOOL)canStartPictureInPictureAutomaticallyFromInline API_AVAILABLE(ios(14.2)) {
+    [super setCanStartPictureInPictureAutomaticallyFromInline:canStartPictureInPictureAutomaticallyFromInline];
+    if ( @available(iOS 15.0, *) ) {
+        if ( canStartPictureInPictureAutomaticallyFromInline ) [self prepareForPictureInPicture];
+    }
+}
+
+- (void)prepareForPictureInPicture API_AVAILABLE(ios(15.0)) {
+    if ( _pictureInPictureController == nil && self.assetStatus == SJAssetStatusReadyToPlay ) {
+        _pictureInPictureController = [SJAliPictureInPictureController.alloc initWithPlayer:self.currentPlayer delegate:self];
+        _pictureInPictureController.canStartPictureInPictureAutomaticallyFromInline = self.canStartPictureInPictureAutomaticallyFromInline;
+    }
+}
+
+- (void)stopPictureInPicture API_AVAILABLE(ios(14.0)) {
+    if ( @available(iOS 15.0, *) ) {
+        [_pictureInPictureController stopPictureInPicture];
+        _pictureInPictureController = nil;
+    }
+    else {
+        [super stopPictureInPicture];
+    }
+}
+
+- (void)cancelPictureInPicture API_AVAILABLE(ios(14.0)) {
+    if ( @available(iOS 15.0, *) ) {
+        [_pictureInPictureController stopPictureInPicture];
+        _pictureInPictureController = nil;
+    }
+}
+
+- (void)pictureInPictureController:(id<SJPictureInPictureController>)controller statusDidChange:(SJPictureInPictureStatus)status API_AVAILABLE(ios(14.0)) {
+    if ( [self.delegate respondsToSelector:@selector(playbackController:pictureInPictureStatusDidChange:)] ) {
+        [self.delegate playbackController:self pictureInPictureStatusDidChange:status];
+    }
+}
+
+- (void)pictureInPictureController:(id<SJPictureInPictureController>)controller restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:(void (^)(BOOL))completionHandler API_AVAILABLE(ios(14.0)) {
+#ifdef DEBUG
+    NSLog(@"%d - -[%@ %s] 暂未提供相关API", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
+#endif
 }
 
 #pragma mark - mark

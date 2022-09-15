@@ -24,7 +24,6 @@ FOUNDATION_EXTERN NSErrorDomain const SJAliMediaPlayerErrorDomain;
 - (instancetype)initWithSource:(__kindof AVPSource *)source config:(nullable AVPConfig *)config cacheConfig:(nullable AVPCacheConfig *)cacheConfig startPosition:(NSTimeInterval)time;
 
 @property (nonatomic) NSTimeInterval trialEndPosition;
-@property (nonatomic) BOOL pauseWhenAppDidEnterBackground;
 @property (nonatomic) AVPScalingMode scalingMode;
 @property (nonatomic) AVPSeekMode seekMode;
 
