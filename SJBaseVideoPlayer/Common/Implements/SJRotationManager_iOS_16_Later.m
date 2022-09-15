@@ -93,6 +93,7 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
         }
         [sourceWindow addSubview:self.target];
         [sourceWindow makeKeyWindow];
+        [self.target snapshotViewAfterScreenUpdates:YES];
         [self.target layoutIfNeeded];
         [UIView performWithoutAnimation:^{
             [self.window setHidden:YES];
