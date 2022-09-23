@@ -17,6 +17,8 @@
 
 #if __has_include(<IJKMediaFramework/IJKMediaFramework.h>)
 #import <IJKMediaFramework/IJKMediaFramework.h>
+#elif __has_include(<IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>)
+#import <IJKMediaFrameworkWithSSL/IJKMediaFrameworkWithSSL.h>
 #else
 #import <PodIJKPlayer/PodIJKPlayer.h>
 #endif
