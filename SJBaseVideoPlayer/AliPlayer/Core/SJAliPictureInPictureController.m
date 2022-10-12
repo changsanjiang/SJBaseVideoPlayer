@@ -5,8 +5,8 @@
 //  Created by 畅三江 on 2022/9/15.
 //
 
-#if __has_include(<AliyunPlayer/AliPlayerPictureInPictureDelegate.h>)
 #import "SJAliPictureInPictureController.h"
+#if __has_include(<AliyunPlayer/AliPlayerPictureInPictureDelegate.h>)
 #import <AVKit/AVPictureInPictureController.h>
 #import "SJAliMediaPlayerInternal.h"
 #import <AliyunPlayer/AliPlayerPictureInPictureDelegate.h>

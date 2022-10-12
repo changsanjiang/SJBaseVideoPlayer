@@ -8,7 +8,6 @@
 
 #import "SJAliMediaPlayer.h"
 #import <AliyunPlayer/AliyunPlayer.h>
-#import <AliyunPlayer/AliPlayerPictureInPictureDelegate.h>
 
 NS_ASSUME_NONNULL_BEGIN
 NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain";
