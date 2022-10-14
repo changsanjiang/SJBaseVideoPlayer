@@ -34,6 +34,10 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
     return YES;
 }
 
+- (BOOL)prefersStatusBarHiddenForRotationFullscreenViewController:(SJRotationFullscreenViewController *)viewController {
+    return NO;
+}
+
 - (UIInterfaceOrientationMask)supportedInterfaceOrientationsForWindow:(nullable UIWindow *)window {
     if ( window == self.window )
         return 1 << self.currentOrientation;

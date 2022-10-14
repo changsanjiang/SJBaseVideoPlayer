@@ -340,17 +340,18 @@ typedef struct _SJPlayerControlInfo {
                     break;
                     /// 垂直
                 case SJPanGestureMovingDirection_V: {
+                    CGFloat value = translate.y * 0.005;
                     switch ( position ) {
                             /// brightness
                         case SJPanGestureTriggeredPosition_Left: {
-                            CGFloat value = self.deviceVolumeAndBrightnessManager.brightness - translate.y * 0.005;
-                            if ( value < 0 ) value = 0;
-                            self.deviceVolumeAndBrightnessManager.brightness = value;
+                            float old = self.deviceVolumeAndBrightnessManager.brightness;
+                            float new = old - value;
+                            NSLog(@"brightness: old: %lf, new: %lf", old, new);
+                            self.deviceVolumeAndBrightnessManager.brightness = new;
                         }
                             break;
                             /// volume
                         case SJPanGestureTriggeredPosition_Right: {
-                            CGFloat value = translate.y * 0.005;
                             self.deviceVolumeAndBrightnessManager.volume -= value;
                         }
                             break;

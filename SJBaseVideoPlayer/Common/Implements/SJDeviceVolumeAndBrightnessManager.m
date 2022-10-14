@@ -10,6 +10,7 @@
 #import "SJBaseVideoPlayerResourceLoader.h"
 #import "SJBaseVideoPlayerConst.h"
 #import "SJPlayerView.h"
+#import "SJDeviceVolumeAndBrightness.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MPVolumeView.h>
 
@@ -142,16 +143,11 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 
 #pragma mark -
 
-@interface SJDeviceVolumeAndBrightnessManager ()
-@property (nonatomic, strong, readonly) SJRunLoopTaskQueue *taskQueue;
-
-@property (nonatomic, strong, readonly) MPVolumeView *sysVolumeView;
-@property (nonatomic, strong, readonly) UISlider *sysVolumeSlider;
+@interface SJDeviceVolumeAndBrightnessManager ()<SJDeviceVolumeAndBrightnessObserver>
 
 @end
 
 @implementation SJDeviceVolumeAndBrightnessManager
-@synthesize sysVolumeSlider = _sysVolumeSlider;
 @synthesize volumeTracking = _volumeTracking;
 @synthesize brightnessTracking = _brightnessTracking;
 
@@ -175,33 +171,20 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
     self = [super init];
     if ( !self ) return nil;
     _showsPromptView = YES;
-    _taskQueue = SJRunLoopTaskQueue.queue(@"SJDeviceVolumeAndBrightnessManagerTaskQueue").update(CFRunLoopGetMain(), kCFRunLoopCommonModes).delay(5);
-    
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        sjkvo_observe(UIScreen.mainScreen, @"brightness", ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self handleBrightnessDidChangeNotification];
-            });
-        });
-        
-        AVAudioSession *session = AVAudioSession.sharedInstance;
-        sjkvo_observe(session,  @"outputVolume", NSKeyValueObservingOptionNew, ^(id  _Nonnull target, NSDictionary<NSKeyValueChangeKey,id> * _Nullable change) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self handleVolumeDidChangeEvent];
-            });
-        });
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self _syncVolume];
-        });
-    });
-    
-    for ( UIView *subview in self.sysVolumeView.subviews ) {
-        if ( [subview.class.description isEqualToString:@"MPVolumeSlider"] ) {
-            self->_sysVolumeSlider = (UISlider *)subview;
-            break;
-        }
-    }
+    [SJDeviceVolumeAndBrightness.shared addObserver:self];
     return self;
+}
+
+- (void)dealloc {
+    [SJDeviceVolumeAndBrightness.shared removeObserver:self];
+}
+
+- (void)device:(SJDeviceVolumeAndBrightness *)device onVolumeChanged:(float)volume {
+    [self _volumeDidChange];
+}
+
+- (void)device:(SJDeviceVolumeAndBrightness *)device onBrightnessChanged:(float)brightness {
+    [self _brightnessDidChange];
 }
 
 - (id<SJDeviceVolumeAndBrightnessManagerObserver>)getObserver {
@@ -219,12 +202,13 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 }
 
 - (void)_addOrRemoveSysVolumeView:(nullable UIWindow *)newWindow {
+    UIView *sysVolumeView = SJDeviceVolumeAndBrightness.shared.sysVolumeView;
     if ( _showsPromptView && newWindow != nil ) {
-        if ( self.sysVolumeView.superview != newWindow )
-            [newWindow addSubview:self.sysVolumeView];
+        if ( sysVolumeView.superview != newWindow )
+            [newWindow addSubview:sysVolumeView];
     }
     else {
-        [self.sysVolumeView removeFromSuperview];
+        [sysVolumeView removeFromSuperview];
     }
 }
 
@@ -240,35 +224,12 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
     }
 }
 
-@synthesize volume = _volume;
 - (void)setVolume:(float)volume {
-    if ( isnan(volume) )
-        return;
-    
-    if ( volume < 0 )
-        volume = 0;
-    else if ( volume > 1 )
-        volume = 1;
-    _volume = volume;
-    _taskQueue.empty().enqueue(^{
-        [self.sysVolumeSlider setValue:volume animated:NO];
-    });
-    
-    [self _volumeDidChange];
+    SJDeviceVolumeAndBrightness.shared.volume = volume;
 }
 
-- (void)_syncVolume {
-    _volume = [AVAudioSession sharedInstance].outputVolume;
-}
-
-@synthesize sysVolumeView = _sysVolumeView;
-- (MPVolumeView *)sysVolumeView {
-    if ( _sysVolumeView == nil ) {
-        CGFloat maxOffset = MAX(CGRectGetWidth(UIScreen.mainScreen.bounds),
-                                CGRectGetHeight(UIScreen.mainScreen.bounds)) + 100;
-        _sysVolumeView = [[MPVolumeView alloc] initWithFrame:CGRectMake(-maxOffset, -maxOffset, 0, 0)];
-    }
-    return _sysVolumeView;
+- (float)volume {
+    return SJDeviceVolumeAndBrightness.shared.volume;
 }
 
 - (nullable id<SJDeviceOutputPromptView>)volumeView {
@@ -328,16 +289,7 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 }
 
 - (void)setBrightness:(float)brightness {
-    if ( isnan(brightness) )
-        return;
-    
-    if ( brightness < 0 )
-        brightness = 0;
-    else if ( brightness > 1 )
-        brightness = 1;
-    
-    [UIScreen mainScreen].brightness = brightness;
-    [self _brightnessDidChange];
+    SJDeviceVolumeAndBrightness.shared.brightness = brightness;
 }
 
 - (float)brightness {
@@ -397,26 +349,26 @@ static NSNotificationName const SJDeviceBrightnessDidChangeNotification = @"SJDe
 
 #pragma mark - notifies
 
-- (void)handleVolumeDidChangeEvent {
-    UIView *targetView = self.targetView;
-    [self _addOrRemoveSysVolumeView:targetView.window];
-    if ( self.isVolumeTracking == NO ) {
-        [self _syncVolume];
-        if ( targetView.window != nil ) {
-            self.volumeTracking = YES;
-            [self _volumeDidChange];
-            self.volumeTracking = NO;
-        }
-    }
-    
-    [NSNotificationCenter.defaultCenter postNotificationName:SJDeviceVolumeDidChangeNotification object:self];
-}
-
-- (void)handleBrightnessDidChangeNotification {
-    if ( !self.isBrightnessTracking )
-        [self _refreshDataForBrightnessView];
-    [NSNotificationCenter.defaultCenter postNotificationName:SJDeviceBrightnessDidChangeNotification object:self];
-}
+//- (void)handleVolumeDidChangeEvent {
+//    UIView *targetView = self.targetView;
+//    [self _addOrRemoveSysVolumeView:targetView.window];
+//    if ( self.isVolumeTracking == NO ) {
+//        [self _syncVolume];
+//        if ( targetView.window != nil ) {
+//            self.volumeTracking = YES;
+//            [self _volumeDidChange];
+//            self.volumeTracking = NO;
+//        }
+//    }
+//    
+//    [NSNotificationCenter.defaultCenter postNotificationName:SJDeviceVolumeDidChangeNotification object:self];
+//}
+//
+//- (void)handleBrightnessDidChangeNotification {
+//    if ( !self.isBrightnessTracking )
+//        [self _refreshDataForBrightnessView];
+//    [NSNotificationCenter.defaultCenter postNotificationName:SJDeviceBrightnessDidChangeNotification object:self];
+//}
 
 #pragma mark - colors
 
