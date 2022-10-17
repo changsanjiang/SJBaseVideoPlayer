@@ -91,7 +91,7 @@ static void*kVolumeContext = &kVolumeContext;
 
 - (void)setBrightness:(float)brightness {
 #ifdef SJDEBUG
-    NSLog(@"brightness.setter: %f", brightness);
+    NSLog(@"brightness.onSet: %f", brightness);
 #endif
 
     
@@ -113,8 +113,19 @@ static void*kVolumeContext = &kVolumeContext;
 #pragma mark - mark
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if ( NSThread.currentThread.isMainThread ) {
+        [self _onValueChangeForKeyPath:keyPath object:object change:change context:context];
+    }
+    else {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self _onValueChangeForKeyPath:keyPath object:object change:change context:context];
+        });
+    }
+}
+
+- (void)_onValueChangeForKeyPath:(NSString *)keyPath object:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
 #ifdef SJDEBUG
-    NSLog(@"%@: %@", keyPath, change);
+    NSLog(@"onChange: %@: %@", keyPath, change);
 #endif
 
     if      ( context == kVolumeContext ) {
