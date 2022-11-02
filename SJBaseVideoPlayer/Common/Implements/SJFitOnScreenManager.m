@@ -144,12 +144,6 @@ static NSNotificationName const SJFitOnScreenManagerTransitioningValueDidChangeN
         if ( fitOnScreen ) {
             UIViewController *top = [self topMostController];
             if ( !animated ) [self _presentedAnimationWithDuration:0 completionHandler:nil];
-            if (@available(iOS 16.0, *)) {
-                
-            } else {
-                // 16以下的系统, 如果当前界面是横屏,fitOn后是竖屏问题
-                self.viewController.modalPresentationStyle = UIModalPresentationFullScreen;
-            }
             [top presentViewController:self.viewController animated:animated completion:^{
                 if ( completionHandler ) completionHandler(self);
             }];
