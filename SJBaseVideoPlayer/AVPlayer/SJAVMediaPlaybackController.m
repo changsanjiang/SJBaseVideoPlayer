@@ -215,6 +215,7 @@ NS_ASSUME_NONNULL_BEGIN
         if ( event.durationWatched <= 0 ) continue;
         time += event.durationWatched;
     }
+    if ( time == 0 ) return [super durationWatched];
     return time;
 }
 
