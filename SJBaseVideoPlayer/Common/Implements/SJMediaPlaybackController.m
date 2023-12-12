@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithInterval:(NSTimeInterval)interval player:(__weak id<SJMediaPlayer>)player currentTimeDidChangeExeBlock:(nonnull void (^)(NSTimeInterval time))currentTimeDidChangeExeBlock playableDurationDidChangeExeBlock:(nonnull void (^)(NSTimeInterval time))playableDurationDidChangeExeBlock durationDidChangeExeBlock:(nonnull void (^)(NSTimeInterval time))durationDidChangeExeBlock;
 - (void)invalidate;
 - (void)stop;
+
+@property (nonatomic, readonly) NSTimeInterval durationWatched;
 @end
 
 @implementation SJMediaPlayerTimeObserverItem {
@@ -42,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
     __weak id<SJMediaPlayer> _player;
     NSTimeInterval _interval;
     
-    NSTimer *_timer;
+    NSTimer *_currentTimeRefreshTimer;
     NSTimeInterval _currentTime;
 }
 
@@ -55,9 +57,9 @@ NS_ASSUME_NONNULL_BEGIN
         _playableDurationDidChangeExeBlock = playableDurationDidChangeExeBlock;
         _durationDidChangeExeBlock = durationDidChangeExeBlock;
         
-        [self resumeOrPause];
+        [self resumeOrStopRefreshTimer];
         
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(resumeOrPause) name:SJMediaPlayerTimeControlStatusDidChangeNotification object:player];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(timeControlStatusDidChange) name:SJMediaPlayerTimeControlStatusDidChangeNotification object:player];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(durationDidChange) name:SJMediaPlayerDurationDidChangeNotification object:_player];
         [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(playableDurationDidChange) name:SJMediaPlayerPlayableDurationDidChangeNotification object:_player];
     }
@@ -65,13 +67,13 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)dealloc {
-    [_timer invalidate];
+    [_currentTimeRefreshTimer invalidate];
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 - (void)invalidate {
-    [_timer invalidate];
-    _timer = nil;
+    [_currentTimeRefreshTimer invalidate];
+    _currentTimeRefreshTimer = nil;
 }
 
 - (void)durationDidChange {
@@ -82,30 +84,41 @@ NS_ASSUME_NONNULL_BEGIN
     if ( _playableDurationDidChangeExeBlock ) _playableDurationDidChangeExeBlock(_player.playableDuration);
 }
 
-- (void)resumeOrPause {
-    if ( _player.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
-        [self invalidate];
-    }
-    else if ( _timer == nil ) {
-        __weak typeof(self) _self = self;
-        _timer = [NSTimer sj_timerWithTimeInterval:_interval repeats:YES usingBlock:^(NSTimer * _Nonnull timer) {
-            __strong typeof(_self) self = _self;
-            if ( !self ) { [timer invalidate]; return ; }
-            [self _refresh];
-        }];
-        _timer.fireDate = [NSDate dateWithTimeIntervalSinceNow:_interval];
-        [NSRunLoop.mainRunLoop addTimer:_timer forMode:NSRunLoopCommonModes];
+- (void)timeControlStatusDidChange {
+    [self resumeOrStopRefreshTimer];
+}
+
+- (void)resumeOrStopRefreshTimer {
+    switch ( _player.timeControlStatus ) {
+        case SJPlaybackTimeControlStatusPaused:
+        case SJPlaybackTimeControlStatusWaitingToPlay:
+            [self invalidate];
+            break;
+        case SJPlaybackTimeControlStatusPlaying: {
+            __weak typeof(self) _self = self;
+            _currentTimeRefreshTimer = [NSTimer sj_timerWithTimeInterval:_interval repeats:YES usingBlock:^(NSTimer * _Nonnull timer) {
+                __strong typeof(_self) self = _self;
+                if ( !self ) { [timer invalidate]; return ; }
+                self->_durationWatched += self->_interval;
+                [self _refreshCurrentTime];
+            }];
+            _currentTimeRefreshTimer.fireDate = [NSDate dateWithTimeIntervalSinceNow:_interval];
+            [NSRunLoop.mainRunLoop addTimer:_currentTimeRefreshTimer forMode:NSRunLoopCommonModes];
+            [self _refreshCurrentTime];
+        }
+            break;
     }
 }
 
 - (void)stop {
     [self invalidate];
+    _durationWatched = 0;
     if ( _playableDurationDidChangeExeBlock ) _playableDurationDidChangeExeBlock(0);
     if ( _currentTimeDidChangeExeBlock ) _currentTimeDidChangeExeBlock(0);
     if ( _durationDidChangeExeBlock ) _durationDidChangeExeBlock(0);
 }
  
-- (void)_refresh {
+- (void)_refreshCurrentTime {
     NSTimeInterval currentTime = _player.currentTime;
     if ( _currentTime != currentTime ) {
         _currentTime = currentTime;
@@ -136,7 +149,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) SJPlaybackTimeControlStatus timeControlStatus;
 @property (nonatomic, nullable) SJWaitingReason reasonForWaitingToPlay;
 @property (nonatomic, strong, nullable) id<SJMediaPlayer> currentPlayer;
-@property (nonatomic, strong, nullable) id periodicTimeObserver;
+@property (nonatomic, strong, nullable) SJMediaPlayerTimeObserverItem *periodicTimeObserver;
 @property (nonatomic, strong, nullable) SJDefinitionMediaPlayerLoader *definitionMediaPlayerLoader;
 @property (nonatomic, strong, nullable) SJVideoPlayerURLAsset *definitionMedia;
 @end
@@ -405,7 +418,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (NSTimeInterval)durationWatched {
-    return 0;
+    return _periodicTimeObserver.durationWatched;
 }
 
 - (nullable NSError *)error {
