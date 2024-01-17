@@ -376,7 +376,7 @@
 				DEVELOPMENT_TEAM = DVCY355DY9;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Project/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.SanJiang.Project;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -396,7 +396,7 @@
 				DEVELOPMENT_TEAM = DVCY355DY9;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Project/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.SanJiang.Project;
 				PRODUCT_NAME = "$(TARGET_NAME)";

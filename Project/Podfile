@@ -1,7 +1,7 @@
 # Uncomment the next line to define a global platform for your project
 #source 'https://cdn.cocoapods.org/'
 
-platform :ios, '9.0'
+platform :ios, '12.0'
 
 target 'Project' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
