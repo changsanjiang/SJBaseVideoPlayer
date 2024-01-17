@@ -26,7 +26,7 @@
     if ( self ) {
         _player = player;
         _delegate = delegate;
-        _player.player.pictureInPictureDelegate = self;
+        [_player.player setPictureinPictureDelegate:self];
     }
     return self;
 }
