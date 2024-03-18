@@ -16,8 +16,6 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface SJAVMediaPlaybackController ()<SJPictureInPictureControllerDelegate>
 @property (nonatomic, strong, nullable) SJAVPictureInPictureController *pictureInPictureController API_AVAILABLE(ios(14.0));
-// https://github.com/changsanjiang/SJVideoPlayer/issues/339
-@property (nonatomic) BOOL needsToRefresh_fix339 API_AVAILABLE(ios(14.0));
 @end
 
 @implementation SJAVMediaPlaybackController
@@ -50,7 +48,8 @@ NS_ASSUME_NONNULL_BEGIN
         SJAVMediaPlayer *player = [SJAVMediaPlayerLoader loadPlayerForMedia:media];
         player.minBufferedDuration = self.minBufferedDuration;
         player.accurateSeeking = self.accurateSeeking;
-        
+        player.pauseWhenAppDidEnterBackground = self.pauseWhenAppDidEnterBackground;
+
         if ( (player.isPlayed && media.original == nil) || player.isPlaybackFinished ) {
             [player seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -72,33 +71,13 @@ NS_ASSUME_NONNULL_BEGIN
     return view;
 }
 
-- (void)receivedApplicationDidBecomeActiveNotification {
+- (void)receivedApplicationWillEnterForegroundNotification {
     if ( @available(iOS 14.0, *) ) {
         if ( _pictureInPictureController.isEnabled )
             return;
     }
-    
-    if ( @available(iOS 14.0, *) ) {
-        if ( self.media.isM3u8 ) {
-            if ( self.pauseWhenAppDidEnterBackground ||
-                 // fix: https://github.com/changsanjiang/SJVideoPlayer/issues/535
-                 self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
-                if ( self.timeControlStatus == SJPlaybackTimeControlStatusPaused ) {
-                    self.needsToRefresh_fix339 = YES;
-                    return;
-                }
-            }
-        }
-        
-    }
-    
     SJAVMediaPlayerLayerView *view = self.currentPlayerView;
     view.layer.player = self.currentPlayer.avPlayer;
-    
-    // fix: https://github.com/changsanjiang/SJVideoPlayer/issues/395
-    if ( self.currentPlayerView.isReadyForDisplay ) {
-        [self.currentPlayerView setScreenshot:nil];
-    }
 }
  
 - (void)receivedApplicationDidEnterBackgroundNotification {
@@ -111,22 +90,8 @@ NS_ASSUME_NONNULL_BEGIN
         [self pause];
     }
     else {
-        [self _removePlayerForLayerIfNeeded];
-    }
-}
-
-- (void)receivedApplicationWillResignActiveNotification {
-    if ( @available(iOS 14.0, *) ) {
-        if ( _pictureInPictureController.isEnabled )
-            return;
-    }
-    
-    if ( self.pauseWhenAppDidEnterBackground && self.assetStatus == SJAssetStatusReadyToPlay /*fix #430 */ )
-        [self.currentPlayerView setScreenshot:self.screenshot];
-    
-    // 修复 14.0 后台播放失效的问题
-    if ( @available(iOS 14.0, *) ) {
-        [self _removePlayerForLayerIfNeeded];
+        SJAVMediaPlayerLayerView *view = self.currentPlayerView;
+        view.layer.player = nil;
     }
 }
 
@@ -232,7 +197,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)refresh {
     if ( self.media != nil ) [SJAVMediaPlayerLoader clearPlayerForMedia:self.media];
     if ( @available(iOS 14.0, *) ) {
-        self.needsToRefresh_fix339 = NO;
         [self cancelPictureInPicture];
     }
     [self cancelGenerateGIFOperation];
@@ -240,20 +204,10 @@ NS_ASSUME_NONNULL_BEGIN
     [super refresh];
 }
 
-- (void)play {
-    if (@available(iOS 14.0, *)) {
-        self.needsToRefresh_fix339 ? [self refresh] : [super play];
-    }
-    else {
-        [super play];
-    }
-}
-
 - (void)stop {
     [self cancelGenerateGIFOperation];
     [self cancelExportOperation];
     if ( @available(iOS 14.0, *) ) {
-        self.needsToRefresh_fix339 = NO;
         [self cancelPictureInPicture];
     }
     [super stop];
@@ -261,6 +215,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (SJPlaybackType)playbackType {
     return self.currentPlayer.playbackType;
+}
+
+- (void)setPauseWhenAppDidEnterBackground:(BOOL)pauseWhenAppDidEnterBackground {
+    [super setPauseWhenAppDidEnterBackground:pauseWhenAppDidEnterBackground];
+    self.currentPlayer.pauseWhenAppDidEnterBackground = pauseWhenAppDidEnterBackground;
 }
 
 #pragma mark -
@@ -303,20 +262,6 @@ NS_ASSUME_NONNULL_BEGIN
     if ( self.currentPlayer == note.object && self.canStartPictureInPictureAutomaticallyFromInline && self.assetStatus == SJAssetStatusReadyToPlay ) {
         [self prepareForPictureInPicture];
     }
-}
-
-- (void)_removePlayerForLayerIfNeeded {
-    if ( self.pauseWhenAppDidEnterBackground )
-        return;
-    
-    if ( @available(iOS 14.0, *) ) {
-        if ( _pictureInPictureController != nil && self.timeControlStatus != SJPlaybackTimeControlStatusPaused ) {
-            return;
-        }
-    }
-    
-    SJAVMediaPlayerLayerView *view = self.currentPlayerView;
-    view.layer.player = nil;
 }
 @end
 
