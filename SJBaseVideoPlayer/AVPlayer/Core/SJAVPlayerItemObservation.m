@@ -36,13 +36,13 @@ static NSString *kLoadedTimeRanges = @"loadedTimeRanges";
     [_playerItem addObserver:self forKeyPath:kLoadedTimeRanges options:options context:&kLoadedTimeRanges];
 
     __weak typeof(self) _self = self;
-    [NSNotificationCenter.defaultCenter addObserverForName:AVPlayerItemDidPlayToEndTimeNotification object:self queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification * _Nonnull note) {
+    [NSNotificationCenter.defaultCenter addObserverForName:AVPlayerItemDidPlayToEndTimeNotification object:_playerItem queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification * _Nonnull note) {
         __strong typeof(_self) self = _self;
         if ( self == nil ) return;
         [self playerItemDidPlayToEndTime:note];
     }];
     
-    [NSNotificationCenter.defaultCenter addObserverForName:AVPlayerItemNewAccessLogEntryNotification object:self queue:nil usingBlock:^(NSNotification * _Nonnull note) {
+    [NSNotificationCenter.defaultCenter addObserverForName:AVPlayerItemNewAccessLogEntryNotification object:_playerItem queue:nil usingBlock:^(NSNotification * _Nonnull note) {
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             __strong typeof(_self) self = _self;
             if ( self == nil ) return;
