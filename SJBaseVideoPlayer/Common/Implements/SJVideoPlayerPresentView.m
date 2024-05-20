@@ -10,13 +10,6 @@
 #import "NSTimer+SJAssetAdd.h"
 #import <UIKit/UIGraphicsRendererSubclass.h>
 
-@interface MImageView : UIImageView
-@end
-
-@implementation MImageView
-
-@end
-
 @interface SJVideoPlayerPresentView ()<UIGestureRecognizerDelegate>
 @property (nonatomic, strong, readonly) UIPanGestureRecognizer *pan;
 @property (nonatomic, strong, readonly) UIPinchGestureRecognizer *pinch;
@@ -190,7 +183,7 @@
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
 
     _placeholderImageView.alpha = 0.001;
-    [self _setPlaceholderImageViewHidden:NO];
+    _placeholderImageView.hidden = NO;
     
     if ( animated ) {
         [UIView animateWithDuration:0.4 animations:^{
@@ -222,18 +215,13 @@
         [UIView animateWithDuration:0.4 animations:^{
             self->_placeholderImageView.alpha = 0.001;
         } completion:^(BOOL finished) {
-            [self _setPlaceholderImageViewHidden:YES];
+            self->_placeholderImageView.hidden = YES;
         }];
     }
     else {
         _placeholderImageView.alpha = 0.001;
-        [self _setPlaceholderImageViewHidden:YES];
+        _placeholderImageView.hidden = YES;
     }
-}
-
-- (void)_setPlaceholderImageViewHidden:(BOOL)isHidden {
-    _placeholderImageView.hidden = isHidden;
-//    NSLog(@"AAA: _setPlaceholderImageViewHidden=%d", isHidden);
 }
 
 #pragma mark -
@@ -259,7 +247,7 @@
     self.backgroundColor = [UIColor blackColor];
     self.placeholderImageView.frame = self.bounds;
     _placeholderImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self _setPlaceholderImageViewHidden:YES];
+    _placeholderImageView.hidden = YES;
     [self addSubview:_placeholderImageView];
     
     /// Pan
@@ -286,7 +274,7 @@
 
 - (UIImageView *)placeholderImageView {
     if ( _placeholderImageView ) return _placeholderImageView;
-    _placeholderImageView = [MImageView new];
+    _placeholderImageView = [UIImageView new];
     _placeholderImageView.contentMode = UIViewContentModeScaleAspectFill;
     _placeholderImageView.clipsToBounds = YES;
     return _placeholderImageView;
