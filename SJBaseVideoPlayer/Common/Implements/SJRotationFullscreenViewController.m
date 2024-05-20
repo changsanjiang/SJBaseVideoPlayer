@@ -50,4 +50,7 @@
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation {
     return UIStatusBarAnimationFade;
 }
+- (void)presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion {
+    return [_delegate rotationFullscreenViewController:self forwardPresentViewController:viewControllerToPresent animated:flag completion:completion];
+}
 @end

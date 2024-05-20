@@ -249,6 +249,10 @@
     return [_actionForwarder preferredStatusBarStyle];
 }
 
+- (void)rotationFullscreenViewController:(SJRotationFullscreenViewController *)viewController forwardPresentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion {
+    return [_actionForwarder presentViewController:viewControllerToPresent animated:flag completion:completion];
+}
+
 #pragma mark -
 
 - (void)_prepareWindowForRotation {

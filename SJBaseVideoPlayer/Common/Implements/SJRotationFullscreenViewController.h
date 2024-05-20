@@ -17,5 +17,6 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol SJRotationFullscreenViewControllerDelegate <NSObject>
 - (UIStatusBarStyle)preferredStatusBarStyleForRotationFullscreenViewController:(SJRotationFullscreenViewController *)viewController;
 - (BOOL)prefersStatusBarHiddenForRotationFullscreenViewController:(SJRotationFullscreenViewController *)viewController;
+- (void)rotationFullscreenViewController:(SJRotationFullscreenViewController *)viewController forwardPresentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion;
 @end
 NS_ASSUME_NONNULL_END
