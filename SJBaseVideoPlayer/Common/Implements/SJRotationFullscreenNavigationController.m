@@ -54,5 +54,8 @@
         [_sj_delegate pushViewController:viewController animated:animated];
     }
 }
+- (void)presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion {
+    [super presentViewController:viewControllerToPresent animated:flag completion:completion];
+}
 @end
 

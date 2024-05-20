@@ -58,7 +58,19 @@ NS_ASSUME_NONNULL_BEGIN
     }];
 }
   
-
+- (void)presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion {
+    __weak typeof(self) _self = self;
+    [_rotationManager rotate:SJOrientation_Portrait animated:YES completionHandler:^(id<SJRotationManager>  _Nonnull mgr) {
+        __strong typeof(_self) self = _self;
+        if ( !self ) return ;
+        UIViewController *vc = [self->_presentView lookupResponderForClass:UIViewController.class];
+        if ( [viewControllerToPresent isViewLoaded] ) viewControllerToPresent.view.frame = vc.view.window.bounds;
+        if ( vc != nil ) {
+            [vc presentViewController:viewControllerToPresent animated:flag completion:completion];
+        }
+    }];
+}
+    
 - (void)viewDidAppear {
     _viewDisappeared = NO;
 }

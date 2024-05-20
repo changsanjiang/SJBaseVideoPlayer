@@ -38,6 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated;
 - (UIStatusBarStyle)preferredStatusBarStyle;
 - (BOOL)prefersStatusBarHidden;
+- (void)presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion;
 @end
 NS_ASSUME_NONNULL_END
 

@@ -69,12 +69,16 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
 #ifdef SJDEBUG
     NSLog(@"%d - -[%@ %s]", (int)__LINE__, NSStringFromClass([self class]), sel_getName(_cmd));
 #endif
-    if ( [self allowsRotation] ) {
-        [self rotateToOrientation:deviceOrientation animated:YES complete:nil];
-    }
+    [self rotateToOrientation:deviceOrientation animated:YES complete:nil];
 }
 
 - (void)rotateToOrientation:(SJOrientation)orientation animated:(BOOL)animated complete:(void (^)(SJRotationManager * _Nonnull))completionHandler {
+    if ( [self allowsRotation] ) {
+        [self _rotateToOrientation:orientation animated:animated complete:completionHandler];
+    }
+}
+
+- (void)_rotateToOrientation:(SJOrientation)orientation animated:(BOOL)animated complete:(void (^)(SJRotationManager * _Nonnull))completionHandler {
     SJOrientation fromOrientation = self.currentOrientation;
     SJOrientation toOrientation = orientation;
     if ( fromOrientation == toOrientation ) {
@@ -221,6 +225,8 @@ API_AVAILABLE(ios(16.0)) @protocol _SJ_iOS_16_IDE_InvisibleMethods <NSObject>
         }];
     }];
 }
+
+
 
 - (void)setNeedsUpdateOfSupportedInterfaceOrientations {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 160000
