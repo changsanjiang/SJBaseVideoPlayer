@@ -119,7 +119,7 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 @synthesize volume = _volume;
 @synthesize muted = _muted;
 
-- (instancetype)initWithSource:(__kindof AVPSource *)source config:(nullable AVPConfig *)config cacheConfig:(nullable AVPCacheConfig *)cacheConfig startPosition:(NSTimeInterval)time {
+- (instancetype)initWithSource:(SJAliMediaSource *)source startPosition:(NSTimeInterval)time {
     self = [super init];
     if ( self ) {
         _source = source;
@@ -132,28 +132,57 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
         _seekMode = AVP_SEEKMODE_INACCURATE;
         _needsSeekToStartPosition = time != 0;
         
-        if ( config != nil )
-            [_player setConfig:config];
+        if ( source.traceID != nil) {
+            [_player setTraceID:source.traceID];
+        }
+        if ( source.config != nil )
+            [_player setConfig:source.config];
         
-        if ( cacheConfig != nil )
-            [_player setCacheConfig:cacheConfig];
+        if ( source.cacheConfig != nil )
+            [_player setCacheConfig:source.cacheConfig];
         
-        if      ( [source isKindOfClass:AVPUrlSource.class] ) {
+        if ( [source.source isKindOfClass:AVPUrlSource.class] ) {
             [_player setUrlSource:source];
         }
-        else if ( [source isKindOfClass:AVPVidStsSource.class] ) {
+        else if ( [source.source isKindOfClass:AVPBitStreamSource.class] ) {
+            [_player setBitStreamSource:source];
+        }
+        else if ( [source.source isKindOfClass:AVPVidStsSource.class] ) {
             [_player setStsSource:source];
         }
-        else if ( [source isKindOfClass:AVPVidMpsSource.class] ) {
+        else if ( [source.source isKindOfClass:AVPVidMpsSource.class] ) {
             [_player setMpsSource:source];
         }
-        else if ( [source isKindOfClass:AVPVidAuthSource.class] ) {
+        else if ( [source.source isKindOfClass:AVPVidAuthSource.class] ) {
             [_player setAuthSource:source];
+        }
+        else if ( [source.source isKindOfClass:AVPLiveStsSource.class] ) {
+            [_player setLiveStsSource:source];
+        }
+        
+        if ( source.verifyStsCallback ) {
+            __weak typeof(self) _self = self;
+            [_player setVerifyStsCallback:^AVPStsStatus(AVPStsInfo info) {
+                __strong typeof(_self) self = _self;
+                return [self _getLiveStsStatus:info verifyStsCallback:source.verifyStsCallback];
+            }];
         }
         
         [_player prepare];
     }
     return self;
+}
+
+- (AVPStsStatus)_getLiveStsStatus:(AVPStsInfo)info verifyStsCallback:(nullable AVPStsStatus (^)(AVPStsInfo, void (^ _Nonnull)(AVPStsInfo)))verifyStsCallback {
+    __weak typeof(self) _self = self;
+    return verifyStsCallback(info, ^(AVPStsInfo stsInfo) {
+        __strong typeof(_self) self = _self;
+        [self _updateLiveStsInfo:stsInfo];
+    });
+}
+
+- (void)_updateLiveStsInfo:(AVPStsInfo)info {
+    [_player updateLiveStsInfo:info.accId accKey:info.accSecret token:info.token region:info.accSecret];
 }
 
 - (void)dealloc {

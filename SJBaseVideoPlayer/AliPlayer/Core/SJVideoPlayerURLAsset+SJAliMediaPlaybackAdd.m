@@ -10,17 +10,28 @@
 #import <objc/message.h>
 
 NS_ASSUME_NONNULL_BEGIN
+@implementation SJAliMediaSource : NSObject
+- (instancetype)initWithSource:(__kindof AVPSource *)source
+{
+    self = [super init];
+    if ( self ) {
+        _source = source;
+    }
+    return self;
+}
+@end
+
 @implementation SJVideoPlayerURLAsset (SJAliMediaPlaybackAdd)
-- (instancetype)initWithSource:(__kindof AVPSource *)source {
+- (instancetype)initWithSource:(SJAliMediaSource *)source {
     return [self initWithSource:source playModel:SJPlayModel.new];
 }
-- (instancetype)initWithSource:(__kindof AVPSource *)source playModel:(__kindof SJPlayModel *)playModel {
+- (instancetype)initWithSource:(SJAliMediaSource *)source playModel:(__kindof SJPlayModel *)playModel {
     return [self initWithSource:source startPosition:0 playModel:playModel];
 }
-- (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)startPosition {
+- (instancetype)initWithSource:(SJAliMediaSource *)source startPosition:(NSTimeInterval)startPosition {
     return [self initWithSource:source startPosition:startPosition playModel:SJPlayModel.new];
 }
-- (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel {
+- (instancetype)initWithSource:(SJAliMediaSource *)source startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel {
     self = [super init];
     if ( self ) {
         self.source = source;
@@ -30,51 +41,24 @@ NS_ASSUME_NONNULL_BEGIN
     return self;
 }
 
-- (void)setSource:(__kindof AVPSource * _Nullable)source {
+- (void)setSource:(SJAliMediaSource * _Nullable)source {
     objc_setAssociatedObject(self, @selector(source), source, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (nullable __kindof AVPSource *)source {
-    __kindof AVPSource *source = objc_getAssociatedObject(self, _cmd);
+- (nullable SJAliMediaSource *)source {
+    SJAliMediaSource *source = objc_getAssociatedObject(self, _cmd);
     if ( source == nil ) {
         if ( self.mediaURL != nil ) {
-            source = AVPUrlSource.alloc.init;
-            [(AVPUrlSource *)source setPlayerUrl:self.mediaURL];
+            AVPUrlSource *urlSource = [[AVPUrlSource alloc] urlWithString:self.mediaURL];
+            if ([self.mediaURL isFileURL]) {
+                urlSource = [[AVPUrlSource alloc] fileURLWithPath:self.mediaURL.relativePath];
+            } else {
+                urlSource = [[AVPUrlSource alloc] urlWithString:self.mediaURL.absoluteString];
+            }
+            source = [[SJAliMediaSource alloc] initWithSource:urlSource];
             [self setSource:source];
         }
     }
     return source;
-}
-
-- (void)setAvpConfig:(nullable AVPConfig *)avpConfig {
-    objc_setAssociatedObject(self, @selector(avpConfig), avpConfig, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-- (nullable AVPConfig *)avpConfig {
-    return objc_getAssociatedObject(self, _cmd);
-}
-
-- (void)setAvpCacheConfig:(nullable AVPCacheConfig *)avpCacheConfig {
-    objc_setAssociatedObject(self, @selector(avpCacheConfig), avpCacheConfig, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-- (nullable AVPCacheConfig *)avpCacheConfig {
-    return objc_getAssociatedObject(self, _cmd);
-}
-@end
-
-/// 切换清晰度时使用
-@implementation SJVideoPlayerURLAsset (SJAliMediaSelectTrack)
-- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo {
-    return [self initWithSource:source subTrackInfo:trackInfo playModel:SJPlayModel.new];
-}
-- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo playModel:(__kindof SJPlayModel *)playModel {
-    self = [self initWithSource:source playModel:playModel];
-    if ( self ) {
-        objc_setAssociatedObject(self, @selector(avpTrackInfo), trackInfo, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-    return self;
-}
-
-- (nullable AVPTrackInfo *)avpTrackInfo {
-    return objc_getAssociatedObject(self, _cmd);
 }
 @end
 
