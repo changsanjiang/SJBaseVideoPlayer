@@ -122,7 +122,7 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
 - (instancetype)initWithSource:(SJAliMediaSource *)source startPosition:(NSTimeInterval)time {
     self = [super init];
     if ( self ) {
-        _source = source;
+        _source = source.source;
         _startPosition = time;
         _assetStatus = SJAssetStatusPreparing;
         _delegateProxy = [SJAliMediaPlayerDelegateProxy weakProxyWithTarget:self];
@@ -142,22 +142,22 @@ NSErrorDomain const SJAliMediaPlayerErrorDomain = @"SJAliMediaPlayerErrorDomain"
             [_player setCacheConfig:source.cacheConfig];
         
         if ( [source.source isKindOfClass:AVPUrlSource.class] ) {
-            [_player setUrlSource:source];
+            [_player setUrlSource:source.source];
         }
         else if ( [source.source isKindOfClass:AVPBitStreamSource.class] ) {
-            [_player setBitStreamSource:source];
+            [_player setBitStreamSource:source.source];
         }
         else if ( [source.source isKindOfClass:AVPVidStsSource.class] ) {
-            [_player setStsSource:source];
+            [_player setStsSource:source.source];
         }
         else if ( [source.source isKindOfClass:AVPVidMpsSource.class] ) {
-            [_player setMpsSource:source];
+            [_player setMpsSource:source.source];
         }
         else if ( [source.source isKindOfClass:AVPVidAuthSource.class] ) {
-            [_player setAuthSource:source];
+            [_player setAuthSource:source.source];
         }
         else if ( [source.source isKindOfClass:AVPLiveStsSource.class] ) {
-            [_player setLiveStsSource:source];
+            [_player setLiveStsSource:source.source];
         }
         
         if ( source.verifyStsCallback ) {
