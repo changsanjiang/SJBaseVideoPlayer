@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
         SJRunLoopTaskQueue.main.enqueue(^{
             __strong typeof(_self) self = _self;
             if ( !self ) return;
-            SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:media.source config:media.avpConfig cacheConfig:media.avpCacheConfig startPosition:media.startPosition];
+            SJAliMediaPlayer *player = [SJAliMediaPlayer.alloc initWithSource:media.source startPosition:media.startPosition];
             player.seekMode = self.seekMode;
             if ( completionHandler ) completionHandler(player);
         });
@@ -176,7 +176,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)switchVideoDefinition:(SJVideoPlayerURLAsset *)media {
-    AVPTrackInfo *trackInfo = media.avpTrackInfo;
+    AVPTrackInfo *trackInfo = media.source.trackInfo;
     if ( trackInfo == nil ) {
         [super switchVideoDefinition:media];
         return;

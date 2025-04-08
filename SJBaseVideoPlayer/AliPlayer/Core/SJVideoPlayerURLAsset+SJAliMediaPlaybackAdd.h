@@ -11,23 +11,29 @@
 #import <AliyunPlayer/AVPConfig.h>
 #import <AliyunPlayer/AVPCacheConfig.h>
 #import <AliyunPlayer/AVPMediaInfo.h>
+#import <AliyunPlayer/AVPDef.h>
 
 NS_ASSUME_NONNULL_BEGIN
-@interface SJVideoPlayerURLAsset (SJAliMediaPlaybackAdd)
-- (instancetype)initWithSource:(__kindof AVPSource *)source;
-- (instancetype)initWithSource:(__kindof AVPSource *)source playModel:(__kindof SJPlayModel *)playModel;
-- (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)startPosition;
-- (instancetype)initWithSource:(__kindof AVPSource *)source startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel;
-
-@property (nonatomic, strong, readonly, nullable) __kindof AVPSource *source;
-@property (nonatomic, strong, nullable) AVPConfig *avpConfig;
-@property (nonatomic, strong, nullable) AVPCacheConfig *avpCacheConfig;
-@end
-
+/// 阿里播放器播放资源配置
+@interface SJAliMediaSource : NSObject
+@property (nonatomic, strong, nullable) NSString *traceID;
+@property (nonatomic, strong, nullable) __kindof AVPSource *source;
+@property (nonatomic, strong, nullable) AVPConfig *config;
+@property (nonatomic, strong, nullable) AVPCacheConfig *cacheConfig;
 /// 切换清晰度时使用
-@interface SJVideoPlayerURLAsset (SJAliMediaSelectTrack)
-- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo;
-- (instancetype)initWithSource:(__kindof AVPSource *)source subTrackInfo:(AVPTrackInfo *)trackInfo playModel:(__kindof SJPlayModel *)playModel;
-@property (nonatomic, strong, readonly, nullable) AVPTrackInfo *avpTrackInfo;
+@property (nonatomic, strong, nullable) AVPTrackInfo *trackInfo;
+@property (nonatomic, copy, nullable) AVPStsStatus (^verifyStsCallback)(AVPStsInfo info, void(^callback)(AVPStsInfo stsInfo));
+
+- (instancetype)initWithSource:(__kindof AVPSource *)source;
 @end
+
+@interface SJVideoPlayerURLAsset (SJAliMediaPlaybackAdd)
+- (instancetype)initWithSource:(SJAliMediaSource *)source;
+- (instancetype)initWithSource:(SJAliMediaSource *)source playModel:(__kindof SJPlayModel *)playModel;
+- (instancetype)initWithSource:(SJAliMediaSource *)source startPosition:(NSTimeInterval)startPosition;
+- (instancetype)initWithSource:(SJAliMediaSource *)source startPosition:(NSTimeInterval)startPosition playModel:(__kindof SJPlayModel *)playModel;
+
+@property (nonatomic, strong, readonly, nullable) SJAliMediaSource *source;
+@end
+
 NS_ASSUME_NONNULL_END
